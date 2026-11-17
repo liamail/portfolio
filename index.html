@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Hedvig+Letters+Serif:opsz@12..24&display=swap" rel="stylesheet">
+<script>if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('pre-enter')</script>
 <style>
 :root{
   /* Layout idea: a left-aligned column of big type; the work index is a multi-track
@@ -51,8 +52,34 @@
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-:root{--ease:cubic-bezier(.22,1,.36,1);--t-move:.52s}
+/* Motion system: one ease for things arriving and moving, one for dissolves, three durations. */
+:root{--ease:cubic-bezier(.22,1,.36,1);--ease-io:cubic-bezier(.4,0,.2,1);--t-fast:.2s;--t-move:.52s;--t-slow:.8s}
 body{overflow-x:clip}
+html{-webkit-tap-highlight-color:transparent}
+/* Entrance: the hero rises in once, as the splash clears. */
+html.pre-enter .home .hero>*,html.pre-enter .home .tabs-in{opacity:0;transform:translateY(16px)}
+html.entering .home .hero>*,html.entering .home .tabs-in{transition:opacity var(--t-slow) var(--ease),transform var(--t-slow) var(--ease)}
+html.entering .home .hero>:nth-child(1){transition-delay:.1s}
+html.entering .home .hero>:nth-child(2){transition-delay:.2s}
+html.entering .home .tabs-in{transition-delay:.32s}
+/* Project page: the title and intro follow the visual in. */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.arrive .work-head>*{animation:rise .7s var(--ease) both}
+.arrive .work-head>:nth-child(1){animation-delay:.08s}
+.arrive .work-head>:nth-child(2){animation-delay:.14s}
+.arrive .work-head>:nth-child(3){animation-delay:.2s}
+.arrive .chapters{animation:rise var(--t-slow) var(--ease) .3s both}
+/* Work preview: the old visual fades away over the new one. */
+#vstage{display:grid}
+#vstage>.stage{grid-area:1/1}
+#vstage>.stage.leaving{z-index:1;pointer-events:none;animation:fade-away .34s var(--ease-io) forwards}
+@keyframes fade-away{to{opacity:0}}
+/* Press feedback on touch. */
+.card a{transition:opacity var(--t-fast) var(--ease)}
+.card a:active{opacity:.75}
+.prow:active .pt{opacity:.6}
+.tabs a:active{transform:scale(.96)}
+.linkish:active,.back:active{opacity:.6}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.55 var(--font);-webkit-font-smoothing:antialiased}
 h1,h2,h3,p,ul,ol,dl,dd,figure,blockquote{margin:0;padding:0}
 ul,ol{list-style:none}
@@ -90,9 +117,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 /* Splash */
 .splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,var(--paper) 80%,transparent);-webkit-backdrop-filter:blur(28px) saturate(1.6);backdrop-filter:blur(28px) saturate(1.6);animation:sp-in .4s ease both}
 .splash[hidden]{display:none}
-.splash.out{animation:sp-out .8s cubic-bezier(.4,0,.2,1) both;pointer-events:none}
-.splash.out .sp-card{animation:sp-card-out .8s cubic-bezier(.4,0,.2,1) both}
-.sp-card{width:min(480px,100%);padding:clamp(8px,2vw,16px);color:var(--ink);animation:sp-card .5s cubic-bezier(.2,.8,.2,1) both}
+.splash.out{animation:sp-out .8s var(--ease-io) both;pointer-events:none}
+.splash.out .sp-card{animation:sp-card-out .8s var(--ease-io) both}
+.sp-card{width:min(480px,100%);padding:clamp(8px,2vw,16px);color:var(--ink);animation:sp-card .5s var(--ease) both}
 .sp-card:focus{outline:none}
 .sp-card .mark{margin-bottom:24px}
 .sp-card .mark svg{height:clamp(34px,4.4vw,44px)}
@@ -123,7 +150,7 @@ body.splash-open{overflow:hidden}
   background:color-mix(in srgb,var(--paper) 42%,transparent);
   border:1px solid var(--primary);
   -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04)}
-.tabs a{position:relative;z-index:1;font-size:1rem;font-weight:600;text-decoration:none;color:var(--ink);padding:9px 18px;border-radius:7px;transition:color .2s}
+.tabs a{position:relative;z-index:1;font-size:1rem;font-weight:600;text-decoration:none;color:var(--ink);padding:9px 18px;border-radius:7px;transition:color var(--t-fast),transform var(--t-fast) var(--ease)}
 .tabs a:hover{color:var(--primary)}
 .tabs a[aria-current="page"],.tabs a[aria-current="page"]:hover{color:var(--primary-ink)}
 .tab-ind{position:absolute;left:0;top:3px;bottom:3px;width:0;border-radius:8px;background:var(--primary);opacity:0;transform:translateX(0);transition:transform var(--t-move) var(--ease),width var(--t-move) var(--ease),opacity .2s}
@@ -147,7 +174,7 @@ body.splash-open{overflow:hidden}
 .prow .pt{white-space:nowrap;width:max-content}
 .prow .pg{display:block;height:0;overflow:hidden;visibility:hidden;white-space:nowrap;font-family:var(--display);font-variation-settings:"opsz" 24;font-size:calc(1.3rem * 1.42);letter-spacing:0}
 .prow{display:block;padding:11px 0;text-decoration:none;color:var(--muted);transition:color .2s}
-.prow .pt{display:block;font-size:1.25rem;line-height:1.2;font-weight:600;letter-spacing:-.015em;transform-origin:left center;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.prow .pt{display:block;font-size:1.25rem;line-height:1.2;font-weight:600;letter-spacing:-.015em;transform-origin:left center;transition:transform .28s var(--ease)}
 .prow .pk{display:block;margin-top:5px;font-size:.84rem;opacity:.8;transition:opacity .2s}
 .prow.is-active{color:var(--ink)}
 .prow.is-active .pt{transform:scale(1.42)}
@@ -160,12 +187,12 @@ body.splash-open{overflow:hidden}
 /* Header */
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0}
 .brand{display:block;color:var(--ink);text-decoration:none;border-radius:8px}
-.brand svg{display:block;height:38px;width:auto;transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.brand svg{display:block;height:38px;width:auto;transition:transform .22s var(--ease)}
 .brand:hover svg{transform:scale(1.06)}
 .brand:active svg{transform:scale(.96)}
 .nav{display:flex;align-items:center;gap:clamp(14px,3vw,28px)}
 .nav a,.linkish{position:relative;text-decoration:none;font-weight:500;padding:4px 0}
-.nav a::after,.linkish::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.nav a::after,.linkish::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .22s var(--ease)}
 .nav a:hover::after,.nav a[aria-current="page"]::after,.linkish:hover::after{transform:scaleX(1)}
 .copy{font-weight:500;padding:8px 14px;border-radius:999px;border:1px solid var(--line);transition:background-color .18s,border-color .18s,color .18s}
 .copy:hover{border-color:var(--ink)}
@@ -184,12 +211,12 @@ body.splash-open{overflow:hidden}
 .kind{color:var(--muted);font-size:.95rem}
 .viewer-text h2{font-size:clamp(1.9rem,3.4vw,2.9rem);line-height:1.05;letter-spacing:-.03em;font-weight:600;margin-top:10px;text-wrap:balance}
 .viewer-text .sum{margin-top:14px;color:var(--muted);max-width:26em}
-.btn{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;transition:transform .18s cubic-bezier(.2,.8,.2,1),background-color .18s}
+.btn{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;transition:transform .18s var(--ease),background-color .18s}
 .btn:hover{background:var(--accent);color:var(--accent-ink)}
 .btn:active{transform:scale(.97)}
-.btn svg{transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.btn svg{transition:transform .22s var(--ease)}
 .btn:hover svg{transform:translateX(3px)}
-.swap{animation:swap .28s cubic-bezier(.2,.8,.2,1)}
+.swap{animation:swap .28s var(--ease)}
 @keyframes swap{from{opacity:.0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* Stage and devices */
@@ -231,12 +258,12 @@ body.splash-open{overflow:hidden}
 .clip.ghost:hover{box-shadow:none}
 .clip.key{width:30px;padding:0;justify-content:center;background:transparent;overflow:visible;transform:translateX(-15px)}
 .clip.key:hover{box-shadow:none}
-.clip.key i{width:15px;height:15px;transform:rotate(45deg);border-radius:3px;background:var(--exp-soft);border:2px solid var(--exp);transition:transform .2s cubic-bezier(.2,.8,.2,1),background-color .18s}
+.clip.key i{width:15px;height:15px;transform:rotate(45deg);border-radius:3px;background:var(--exp-soft);border:2px solid var(--exp);transition:transform .2s var(--ease),background-color .18s}
 .clip.key:hover i{transform:rotate(45deg) scale(1.18)}
 .clip.key.is-active i{background:var(--exp);transform:rotate(45deg) scale(1.18)}
-.ph{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink);pointer-events:none;z-index:3;transition:left .5s cubic-bezier(.2,.8,.2,1)}
+.ph{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink);pointer-events:none;z-index:3;transition:left .5s var(--ease)}
 .ph.live{transition:none}
-.ph.sweep{transition:left 1.3s cubic-bezier(.3,.7,.1,1)}
+.ph.sweep{transition:left 1.3s var(--ease)}
 .ph::before{content:"";position:absolute;top:0;left:-5px;width:12px;height:14px;border-radius:3px 3px 6px 6px;background:var(--ink)}
 .ph b{position:absolute;top:-2px;left:14px;font-size:.75rem;font-weight:600;background:var(--ink);color:var(--paper);padding:2px 7px;border-radius:6px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ph.flip b{left:auto;right:14px}
@@ -248,7 +275,7 @@ body.splash-open{overflow:hidden}
 .card h2{font-size:1.6rem;line-height:1.1;letter-spacing:-.025em;font-weight:600}
 .card .sum{color:var(--muted);margin-top:6px}
 .card h2{margin-top:4px}
-.card .stage{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.card .stage{transition:transform .25s var(--ease)}
 .card a:active .stage{transform:scale(.985)}
 .soon{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted)}
 .soon strong{color:var(--ink);font-weight:600}
@@ -259,7 +286,7 @@ body.splash-open{overflow:hidden}
 
 /* Work page */
 .back{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
-.back svg{transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.back svg{transition:transform .22s var(--ease)}
 .back:hover svg{transform:translateX(-3px)}
 .work-head{padding:clamp(28px,5vw,64px) 0 0}
 .work-head h1{font-size:clamp(2.4rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;margin-top:clamp(20px,4vw,40px);max-width:12em;text-wrap:balance}
@@ -304,7 +331,7 @@ body.splash-open{overflow:hidden}
 .next{display:block;text-decoration:none;border-top:1px solid var(--line);padding:clamp(36px,6vw,72px) 0}
 .next small{display:block;color:var(--muted);font-size:.95rem}
 .next strong{display:inline-flex;align-items:center;gap:16px;margin-top:8px;font-size:clamp(2rem,5vw,3.6rem);line-height:1.05;letter-spacing:-.035em;font-weight:600}
-.next svg{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.next svg{transition:transform .28s var(--ease)}
 .next:hover svg{transform:translateX(10px)}
 .has-dock{padding-bottom:96px}
 
@@ -339,12 +366,12 @@ body.splash-open{overflow:hidden}
 .td-tracks{position:relative;touch-action:pan-y}
 .td-ruler{position:relative;height:22px;cursor:ew-resize;touch-action:none}
 .td-ruler i{position:absolute;top:4px;font-style:normal;font-size:.72rem;color:var(--muted);padding-left:5px;border-left:1px solid var(--line);height:14px;line-height:14px;font-variant-numeric:tabular-nums}
-.td-els{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.2,.8,.2,1)}
+.td-els{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s var(--ease)}
 .td-els.open{grid-template-rows:1fr}
 .td-els>div{overflow:hidden;min-height:0}
 .td-row{position:relative;background:var(--paper);border-radius:8px;margin-bottom:5px}
 .td-row.el{height:30px}.td-row.main{height:46px}.td-row.aud{height:20px;margin-bottom:0;overflow:hidden}
-.td-clip{position:absolute;top:3px;bottom:3px;border-radius:7px;display:flex;align-items:center;padding:0 9px;font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;cursor:grab;touch-action:none;transition:left .2s cubic-bezier(.2,.8,.2,1),width .2s cubic-bezier(.2,.8,.2,1),box-shadow .15s}
+.td-clip{position:absolute;top:3px;bottom:3px;border-radius:7px;display:flex;align-items:center;padding:0 9px;font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;cursor:grab;touch-action:none;transition:left .2s var(--ease),width .2s var(--ease),box-shadow .15s}
 .td-clip.drag{transition:box-shadow .15s;cursor:grabbing;z-index:3;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .td-clip.sc{background:var(--accent-soft);color:var(--ink)}
 .td-clip.sc b{margin-left:8px;font-size:.7rem;padding:1px 6px;border-radius:999px;background:var(--exp-soft);color:var(--ink);transition:opacity .2s}
@@ -371,7 +398,7 @@ body.splash-open{overflow:hidden}
 .reach{list-style:none;display:grid;gap:14px;justify-items:start}
 .rl{display:inline-flex;align-items:center;gap:14px;font:inherit;color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
 .rl-t{font-family:var(--display);font-variation-settings:"opsz" 24;font-weight:400;font-size:clamp(1.6rem,2.6vw,2rem);line-height:1.1;overflow-wrap:anywhere;transition:color .2s}
-.rl-i{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;color:var(--ink);border:1px solid var(--primary);background:color-mix(in srgb,var(--paper) 42%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);transition:background-color .2s,color .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
+.rl-i{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;color:var(--ink);border:1px solid var(--primary);background:color-mix(in srgb,var(--paper) 42%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);transition:background-color .2s,color .2s,transform .25s var(--ease)}
 .rl:hover,.rl:focus-visible,.rl.done{color:var(--ink)}
 .rl:hover .rl-i,.rl:focus-visible .rl-i,.rl.done .rl-i{background:var(--primary);color:var(--primary-ink)}
 .rl:hover .rl-i{transform:translateX(3px)}
@@ -388,10 +415,10 @@ body.splash-open{overflow:hidden}
 .foot .contact-line{color:var(--ink)}
 
 /* View transitions */
-::view-transition-group(hero-media){animation-duration:.5s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+::view-transition-group(hero-media){animation-duration:.5s;animation-timing-function:var(--ease)}
 ::view-transition-group(tabs){z-index:5;animation:none}
 ::view-transition-old(tabs){display:none}
-::view-transition-new(tabs){animation:tabs-in .28s .38s cubic-bezier(.2,.8,.2,1) both}
+::view-transition-new(tabs){animation:tabs-in .28s .38s var(--ease) both}
 @keyframes tabs-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
 @media (prefers-reduced-motion: reduce){
@@ -675,19 +702,16 @@ const SITE = {
   function figure(m, slug){
     return '<figure class="fig">' + stage(device(m), slug) + (m.caption ? '<figcaption>' + esc(m.caption) + '</figcaption>' : '') + '</figure>';
   }
-  function initVideos(){
-    const vids = [...main.querySelectorAll('video[data-auto]')];
-    if (reduce || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        const v = e.target;
-        if (e.isIntersecting && !v.closest('.stage').dataset.paused) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
-        else v.pause();
-      });
-    }, { threshold: 0.35 });
-    vids.forEach(v => io.observe(v));
-    cleanup.push(() => io.disconnect());
-  }
+  // One observer for the whole visit, so a video kept aside and shown again carries on
+  // where it was instead of loading from scratch.
+  const vio = (!reduce && 'IntersectionObserver' in window) ? new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      const v = e.target, st = v.closest('.stage');
+      if (e.isIntersecting && st && !st.dataset.paused && !st.classList.contains('leaving')) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+      else v.pause();
+    });
+  }, { threshold: 0.35 }) : null;
+  function initVideos(root){ if (vio) (root || main).querySelectorAll('video[data-auto]').forEach(v => vio.observe(v)); }
   main.addEventListener('click', e => {
     const b = e.target.closest('.pp'); if (!b) return;
     e.preventDefault(); e.stopPropagation();
@@ -832,12 +856,24 @@ const SITE = {
     const holder = document.getElementById('vstage'); if (!holder) return;
     const rows = [...main.querySelectorAll('.prow[data-p]')];
     let now = active.slug;
+    // Each project's visual is built once and kept, so going back to one doesn't reload its video.
+    const made = { [active.slug]: holder.querySelector('.stage') };
     // Hover or focus a project to preview it. The preview stays after the pointer leaves.
     const pick = slug => {
       if (slug === now) return;
       now = slug; lastItem = slug;
       rows.forEach(r => r.classList.toggle('is-active', r.dataset.p === slug));
-      holder.innerHTML = stage(device(bySlug[slug].hero), slug, 'swap');
+      holder.querySelectorAll('.stage.leaving').forEach(el => { el.classList.remove('leaving'); el.remove(); });
+      const old = holder.querySelector('.stage');
+      let el = made[slug];
+      if (!el) { const t = document.createElement('div'); t.innerHTML = stage(device(bySlug[slug].hero), slug); el = made[slug] = t.firstElementChild; }
+      el.classList.remove('leaving');
+      holder.appendChild(el);
+      initVideos(el);
+      if (old && old !== el) {
+        if (reduce) old.remove();
+        else { old.classList.add('leaving'); old.querySelectorAll('video').forEach(v => v.pause()); setTimeout(() => { if (old.classList.contains('leaving')) { old.classList.remove('leaving'); old.remove(); } }, 360); }
+      }
       const sum = document.getElementById('vsum'); if (sum) { sum.textContent = bySlug[slug].summary; sum.classList.remove('swap'); void sum.offsetWidth; sum.classList.add('swap'); }
       const v = holder.querySelector('video');
       if (v && !reduce) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
@@ -890,15 +926,19 @@ const SITE = {
     if (homeTab === 'work') initWorkPanel(active);
     home._mark = mark;
   }
-  let pushRun = null, pushAnims = [], pushOut = null;
+  // Work and About are each built once per visit to the home page and kept while the other is
+  // showing, so switching back doesn't rebuild the section or reload its videos.
+  let kept = {};
+  const keep = (tab, nodes) => { const f = document.createDocumentFragment(); nodes.forEach(n => f.appendChild(n)); kept[tab] = f; };
+  let pushRun = null, pushAnims = [], pushOut = null, pushFrom = null;
   function finishPush(){
     pushAnims.forEach(a => { try { a.finish(); } catch (e) {} });
     pushAnims = [];
-    if (pushOut) { pushOut.remove(); pushOut = null; }
+    if (pushOut) { keep(pushFrom, [...pushOut.childNodes]); pushOut.remove(); pushOut = null; }
   }
   function startPush(){
     if (!pushRun) return;
-    const { panel, out, oldTop, dir } = pushRun; pushRun = null;
+    const { panel, out, oldTop, dir, from } = pushRun; pushRun = null; pushFrom = from;
     // Pin the old content where it was on screen, even if the page has just jumped.
     panel.appendChild(out);
     out.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
@@ -910,7 +950,7 @@ const SITE = {
       out.animate([{ transform: 'translateX(0)', opacity: 1 }, { transform: 'translateX(' + (-dir * d) + 'px)', opacity: 0 }], { duration: 360, easing: ease, fill: 'forwards' }),
       ...inEls.map(el => el.animate([{ transform: 'translateX(' + (dir * d) + 'px)', opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], { duration: 520, delay: 60, easing: ease, fill: 'backwards' }))
     ];
-    const done = () => { if (pushOut === out) { out.remove(); pushOut = null; } };
+    const done = () => { if (pushOut === out) { keep(from, [...out.childNodes]); out.remove(); pushOut = null; } };
     pushAnims[0].finished.then(done, () => {});
     setTimeout(done, 700);   // belt and braces if the animation is interrupted
   }
@@ -933,12 +973,12 @@ const SITE = {
         out = document.createElement('div');
         out.className = 'panel-out'; out.setAttribute('aria-hidden', 'true'); out.inert = true;
         while (panel.firstChild) out.appendChild(panel.firstChild);
-      }
+      } else keep(from, [...panel.childNodes]);
       panel.className = 'panel is-' + tab;
-      panel.innerHTML = panelHTML(tab, active);
-      if (tab === 'work') initWorkPanel(active);
-      initVideos();
-      if (push) pushRun = { panel, out, oldTop, dir: tab === 'about' ? 1 : -1 };
+      if (kept[tab]) { panel.appendChild(kept[tab]); delete kept[tab]; }
+      else { panel.innerHTML = panelHTML(tab, active); if (tab === 'work') initWorkPanel(active); }
+      initVideos(panel);
+      if (push) pushRun = { panel, out, oldTop, from, dir: tab === 'about' ? 1 : -1 };
     }
     current = '#' + tab;
     if (location.hash !== current) location.hash = current;
@@ -1171,6 +1211,7 @@ const SITE = {
   function render(hash, opts){
     const r = parse(hash), first = current === null;
     cleanup.forEach(f => f()); cleanup = [];
+    finishPush(); kept = {};
     current = hash;
     if (r.name === 'home') {
       const active = bySlug[lastItem] || bySlug[SITE.flagship];
@@ -1180,6 +1221,7 @@ const SITE = {
     } else {
       lastItem = r.item.slug;
       main.innerHTML = itemHTML(r.item);
+      if (!first && !reduce) { const art = main.querySelector('article'); if (art) art.classList.add('arrive'); }
       initDock();
       initDemo();
     }
@@ -1659,7 +1701,17 @@ const SITE = {
 <script>
 (function(){
   const FLAGS = { splash: true };
-  const box = document.getElementById('splash'); if (!box || !FLAGS.splash) return;
+  // The hero waits hidden (see pre-enter) and rises in as the splash clears, or straight away with no splash.
+  const root = document.documentElement;
+  const enter = () => {
+    if (!root.classList.contains('pre-enter')) return;
+    root.classList.add('entering');
+    // Two frames lets the hidden state paint first so the rise animates; the timer is a fallback.
+    const show = () => root.classList.remove('pre-enter');
+    requestAnimationFrame(() => requestAnimationFrame(show)); setTimeout(show, 60);
+    setTimeout(() => root.classList.remove('entering'), 1600);
+  };
+  const box = document.getElementById('splash'); if (!box || !FLAGS.splash) { enter(); return; }
   const tpl = document.getElementById('logo-tpl'), ok = document.getElementById('sp-ok');
   document.getElementById('sp-mark').innerHTML = tpl ? tpl.innerHTML : '';
   document.body.appendChild(box); // keep it outside the page wrapper so it is not made inert with it
@@ -1671,6 +1723,7 @@ const SITE = {
   const close = () => {
     document.removeEventListener('keydown', key);
     sib.forEach(e => e.removeAttribute('inert')); document.body.classList.remove('splash-open');
+    enter();
     const done = () => { box.hidden = true; };
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) done(); else { box.classList.add('out'); setTimeout(done, 800); }
   };
