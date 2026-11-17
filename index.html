@@ -165,9 +165,10 @@ body.splash-open{overflow:hidden}
 /* Project list with hover preview. Rows never change height: the active title only scales. */
 .pane:not(.off){will-change:opacity,transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
-.pane.is-out{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px) * -1),0,0);transition:opacity .18s var(--ease-io),transform .18s var(--ease-io);pointer-events:none}
-.pane.is-in-start{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px)),0,0);transition:none}
-.pane.is-in{transition:opacity .45s var(--ease),transform .56s var(--ease)}
+.pane.pinned{position:absolute;left:0;right:0;pointer-events:none}
+.pane.from-side{transform:translate3d(calc(var(--dir,1) * 100vw),0,0);transition:none}
+.pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .62s cubic-bezier(.65,0,.35,1)}
+.pane.pushing-in{transform:translate3d(0,0,0);transition:transform .56s .07s cubic-bezier(.16,1.06,.3,1)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -723,7 +724,7 @@ const SITE = {
       if (e.isIntersecting) { near.add(v); if (performance.now() >= holdUntil && canPlay(v)) playV(v); }
       else { near.delete(v); v.pause(); }
     });
-  }, { rootMargin: '50% 0px 50% 0px', threshold: 0 }) : null;
+  }, { rootMargin: '50% 100% 50% 100%', threshold: 0 }) : null;
   function holdVideos(ms){
     holdUntil = performance.now() + ms; clearTimeout(holdT);
     holdT = setTimeout(() => near.forEach(v => { if (canPlay(v)) playV(v); }), ms + 20);
@@ -948,23 +949,24 @@ const SITE = {
   // that isn't showing stays in the page, hidden, rather than being taken out: a video that
   // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
   //
-  // Switching is done in two steps, never with both sections on screen at once:
-  //   1. the current section slides a little and fades out where it is;
-  //   2. while nothing is showing, the sections swap and the page jumps to the right place,
-  //      then the new section slides in from the other side and settles.
-  // Work sits to the left of About, so going to About moves left and coming back moves right.
-  const OUT_MS = 180, IN_MS = 560;
+  // Switching is a full push. The two sections sit side by side: Work on the left, About on the
+  // right. The current one starts moving off the screen first; the new one follows a beat later,
+  // a little quicker, and skids into place. Everything is set up before the first frame is drawn
+  // (the old section pinned exactly where it was, the new one parked just off screen), so the
+  // first thing you see is the movement itself, never a frame of the new layout.
+  const PUSH_MS = 640;
   let switchId = 0, switchT = 0;
+  const PUSH_CLASSES = ['pinned', 'from-side', 'pushing-out', 'pushing-in'];
   const paneOff = el => {
-    el.classList.remove('is-out', 'is-in', 'is-in-start');
+    el.classList.remove(...PUSH_CLASSES); el.style.top = '';
     el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true');
   };
   const paneOn = el => { el.classList.remove('off'); el.inert = false; el.removeAttribute('aria-hidden'); };
   function finishPush(){
     clearTimeout(switchT); switchId++;
     document.querySelectorAll('.pane').forEach(el => {
-      if (el.classList.contains('is-out')) paneOff(el);
-      el.classList.remove('is-in', 'is-in-start');
+      if (el.classList.contains('pinned')) paneOff(el);
+      else el.classList.remove(...PUSH_CLASSES);
     });
   }
   function setTab(tab, scroll){
@@ -1011,39 +1013,45 @@ const SITE = {
     if (reduce || !inSection || !outP) { if (outP) outP.querySelectorAll('video').forEach(v => v.pause()); swap(); land(); return; }
 
     const id = switchId;
-    const d = Math.round(Math.min(64, Math.max(28, panel.offsetWidth * 0.06)));
-    panel.style.setProperty('--push', d + 'px'); panel.style.setProperty('--dir', dir);
-    outP.querySelectorAll('video').forEach(v => v.pause());
-    holdVideos(OUT_MS); window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 400;
-    outP.classList.add('is-out');
-    switchT = setTimeout(() => {
-      if (id !== switchId) return;
-      inP.classList.add('is-in-start');      // in place but transparent, just off to the side
-      swap(); land();
-      void inP.offsetWidth;
-      // Wake the videos that will be on screen while the section is still transparent, and only
-      // slide it in once each has a frame to show (or after a short wait at most), so no video
-      // appears blank and then pops in.
-      const vh = window.innerHeight;
-      const vids = [...inP.querySelectorAll('video')].filter(v => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < vh && canPlay(v); });
-      vids.forEach(playV);
-      let went = false;
-      const go = () => {
-        if (went || id !== switchId) return; went = true;
-        requestAnimationFrame(() => {
+    panel.style.setProperty('--dir', tab === 'about' ? 1 : -1);
+    window.LR.calmUntil = performance.now() + PUSH_MS + 500;
+    // 1. Note where the current section sits on screen.
+    const oldTop = (outP.firstElementChild || outP).getBoundingClientRect().top;
+    // 2. Lay out the end state: the new section in the page, the scroll where it will finish.
+    inP.classList.add('from-side');
+    outP.classList.add('pinned');
+    panel.className = 'panel is-' + tab;
+    paneOn(inP);
+    land();
+    // 3. Pin the old section back exactly where it was, so this frame looks unchanged.
+    outP.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
+    void panel.offsetWidth;
+    // 4. Wake the new section's on-screen videos, then push once they have a frame (short wait at most).
+    const vh = window.innerHeight;
+    const vids = [...inP.querySelectorAll('video')].filter(v => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < vh && canPlay(v); });
+    vids.forEach(playV);
+    let went = false;
+    const go = () => {
+      if (went || id !== switchId) return; went = true;
+      const start = () => {
+        if (id !== switchId || outP.classList.contains('pushing-out')) return;
+        outP.classList.add('pushing-out');
+        inP.classList.add('pushing-in'); inP.classList.remove('from-side');
+        switchT = setTimeout(() => {
           if (id !== switchId) return;
-          inP.classList.add('is-in'); inP.classList.remove('is-in-start');
-          switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('is-in'); }, IN_MS + 60);
-        });
-        setTimeout(() => { if (id === switchId && inP.classList.contains('is-in-start')) { inP.classList.add('is-in'); inP.classList.remove('is-in-start'); } }, 60);
+          paneOff(outP);
+          inP.classList.remove('pushing-in');
+          outP.querySelectorAll('video').forEach(v => v.pause());
+        }, PUSH_MS + 80);
       };
-      const ready = () => vids.every(v => v.readyState >= 2);
-      if (ready()) go();
-      else {
-        vids.forEach(v => { v.addEventListener('loadeddata', () => { if (ready()) go(); }, { once: true }); v.addEventListener('playing', () => { if (ready()) go(); }, { once: true }); });
-        setTimeout(go, 320);
-      }
-    }, OUT_MS);
+      requestAnimationFrame(start); setTimeout(start, 40);   // the timer covers a frame that never comes
+    };
+    const ready = () => vids.every(v => v.readyState >= 2);
+    if (ready()) go();
+    else {
+      vids.forEach(v => { v.addEventListener('loadeddata', () => { if (ready()) go(); }, { once: true }); v.addEventListener('playing', () => { if (ready()) go(); }, { once: true }); });
+      setTimeout(go, 260);
+    }
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-tab]');
