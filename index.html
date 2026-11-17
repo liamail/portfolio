@@ -944,7 +944,9 @@ const SITE = {
   // that isn't showing stays in the page, hidden, rather than being taken out: a video that
   // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
   let pushAnims = [], pushRun = null;
-  const paneOff = el => { el.classList.remove('leaving'); el.style.top = ''; el.style.transform = ''; el.style.opacity = ''; el.style.willChange = ''; el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
+  // The leave animation holds its last frame (faded out) until it is cancelled, so cancel it
+  // here, or the section would still be invisible the next time it's shown.
+  const paneOff = el => { el.getAnimations().forEach(a => a.cancel()); el.classList.remove('leaving'); el.style.top = ''; el.style.transform = ''; el.style.opacity = ''; el.style.willChange = ''; el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
   function finishPush(){
     pushAnims.forEach(a => { try { a.finish(); } catch (e) {} });
     pushAnims = [];
@@ -953,6 +955,7 @@ const SITE = {
   function startPush(){
     if (!pushRun) return;
     const { panel, outP, inP, oldTop, dir } = pushRun; pushRun = null;
+    inP.getAnimations().forEach(a => a.cancel());
     // Pin the old section exactly where it was on screen, even if the page has just jumped.
     outP.classList.add('leaving');
     outP.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
@@ -991,6 +994,7 @@ const SITE = {
         initVideos(inP);
       }
       panel.className = 'panel is-' + tab;
+      inP.getAnimations().forEach(a => a.cancel());
       inP.classList.remove('off'); inP.inert = false; inP.removeAttribute('aria-hidden');
       if (outP) {
         outP.querySelectorAll('video').forEach(v => v.pause());
