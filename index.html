@@ -304,7 +304,33 @@ body.splash-open{overflow:hidden}
 .back{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
 .back svg{transition:transform .22s var(--ease)}
 .back:hover svg{transform:translateX(-3px)}
-.work-head{padding:clamp(28px,5vw,64px) 0 0}
+.work-head{padding:calc(var(--tabs-top) + var(--nav-h) + clamp(24px,4vw,48px)) 0 0}
+.work-head h1{margin-top:0!important}
+/* Floating controls share one spot, one size and one look: the Work/About tabs on the home page,
+   a square back button on project pages. */
+:root{--nav-h:calc(1rem * 1.55 + 26px);--navx:calc(var(--gutter) - 3px)}
+.navback{position:fixed;z-index:30;top:var(--tabs-top);left:var(--navx);display:grid;place-items:center;width:var(--nav-h);height:var(--nav-h);border-radius:12px;color:var(--ink);text-decoration:none;
+  background:color-mix(in srgb,var(--paper) 66%,transparent);border:1px solid var(--primary);
+  -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);
+  transform:translateZ(0);transition:background-color var(--t-fast),color var(--t-fast),transform var(--t-fast) var(--ease);view-transition-name:nav-back}
+.navback svg{transition:transform .22s var(--ease)}
+.navback:hover{background:var(--primary);color:var(--primary-ink)}
+.navback:hover svg{transform:translateX(-2px)}
+.navback:active{transform:scale(.94)}
+.navback:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.home .tabs-in{view-transition-name:nav-pill}
+/* Moving between home and a project, the two controls push past each other sideways: going in,
+   the tabs leave to the left and the back button arrives from the right; coming back, the
+   reverse. */
+::view-transition-group(nav-pill),::view-transition-group(nav-back){z-index:10;animation:none}
+::view-transition-old(nav-pill){animation:nav-out-l .3s cubic-bezier(.55,0,.75,.3) both}
+::view-transition-new(nav-back){animation:nav-in-r .44s .14s cubic-bezier(.16,.9,.24,1) both}
+::view-transition-old(nav-back){animation:nav-out-r .3s cubic-bezier(.55,0,.75,.3) both}
+::view-transition-new(nav-pill){animation:nav-in-l .44s .14s cubic-bezier(.16,.9,.24,1) both}
+@keyframes nav-out-l{to{opacity:0;transform:translate3d(-48px,0,0)}}
+@keyframes nav-out-r{to{opacity:0;transform:translate3d(48px,0,0)}}
+@keyframes nav-in-r{from{opacity:0;transform:translate3d(48px,0,0)}}
+@keyframes nav-in-l{from{opacity:0;transform:translate3d(-48px,0,0)}}
 .work-head h1{font-size:clamp(2.4rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;margin-top:clamp(20px,4vw,40px);max-width:12em;text-wrap:balance}
 .thesis{margin-top:18px;font-size:clamp(1.15rem,2vw,1.4rem);line-height:1.4;color:var(--muted);max-width:30em}
 .work-head h1 .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:.26em;font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;margin-left:1.15em;white-space:nowrap}
@@ -1102,8 +1128,8 @@ const SITE = {
   function itemHTML(w){
     const i = SITE.work.indexOf(w), nx = SITE.work[(i + 1) % SITE.work.length];
     return '<article>' +
+      '<a class="navback back" href="#work" data-route aria-label="All work">' + arrowBack + '</a>' +
       '<header class="work-head">' +
-        '<a class="back linkish" href="#work" data-route>' + arrowBack + ' All work</a>' +
         '<h1 tabindex="-1">' + esc(w.title) + '<sub class="yr"><span class="vh">, </span>' + esc(w.when) + '</sub></h1>' +
         '<p class="thesis">' + esc(w.thesis) + '</p>' +
         (FLAGS.projectMeta ? '<dl class="meta">' + w.meta.map(m => '<div><dt>' + esc(m[0]) + '</dt><dd>' + esc(m[1]) + '</dd></div>').join('') + '</dl>' : '') +
@@ -1335,8 +1361,6 @@ const SITE = {
       const d = slug ? visibleStage(slug) : null;
       const pill = main.querySelector('.tabs-in');
       if (d) d.style.viewTransitionName = 'hero-media';
-      // Back on the home page the tabs wait, then ease in once the page has settled.
-      if (pill && to.name === 'home' && !reduce) pill.classList.add('wait');
     };
     const revealTabs = () => {
       const pill = main.querySelector('.tabs-in.wait'); if (!pill) return;
@@ -1394,6 +1418,13 @@ const SITE = {
     try { navigator.clipboard.writeText(SITE.email).then(() => done(true), () => done(false)); } catch (err) { done(false); }
   });
 
+  // The back button sits exactly where the tabs' left edge does: the content column's edge.
+  const placeNav = () => {
+    document.documentElement.style.setProperty('--navx', (main.getBoundingClientRect().left - 3) + 'px');
+  };
+  // Re-measure whenever the column moves, including when a scrollbar appears or goes.
+  if ('ResizeObserver' in window) new ResizeObserver(placeNav).observe(document.documentElement);
+  window.addEventListener('resize', placeNav); placeNav();
   render(location.hash || '');
 })();
 </script>
