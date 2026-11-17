@@ -148,9 +148,10 @@ body.splash-open{overflow:hidden}
 .mark-base{color:var(--primary)}
 .tabs{position:sticky;top:var(--tabs-top);z-index:10;display:flex;margin-top:calc(clamp(22px,3vw,36px) + 24px);margin-bottom:var(--pad,22vh);pointer-events:none}
 .tabs-in{position:relative;display:inline-flex;gap:2px;padding:3px;margin-left:-3px;border-radius:12px;pointer-events:auto;
-  background:color-mix(in srgb,var(--paper) 42%,transparent);
+  background:color-mix(in srgb,var(--paper) 66%,transparent);
   border:1px solid var(--primary);
-  -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04)}
+  -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);
+  transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .tabs a{position:relative;z-index:1;font-size:1rem;font-weight:600;text-decoration:none;color:var(--ink);padding:9px 18px;border-radius:7px;transition:color var(--t-fast),transform var(--t-fast) var(--ease)}
 .tabs a:hover{color:var(--primary)}
 .tabs a[aria-current="page"],.tabs a[aria-current="page"]:hover{color:var(--primary-ink)}
@@ -162,8 +163,9 @@ body.splash-open{overflow:hidden}
 .panel .about-head h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.04;letter-spacing:-.03em;font-weight:600;max-width:14em;text-wrap:balance}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
+.pane:not(.off){will-change:opacity,transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
-.pane.is-out{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px) * -1),0,0);transition:opacity .2s var(--ease-io),transform .2s var(--ease-io);pointer-events:none}
+.pane.is-out{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px) * -1),0,0);transition:opacity .18s var(--ease-io),transform .18s var(--ease-io);pointer-events:none}
 .pane.is-in-start{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px)),0,0);transition:none}
 .pane.is-in{transition:opacity .45s var(--ease),transform .56s var(--ease)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
@@ -951,7 +953,7 @@ const SITE = {
   //   2. while nothing is showing, the sections swap and the page jumps to the right place,
   //      then the new section slides in from the other side and settles.
   // Work sits to the left of About, so going to About moves left and coming back moves right.
-  const OUT_MS = 200, IN_MS = 560;
+  const OUT_MS = 180, IN_MS = 560;
   let switchId = 0, switchT = 0;
   const paneOff = el => {
     el.classList.remove('is-out', 'is-in', 'is-in-start');
@@ -1012,20 +1014,35 @@ const SITE = {
     const d = Math.round(Math.min(64, Math.max(28, panel.offsetWidth * 0.06)));
     panel.style.setProperty('--push', d + 'px'); panel.style.setProperty('--dir', dir);
     outP.querySelectorAll('video').forEach(v => v.pause());
-    holdVideos(OUT_MS + IN_MS); window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 200;
+    holdVideos(OUT_MS); window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 400;
     outP.classList.add('is-out');
     switchT = setTimeout(() => {
       if (id !== switchId) return;
-      inP.classList.add('is-in-start');      // waiting just off to the side, transparent
+      inP.classList.add('is-in-start');      // in place but transparent, just off to the side
       swap(); land();
-      void inP.offsetWidth;                   // let that starting point take effect first
+      void inP.offsetWidth;
+      // Wake the videos that will be on screen while the section is still transparent, and only
+      // slide it in once each has a frame to show (or after a short wait at most), so no video
+      // appears blank and then pops in.
+      const vh = window.innerHeight;
+      const vids = [...inP.querySelectorAll('video')].filter(v => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < vh && canPlay(v); });
+      vids.forEach(playV);
       let went = false;
       const go = () => {
         if (went || id !== switchId) return; went = true;
-        inP.classList.add('is-in'); inP.classList.remove('is-in-start');
-        switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('is-in'); }, IN_MS + 60);
+        requestAnimationFrame(() => {
+          if (id !== switchId) return;
+          inP.classList.add('is-in'); inP.classList.remove('is-in-start');
+          switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('is-in'); }, IN_MS + 60);
+        });
+        setTimeout(() => { if (id === switchId && inP.classList.contains('is-in-start')) { inP.classList.add('is-in'); inP.classList.remove('is-in-start'); } }, 60);
       };
-      requestAnimationFrame(go); setTimeout(go, 50);   // the timer covers a frame that never comes
+      const ready = () => vids.every(v => v.readyState >= 2);
+      if (ready()) go();
+      else {
+        vids.forEach(v => { v.addEventListener('loadeddata', () => { if (ready()) go(); }, { once: true }); v.addEventListener('playing', () => { if (ready()) go(); }, { once: true }); });
+        setTimeout(go, 320);
+      }
     }, OUT_MS);
   }
   document.addEventListener('click', e => {
