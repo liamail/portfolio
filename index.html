@@ -1134,12 +1134,13 @@ const SITE = {
       initDemo();
     }
     initVideos();
-    // Where to land: back on the home page you return to where you were; a link straight to Work
-    // or About opens at that section; a project opens at the top unless you came back to it.
+    // Where to land: back on the home page you return to where you were; otherwise the home page
+    // opens at the top; a project opens at the top unless you came back to it.
     let y = 0;
     if (r.name === 'home') {
+      // A fresh load or refresh always starts at the top of the page, even if the address still
+      // ends in #work or #about from earlier browsing.
       if (opts && opts.restore) y = homeY();
-      else if (first && r.named) { mem.at = 'section'; y = panelTop(); }
     } else if (opts && opts.history && mem.item[r.item.slug] != null) y = mem.item[r.item.slug];
     jump(y);
     if (r.name === 'home') { const hm = main.querySelector('.home'); if (hm && hm._mark) hm._mark(); }
