@@ -165,11 +165,11 @@ body.splash-open{overflow:hidden}
 /* Project list with hover preview. Rows never change height: the active title only scales. */
 .pane:not(.off){will-change:opacity,transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
-.pane.pinned{position:absolute;left:0;right:0;pointer-events:none}
+.pane.parked{position:absolute;left:0;right:0;top:0;pointer-events:none}
 .pane.from-side{transform:translate3d(calc(var(--dir,1) * 100vw),0,0);transition:none}
-.pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .46s cubic-bezier(.65,0,.35,1)}
-/* The new section trails the old one and never catches it up, then settles firmly into place. */
-.pane.pushing-in{transform:translate3d(0,0,0);transition:transform .52s .32s cubic-bezier(.45,0,.15,1)}
+.pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .4s cubic-bezier(.55,0,.75,.3);pointer-events:none}
+/* The new section comes in quickly and settles firmly, as if it skids into place. */
+.pane.pushing-in{transform:translate3d(0,0,0);transition:transform .52s cubic-bezier(.12,.75,.2,1)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -951,13 +951,14 @@ const SITE = {
   // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
   //
   // Switching is a full push. The two sections sit side by side: Work on the left, About on the
-  // right. The current one leads off the screen; the new one trails a beat behind it, never
-  // overlapping, and settles firmly into place. Everything is set up before the first frame is drawn
-  // (the old section pinned exactly where it was, the new one parked just off screen), so the
-  // first thing you see is the movement itself, never a frame of the new layout.
-  const PUSH_MS = 840;
+  // right. The current one slides off screen first, from exactly where it is (nothing about it is
+  // re-laid out, so nothing can blink). Only once it has gone does the page swap sections and
+  // jump to the new scroll position, while the screen is clear, and the new section slides in.
+  // On iPhone a scroll jump and a layout change can land a frame apart; doing both while nothing
+  // is showing keeps that invisible.
+  const OUT_MS = 400, IN_MS = 520;
   let switchId = 0, switchT = 0;
-  const PUSH_CLASSES = ['pinned', 'from-side', 'pushing-out', 'pushing-in'];
+  const PUSH_CLASSES = ['parked', 'from-side', 'pushing-out', 'pushing-in'];
   const paneOff = el => {
     el.classList.remove(...PUSH_CLASSES); el.style.top = '';
     el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true');
@@ -966,7 +967,7 @@ const SITE = {
   function finishPush(){
     clearTimeout(switchT); switchId++;
     document.querySelectorAll('.pane').forEach(el => {
-      if (el.classList.contains('pinned')) paneOff(el);
+      if (el.classList.contains('pushing-out')) paneOff(el);
       else el.classList.remove(...PUSH_CLASSES);
     });
   }
@@ -1015,44 +1016,30 @@ const SITE = {
 
     const id = switchId;
     panel.style.setProperty('--dir', tab === 'about' ? 1 : -1);
-    window.LR.calmUntil = performance.now() + PUSH_MS + 500;
-    // 1. Note where the current section sits on screen.
-    const oldTop = (outP.firstElementChild || outP).getBoundingClientRect().top;
-    // 2. Lay out the end state: the new section in the page, the scroll where it will finish.
-    inP.classList.add('from-side');
-    outP.classList.add('pinned');
-    panel.className = 'panel is-' + tab;
-    paneOn(inP);
-    land();
-    // 3. Pin the old section back exactly where it was, so this frame looks unchanged.
-    outP.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
-    void panel.offsetWidth;
-    // 4. Wake the new section's on-screen videos, then push once they have a frame (short wait at most).
-    const vh = window.innerHeight;
-    const vids = [...inP.querySelectorAll('video')].filter(v => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < vh && canPlay(v); });
-    vids.forEach(playV);
-    let went = false;
-    const go = () => {
-      if (went || id !== switchId) return; went = true;
-      const start = () => {
-        if (id !== switchId || outP.classList.contains('pushing-out')) return;
-        outP.classList.add('pushing-out');
+    window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 500;
+    // Park the new section just off screen (out of the layout, so nothing on screen moves) and
+    // wake its videos there, so they have a picture by the time it arrives.
+    inP.classList.add('parked', 'from-side'); paneOn(inP);
+    inP.querySelectorAll('video').forEach(v => { if (canPlay(v)) playV(v); });
+    // The current section leaves from where it stands.
+    outP.classList.add('pushing-out');
+    switchT = setTimeout(() => {
+      if (id !== switchId) return;
+      // Screen clear: swap, jump, and start the new section from just off screen.
+      paneOff(outP);
+      outP.querySelectorAll('video').forEach(v => v.pause());
+      inP.classList.remove('parked');
+      panel.className = 'panel is-' + tab;
+      land();
+      void inP.offsetWidth;
+      let went = false;
+      const go = () => {
+        if (went || id !== switchId) return; went = true;
         inP.classList.add('pushing-in'); inP.classList.remove('from-side');
-        switchT = setTimeout(() => {
-          if (id !== switchId) return;
-          paneOff(outP);
-          inP.classList.remove('pushing-in');
-          outP.querySelectorAll('video').forEach(v => v.pause());
-        }, PUSH_MS + 80);
+        switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('pushing-in'); }, IN_MS + 60);
       };
-      requestAnimationFrame(start); setTimeout(start, 40);   // the timer covers a frame that never comes
-    };
-    const ready = () => vids.every(v => v.readyState >= 2);
-    if (ready()) go();
-    else {
-      vids.forEach(v => { v.addEventListener('loadeddata', () => { if (ready()) go(); }, { once: true }); v.addEventListener('playing', () => { if (ready()) go(); }, { once: true }); });
-      setTimeout(go, 260);
-    }
+      requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 70);
+    }, OUT_MS);
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-tab]');
