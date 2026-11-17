@@ -632,7 +632,22 @@ const SITE = {
 
   let current = null;       // hash last rendered
   let lastItem = null;      // slug of the last work page seen
-  let homeScroll = 0, homeTab = 'work';
+  let homeTab = 'work';
+  /* Scroll memory. The home page remembers whether you were in the hero or in a section, and
+     how far down each tab you were, measured from the top of that section rather than the page,
+     so it survives the hero changing height. Project pages remember their own position, used
+     when you return with the browser's back or forward. */
+  const mem = { at: 'hero', heroY: 0, tab: { work: null, about: null }, item: {} };
+  try { history.scrollRestoration = 'manual'; } catch (e) {}
+  function saveScroll(){
+    const r = parse(current); if (!current && current !== '') return;
+    if (r.name === 'item') { mem.item[r.item.slug] = window.scrollY; return; }
+    const pt = panelTop();
+    if (window.scrollY >= pt - 2) { mem.at = 'section'; mem.tab[homeTab] = window.scrollY - pt; }
+    else { mem.at = 'hero'; mem.heroY = window.scrollY; }
+  }
+  const homeY = () => mem.at === 'section' ? panelTop() + (mem.tab[homeTab] || 0) : mem.heroY;
+  const jump = y => window.scrollTo({ top: Math.max(0, y), behavior: 'instant' });
   let firstHome = true;
   let cleanup = [];
 
@@ -833,8 +848,12 @@ const SITE = {
   function initHome(active){
     const home = main.querySelector('.home'), hero = main.querySelector('.hero'), tabs = main.querySelector('.tabs');
     // Centre the logo, headline, intro and tabs as one group in the first screen.
+    // The viewport height is read once per width, so a phone's address bar showing or hiding
+    // doesn't resize the hero and shift everything below it.
+    let vw = 0, vh = 0;
     const layout = () => {
-      const pad = Math.max(40, (window.innerHeight - hero.offsetHeight - tabs.offsetHeight - parseFloat(getComputedStyle(tabs).marginTop)) / 2);
+      if (window.innerWidth !== vw || Math.abs(window.innerHeight - vh) > 160) { vw = window.innerWidth; vh = window.innerHeight; }
+      const pad = Math.max(40, (vh - hero.offsetHeight - tabs.offsetHeight - parseFloat(getComputedStyle(tabs).marginTop)) / 2);
       home.style.setProperty('--pad', pad + 'px');
       home.style.setProperty('--tabs-h', tabs.offsetHeight + 'px');
     };
@@ -861,6 +880,9 @@ const SITE = {
   }
   function setTab(tab, scroll){
     const panel = document.getElementById('panel'); if (!panel) return;
+    const tabs = main.querySelector('.tabs');
+    const inSection = tabs && tabs.classList.contains('live');
+    saveScroll();
     if (tab !== homeTab) {
       homeTab = tab;
       const active = bySlug[lastItem] || bySlug[SITE.flagship];
@@ -872,7 +894,15 @@ const SITE = {
     current = '#' + tab;
     if (location.hash !== current) location.hash = current;
     const home = main.querySelector('.home');
-    if (scroll) window.scrollTo({ top: panelTop(), behavior: reduce ? 'auto' : 'smooth' });
+    if (inSection) {
+      // Already in a section: switch in place, no scrolling animation. A tab you've scrolled in
+      // before opens where you left it; otherwise at its top.
+      mem.at = 'section';
+      jump(panelTop() + (mem.tab[tab] || 0));
+    } else if (scroll) {
+      mem.at = 'section';
+      window.scrollTo({ top: panelTop() + (mem.tab[tab] || 0), behavior: reduce ? 'instant' : 'smooth' });
+    }
     if (home && home._mark) home._mark();
   }
   document.addEventListener('click', e => {
@@ -1102,27 +1132,28 @@ const SITE = {
       initDemo();
     }
     initVideos();
-    // Coming back from a project returns to where you were; a link straight to Work or About opens at that section.
-    window.scrollTo(0, r.name !== 'home' ? 0 : opts && opts.restore ? homeScroll : (first && r.named) || (opts && opts.section) ? panelTop() : 0);
+    // Where to land: back on the home page you return to where you were; a link straight to Work
+    // or About opens at that section; a project opens at the top unless you came back to it.
+    let y = 0;
+    if (r.name === 'home') {
+      if (opts && opts.restore) y = homeY();
+      else if (first && r.named) { mem.at = 'section'; y = panelTop(); }
+    } else if (opts && opts.history && mem.item[r.item.slug] != null) y = mem.item[r.item.slug];
+    jump(y);
     if (r.name === 'home') { const hm = main.querySelector('.home'); if (hm && hm._mark) hm._mark(); }
     if (!first && r.name !== 'home') { const h = main.querySelector('h1'); if (h) h.focus({ preventScroll: true }); }
   }
   const visibleStage = slug => [...document.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => el.offsetParent !== null);
-  function show(hash){
+  function show(hash, history){
     const from = parse(current), to = parse(hash);
-    if (from.name === 'home') homeScroll = window.scrollY;
+    saveScroll();
     const slug = to.name === 'item' ? to.item.slug : (from.name === 'item' ? from.item.slug : null);
-    const opts = { restore: from.name === 'item' && to.name === 'home' && homeScroll > 0, section: from.name === 'item' && to.name === 'home' };
+    const opts = { restore: from.name === 'item' && to.name === 'home', history: !!history };
     const run = () => {
       if (location.hash !== hash) location.hash = hash;
       render(hash, opts);
       const d = slug ? visibleStage(slug) : null;
       const pill = main.querySelector('.tabs-in');
-      // Coming back to the list: keep the project's visual clear of the floating tabs.
-      if (d && pill && opts.restore) {
-        const clear = pill.getBoundingClientRect().bottom + 16, top = d.getBoundingClientRect().top;
-        if (top < clear) window.scrollBy(0, top - clear);
-      }
       if (d) d.style.viewTransitionName = 'hero-media';
       // The tabs get their own layer so they sit above the visual as it lands, and fade in once it has.
       if (pill && document.startViewTransition && !reduce) pill.style.viewTransitionName = 'tabs';
@@ -1144,7 +1175,7 @@ const SITE = {
   window.addEventListener('hashchange', () => {
     if (location.hash === current) return;
     const to = parse(location.hash);
-    if (to.name === 'home' && parse(current).name === 'home' && current !== null) setTab(to.tab, to.named); else show(location.hash);
+    if (to.name === 'home' && parse(current).name === 'home' && current !== null) setTab(to.tab, to.named); else show(location.hash, true);
   });
 
   /* ---------- Get in touch: Email copies the address ---------- */
