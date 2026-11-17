@@ -157,22 +157,28 @@ body.splash-open{overflow:hidden}
 .tabs a[aria-current="page"],.tabs a[aria-current="page"]:hover{color:var(--primary-ink)}
 .tab-ind{position:absolute;left:0;top:3px;bottom:3px;width:0;border-radius:8px;background:var(--primary);opacity:0;transform:translateX(0);transition:transform var(--t-move) var(--ease),width var(--t-move) var(--ease),opacity .2s}
 .tabs.live .tab-ind{opacity:1}
-.panel{position:relative;min-height:70vh;padding-top:clamp(20px,3vw,36px);padding-bottom:clamp(80px,12vw,140px)}
+.panel{position:relative;min-height:70vh;overflow-x:visible;overflow-y:clip}
+.pane{padding-top:clamp(20px,3vw,36px);padding-bottom:clamp(80px,12vw,140px)}
+.pane[data-pane="work"]{--side:-1}
+.pane[data-pane="about"]{--side:1}
 .panel .reel{margin-top:0}
 .panel .about-head{padding-top:0}
 .panel .about-head h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.04;letter-spacing:-.03em;font-weight:600;max-width:14em;text-wrap:balance}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
-.pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
-.pane.from-side{transform:translate3d(calc(var(--dir,1) * 100vw),0,0);transition:none}
-.pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .4s cubic-bezier(.55,0,.75,.3);pointer-events:none}
-/* The new section comes in quickly and settles firmly, as if it skids into place. */
-.pane.pushing-in{transform:translate3d(0,0,0);transition:transform .52s cubic-bezier(.12,.75,.2,1)}
+/* The section that isn't showing is fully built and drawn, parked just off screen to its side
+   and lined up with where it will sit once it's showing, so a switch only ever moves things that
+   are already there. The panel clips it vertically so it never adds to the page's length. */
+.pane.off{position:absolute;left:0;right:0;top:var(--k,0px);transform:translate3d(calc(var(--side) * 100vw),0,0);pointer-events:none}
+.pane.pushing-out{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:transform .46s cubic-bezier(.65,0,.35,1);pointer-events:none}
+.pane.off.pushing-in{transform:translate3d(0,0,0);transition:transform .52s .32s cubic-bezier(.45,0,.15,1)}
+/* While sections move under the tabs, the tabs drop their live blur (it flickers on iPhone). */
+html.switching .tabs-in{-webkit-backdrop-filter:none;backdrop-filter:none;background:color-mix(in srgb,var(--paper) 94%,transparent)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
-  .panel.is-work{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 0 12px;display:grid;align-content:center}
-  .panel.is-work .viewer .stage{height:clamp(440px,62vh,640px)}
+  .pane[data-pane="work"]{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 0 12px;display:grid;align-content:center}
+  .pane[data-pane="work"] .viewer .stage{height:clamp(440px,62vh,640px)}
 }
 .plist{display:grid;align-content:center}
 /* An invisible copy of each title at its enlarged size sets the column width, so the hovered
@@ -907,7 +913,9 @@ const SITE = {
       '<header class="hero"><div class="mark" role="img" aria-label="Liam Rayner">' + LOGO + '</div>' +
       '<h1 class="intro-line" tabindex="-1">' + esc(SITE.intro.text).replace('Liam Rayner', '<span class="me">Liam Rayner</span>') + '</h1></header>' +
       '<nav class="tabs" aria-label="Sections"><div class="tabs-in"><span class="tab-ind" aria-hidden="true"></span><a href="#work" data-tab="work">Work</a><a href="#about" data-tab="about">About</a></div></nav>' +
-      '<div class="panel is-' + tab + '" id="panel"><div class="pane" data-pane="' + tab + '">' + panelHTML(tab, active) + '</div></div></div>';
+      '<div class="panel is-' + tab + '" id="panel">' +
+        ['work', 'about'].map(t => '<div class="pane' + (t === tab ? '' : ' off') + '" data-pane="' + t + '"' + (t === tab ? '' : ' inert aria-hidden="true"') + '>' + panelHTML(t, active) + '</div>').join('') +
+      '</div></div>';
   }
   const panelTop = () => { const p = document.getElementById('panel'), t = main.querySelector('.tabs'); return p ? Math.max(0, p.getBoundingClientRect().top + window.scrollY - (t ? t.offsetHeight + tabsTop() + 12 : 0)) : 0; };
   const tabsTop = () => { const t = main.querySelector('.tabs'); return t ? parseFloat(getComputedStyle(t).top) || 12 : 12; };
@@ -941,41 +949,49 @@ const SITE = {
     cleanup.push(() => { window.removeEventListener('scroll', mark); window.removeEventListener('resize', onResize); });
     layout(); mark();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (main.contains(home)) onResize(); });
-    if (homeTab === 'work') initWorkPanel(active);
+    initWorkPanel(active);
     home._mark = mark;
+    // Keep the hidden section lined up with where it would land, so a switch never re-draws it.
+    let prepT = 0;
+    const prepSoon = () => { clearTimeout(prepT); prepT = setTimeout(prepOff, 120); };
+    window.addEventListener('scroll', prepSoon, { passive: true });
+    cleanup.push(() => { clearTimeout(prepT); window.removeEventListener('scroll', prepSoon); });
+    prepOff();
   }
-  // Work and About each live in their own pane, built once per visit to the home page. The pane
-  // that isn't showing stays in the page, hidden, rather than being taken out: a video that
-  // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
-  //
-  // Switching is a full push. The two sections sit side by side: Work on the left, About on the
-  // right. The current one slides off screen first, from exactly where it is (nothing about it is
-  // re-laid out, so nothing can blink). Only once it has gone does the page swap sections and
-  // jump to the new scroll position, while the screen is clear, and the new section slides in.
-  // On iPhone a scroll jump and a layout change can land a frame apart; doing both while nothing
-  // is showing keeps that invisible.
-  const OUT_MS = 400, IN_MS = 520;
-  let switchId = 0, switchT = 0;
-  const PUSH_CLASSES = ['from-side', 'pushing-out', 'pushing-in'];
-  const paneOff = el => {
-    el.classList.remove(...PUSH_CLASSES); el.style.top = '';
-    el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true');
-  };
-  const paneOn = el => { el.classList.remove('off'); el.inert = false; el.removeAttribute('aria-hidden'); };
+  // Work and About are both built when the home page is, each in its own pane. The one that
+  // isn't showing is parked just off screen to its side, already drawn, and kept lined up with the
+  // spot it will land in (see prepOff). Switching is then a full push of things that already
+  // exist: the current section slides away to its side, the new one follows a beat later and
+  // settles. Only when it has landed does the page quietly hand over (the new section takes its
+  // place in the layout and the scroll position moves to match), with nothing visibly changing.
+  const PUSH_MS = 860;
+  let switchId = 0, switchT = 0, pending = null;
+  const paneOff = el => { el.classList.remove('pushing-out', 'pushing-in'); el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
+  const paneOn = el => { el.classList.remove('off', 'pushing-in', 'pushing-out'); el.inert = false; el.removeAttribute('aria-hidden'); };
+  // Where the page will scroll to when a tab is shown, and the matching place to park it.
+  function landingY(tab){
+    const panel = document.getElementById('panel'); if (!panel) return 0;
+    const on = panel.querySelector('.pane:not(.off)'), off = panel.querySelector('.pane[data-pane="' + tab + '"]');
+    const docH = document.documentElement.scrollHeight - (on ? on.offsetHeight : 0) + (off ? off.offsetHeight : 0);
+    return Math.max(0, Math.min(panelTop() + (mem.tab[tab] || 0), docH - window.innerHeight));
+  }
+  function prepOff(){
+    const panel = document.getElementById('panel'), tabs = main.querySelector('.tabs');
+    if (!panel || pending || !tabs || !tabs.classList.contains('live')) return;
+    const off = panel.querySelector('.pane.off'); if (!off) return;
+    off.style.setProperty('--k', (window.scrollY - landingY(off.dataset.pane)) + 'px');
+  }
   function finishPush(){
     clearTimeout(switchT); switchId++;
-    document.querySelectorAll('.pane').forEach(el => {
-      if (el.classList.contains('pushing-out')) paneOff(el);
-      else el.classList.remove(...PUSH_CLASSES);
-    });
+    if (pending) { const p = pending; pending = null; p(); }
   }
   function setTab(tab, scroll){
     const panel = document.getElementById('panel'); if (!panel) return;
     const tabs = main.querySelector('.tabs');
-    const inSection = tabs && tabs.classList.contains('live');
     const home = main.querySelector('.home');
-    saveScroll();
     finishPush();
+    const inSection = tabs && tabs.classList.contains('live');
+    saveScroll();
     const from = homeTab, changing = tab !== homeTab;
     homeTab = tab;
     current = '#' + tab;
@@ -985,8 +1001,8 @@ const SITE = {
     if (home && home._mark) home._mark();   // the tab fill starts moving straight away
 
     // Where the page should end up once the new section is showing.
-    const land = () => {
-      if (inSection) { mem.at = 'section'; jump(panelTop() + (mem.tab[tab] || 0)); }
+    const land = y => {
+      if (inSection) { mem.at = 'section'; jump(y); }
       else if (scroll) {
         // From the hero, both tabs start fresh at the top of the section.
         mem.at = 'section'; mem.tab.work = mem.tab.about = null;
@@ -994,63 +1010,36 @@ const SITE = {
       }
       if (home && home._mark) home._mark();
     };
-    if (!changing) { land(); return; }
-
-    const active = bySlug[lastItem] || bySlug[SITE.flagship];
     const outP = panel.querySelector('.pane[data-pane="' + from + '"]');
-    let inP = panel.querySelector('.pane[data-pane="' + tab + '"]');
-    if (!inP) {
-      inP = document.createElement('div'); inP.className = 'pane off'; inP.dataset.pane = tab;
-      inP.innerHTML = panelHTML(tab, active); panel.appendChild(inP);
-      if (tab === 'work') initWorkPanel(active);
-      initVideos(inP);
-    }
-    const dir = tab === 'about' ? 1 : -1;
-    const swap = () => {
-      if (outP) paneOff(outP);
-      panel.className = 'panel is-' + tab;
+    const inP = panel.querySelector('.pane[data-pane="' + tab + '"]');
+    if (!changing || !inP) { land(landingY(tab)); return; }
+    const settle = () => {
+      outP.querySelectorAll('video').forEach(v => v.pause());
       paneOn(inP);
+      panel.className = 'panel is-' + tab;
     };
-    // Only animate when you're in the section and can see it; from the hero, swap and scroll.
-    if (reduce || !inSection || !outP) { if (outP) outP.querySelectorAll('video').forEach(v => v.pause()); swap(); land(); return; }
+    // From the hero, or with reduced motion, simply swap and scroll.
+    if (reduce || !inSection || !outP) { const y = landingY(tab); if (outP) paneOff(outP); settle(); land(y); prepOff(); return; }
 
     const id = switchId;
-    panel.style.setProperty('--dir', tab === 'about' ? 1 : -1);
-    window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 500;
-    // At the tap, the only change is the current section starting to move. Everything else waits
-    // until it has left, so nothing new is drawn while you're looking at the old content.
+    const y = landingY(tab);
+    inP.style.setProperty('--k', (window.scrollY - y) + 'px');   // already there unless you just scrolled
+    window.LR.calmUntil = performance.now() + PUSH_MS + 400;
+    document.documentElement.classList.add('switching');
     outP.classList.add('pushing-out');
-    switchT = setTimeout(() => {
-      if (id !== switchId) return;
-      // Screen clear: swap, jump, and place the new section just off screen.
+    inP.classList.add('pushing-in');
+    inP.inert = false; inP.removeAttribute('aria-hidden');
+    pending = () => {
+      // The hand-over: the old section is parked in its place off screen, the new one takes its
+      // place in the layout, and the scroll moves so that it stays exactly where it is on screen.
       paneOff(outP);
-      outP.querySelectorAll('video').forEach(v => v.pause());
-      inP.classList.add('from-side');
-      panel.className = 'panel is-' + tab;
-      paneOn(inP);
-      land();
-      void inP.offsetWidth;
-      // Wake the videos that will be on screen; slide in once each has a picture (brief wait at most).
-      const vh = window.innerHeight;
-      const vids = [...inP.querySelectorAll('video')].filter(v => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < vh && canPlay(v); });
-      vids.forEach(playV);
-      let went = false;
-      const go = () => {
-        if (went || id !== switchId) return; went = true;
-        const start = () => {
-          if (id !== switchId || inP.classList.contains('pushing-in')) return;
-          inP.classList.add('pushing-in'); inP.classList.remove('from-side');
-          switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('pushing-in'); }, IN_MS + 60);
-        };
-        requestAnimationFrame(() => requestAnimationFrame(start)); setTimeout(start, 70);
-      };
-      const ready = () => vids.every(v => v.readyState >= 2);
-      if (ready()) go();
-      else {
-        vids.forEach(v => { v.addEventListener('loadeddata', () => { if (ready()) go(); }, { once: true }); v.addEventListener('playing', () => { if (ready()) go(); }, { once: true }); });
-        setTimeout(go, 180);
-      }
-    }, OUT_MS);
+      settle();
+      land(y);
+      document.documentElement.classList.remove('switching');
+      near.forEach(v => { if (canPlay(v)) playV(v); });
+      requestAnimationFrame(prepOff);
+    };
+    switchT = setTimeout(() => { if (id === switchId && pending) { const p = pending; pending = null; p(); } }, PUSH_MS + 40);
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-tab]');
