@@ -163,9 +163,7 @@ body.splash-open{overflow:hidden}
 .panel .about-head h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.04;letter-spacing:-.03em;font-weight:600;max-width:14em;text-wrap:balance}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
-.pane:not(.off){will-change:opacity,transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
-.pane.parked{position:absolute;left:0;right:0;top:0;pointer-events:none}
 .pane.from-side{transform:translate3d(calc(var(--dir,1) * 100vw),0,0);transition:none}
 .pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .4s cubic-bezier(.55,0,.75,.3);pointer-events:none}
 /* The new section comes in quickly and settles firmly, as if it skids into place. */
@@ -958,7 +956,7 @@ const SITE = {
   // is showing keeps that invisible.
   const OUT_MS = 400, IN_MS = 520;
   let switchId = 0, switchT = 0;
-  const PUSH_CLASSES = ['parked', 'from-side', 'pushing-out', 'pushing-in'];
+  const PUSH_CLASSES = ['from-side', 'pushing-out', 'pushing-in'];
   const paneOff = el => {
     el.classList.remove(...PUSH_CLASSES); el.style.top = '';
     el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true');
@@ -981,7 +979,9 @@ const SITE = {
     const from = homeTab, changing = tab !== homeTab;
     homeTab = tab;
     current = '#' + tab;
-    if (location.hash !== current) location.hash = current;
+    // Update the address quietly. Assigning location.hash counts as a navigation, and Chrome on
+    // iPhone redraws the whole page for it, which showed as a blank frame right at the tap.
+    if (location.hash !== current) { try { history.replaceState(history.state, '', current); } catch (e) { location.hash = current; } }
     if (home && home._mark) home._mark();   // the tab fill starts moving straight away
 
     // Where the page should end up once the new section is showing.
@@ -1017,28 +1017,39 @@ const SITE = {
     const id = switchId;
     panel.style.setProperty('--dir', tab === 'about' ? 1 : -1);
     window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 500;
-    // Park the new section just off screen (out of the layout, so nothing on screen moves) and
-    // wake its videos there, so they have a picture by the time it arrives.
-    inP.classList.add('parked', 'from-side'); paneOn(inP);
-    inP.querySelectorAll('video').forEach(v => { if (canPlay(v)) playV(v); });
-    // The current section leaves from where it stands.
+    // At the tap, the only change is the current section starting to move. Everything else waits
+    // until it has left, so nothing new is drawn while you're looking at the old content.
     outP.classList.add('pushing-out');
     switchT = setTimeout(() => {
       if (id !== switchId) return;
-      // Screen clear: swap, jump, and start the new section from just off screen.
+      // Screen clear: swap, jump, and place the new section just off screen.
       paneOff(outP);
       outP.querySelectorAll('video').forEach(v => v.pause());
-      inP.classList.remove('parked');
+      inP.classList.add('from-side');
       panel.className = 'panel is-' + tab;
+      paneOn(inP);
       land();
       void inP.offsetWidth;
+      // Wake the videos that will be on screen; slide in once each has a picture (brief wait at most).
+      const vh = window.innerHeight;
+      const vids = [...inP.querySelectorAll('video')].filter(v => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < vh && canPlay(v); });
+      vids.forEach(playV);
       let went = false;
       const go = () => {
         if (went || id !== switchId) return; went = true;
-        inP.classList.add('pushing-in'); inP.classList.remove('from-side');
-        switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('pushing-in'); }, IN_MS + 60);
+        const start = () => {
+          if (id !== switchId || inP.classList.contains('pushing-in')) return;
+          inP.classList.add('pushing-in'); inP.classList.remove('from-side');
+          switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('pushing-in'); }, IN_MS + 60);
+        };
+        requestAnimationFrame(() => requestAnimationFrame(start)); setTimeout(start, 70);
       };
-      requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 70);
+      const ready = () => vids.every(v => v.readyState >= 2);
+      if (ready()) go();
+      else {
+        vids.forEach(v => { v.addEventListener('loadeddata', () => { if (ready()) go(); }, { once: true }); v.addEventListener('playing', () => { if (ready()) go(); }, { once: true }); });
+        setTimeout(go, 180);
+      }
     }, OUT_MS);
   }
   document.addEventListener('click', e => {
