@@ -1496,11 +1496,11 @@ const SITE = {
   }
 
   /* ---------- Easter egg ----------
-     Rest the cursor on empty background for two seconds and a black hole grows there from a
+     Rest the cursor on empty background for ten seconds and a black hole grows there from a
      pinpoint to 100px across. The glows and their grain bend, swirl and pour into it. Move the
      cursor away and it shrinks back to nothing. Press on the hole and drag to carry it around. */
   const BG = 'html,body,.wrap,main,.home,.hero,.tabs,.tabs-in,.panel,.plist,#vstage,.reel,.viewer,.viewer-text,article,.work-head,.hero,.fig,.chapters,.chapter,.chapter>.body,.about-head,.bio,.foot,.cards,.quotes';
-  const HOLD = 2000, LONG = 550, SIZE = 50, GROW = 1.6, SHRINK = 0.9;
+  const HOLD = 10000, LONG = 550, SIZE = 50, GROW = 1.6, SHRINK = 0.9;
   let hActive = false, drag = false, hs = 0, hl = 0, hx = 0, hy = 0, tx = 0, ty = 0, hR = 0;
   let aX = -9999, aY = -9999, aT = 0, aOK = false;
   function holeUpdate(dt){
