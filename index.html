@@ -167,8 +167,9 @@ body.splash-open{overflow:hidden}
 .pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
 .pane.pinned{position:absolute;left:0;right:0;pointer-events:none}
 .pane.from-side{transform:translate3d(calc(var(--dir,1) * 100vw),0,0);transition:none}
-.pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .62s cubic-bezier(.65,0,.35,1)}
-.pane.pushing-in{transform:translate3d(0,0,0);transition:transform .56s .07s cubic-bezier(.16,1.06,.3,1)}
+.pane.pushing-out{transform:translate3d(calc(var(--dir,1) * -100vw),0,0);transition:transform .56s cubic-bezier(.65,0,.35,1)}
+/* The new section trails the old one and never catches it up, then settles firmly into place. */
+.pane.pushing-in{transform:translate3d(0,0,0);transition:transform .62s .12s cubic-bezier(.45,0,.15,1)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -950,11 +951,11 @@ const SITE = {
   // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
   //
   // Switching is a full push. The two sections sit side by side: Work on the left, About on the
-  // right. The current one starts moving off the screen first; the new one follows a beat later,
-  // a little quicker, and skids into place. Everything is set up before the first frame is drawn
+  // right. The current one leads off the screen; the new one trails a beat behind it, never
+  // overlapping, and settles firmly into place. Everything is set up before the first frame is drawn
   // (the old section pinned exactly where it was, the new one parked just off screen), so the
   // first thing you see is the movement itself, never a frame of the new layout.
-  const PUSH_MS = 640;
+  const PUSH_MS = 740;
   let switchId = 0, switchT = 0;
   const PUSH_CLASSES = ['pinned', 'from-side', 'pushing-out', 'pushing-in'];
   const paneOff = el => {
