@@ -163,7 +163,9 @@ body.splash-open{overflow:hidden}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
 .pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
-.pane.leaving{position:absolute;left:0;right:0;pointer-events:none}
+.pane.is-out{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px) * -1),0,0);transition:opacity .2s var(--ease-io),transform .2s var(--ease-io);pointer-events:none}
+.pane.is-in-start{opacity:0;transform:translate3d(calc(var(--dir,1) * var(--push,40px)),0,0);transition:none}
+.pane.is-in{transition:opacity .45s var(--ease),transform .56s var(--ease)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -943,81 +945,88 @@ const SITE = {
   // Work and About each live in their own pane, built once per visit to the home page. The pane
   // that isn't showing stays in the page, hidden, rather than being taken out: a video that
   // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
-  let pushAnims = [], pushRun = null;
-  // The leave animation holds its last frame (faded out) until it is cancelled, so cancel it
-  // here, or the section would still be invisible the next time it's shown.
-  const paneOff = el => { el.getAnimations().forEach(a => a.cancel()); el.classList.remove('leaving'); el.style.top = ''; el.style.transform = ''; el.style.opacity = ''; el.style.willChange = ''; el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
+  //
+  // Switching is done in two steps, never with both sections on screen at once:
+  //   1. the current section slides a little and fades out where it is;
+  //   2. while nothing is showing, the sections swap and the page jumps to the right place,
+  //      then the new section slides in from the other side and settles.
+  // Work sits to the left of About, so going to About moves left and coming back moves right.
+  const OUT_MS = 200, IN_MS = 560;
+  let switchId = 0, switchT = 0;
+  const paneOff = el => {
+    el.classList.remove('is-out', 'is-in', 'is-in-start');
+    el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true');
+  };
+  const paneOn = el => { el.classList.remove('off'); el.inert = false; el.removeAttribute('aria-hidden'); };
   function finishPush(){
-    pushAnims.forEach(a => { try { a.finish(); } catch (e) {} });
-    pushAnims = [];
-    document.querySelectorAll('.pane.leaving').forEach(paneOff);
-  }
-  function startPush(){
-    if (!pushRun) return;
-    const { panel, outP, inP, oldTop, dir } = pushRun; pushRun = null;
-    inP.getAnimations().forEach(a => a.cancel());
-    // Pin the old section exactly where it was on screen, even if the page has just jumped.
-    outP.classList.add('leaving');
-    outP.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
-    const d = Math.min(120, Math.max(40, panel.offsetWidth * 0.1));
-    const tx = x => 'translate3d(' + x + 'px,0,0)';
-    outP.style.willChange = inP.style.willChange = 'transform, opacity';
-    pushAnims = [
-      // The old section eases away quickly; the new one glides in a beat later and settles slowly.
-      outP.animate([{ transform: tx(0), opacity: 1 }, { transform: tx(-dir * d), opacity: 0 }], { duration: 280, easing: 'cubic-bezier(.4,0,.7,.2)', fill: 'forwards' }),
-      inP.animate([{ transform: tx(dir * d), opacity: 0 }, { transform: tx(0), opacity: 1 }], { duration: 600, delay: 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' })
-    ];
-    const outDone = () => { if (outP.classList.contains('leaving')) paneOff(outP); };
-    pushAnims[0].finished.then(outDone, () => {}); setTimeout(outDone, 600);
-    pushAnims[1].finished.then(() => { inP.style.willChange = ''; }, () => {});
+    clearTimeout(switchT); switchId++;
+    document.querySelectorAll('.pane').forEach(el => {
+      if (el.classList.contains('is-out')) paneOff(el);
+      el.classList.remove('is-in', 'is-in-start');
+    });
   }
   function setTab(tab, scroll){
     const panel = document.getElementById('panel'); if (!panel) return;
     const tabs = main.querySelector('.tabs');
     const inSection = tabs && tabs.classList.contains('live');
+    const home = main.querySelector('.home');
     saveScroll();
-    if (tab !== homeTab) {
-      const from = homeTab;
-      homeTab = tab;
-      const active = bySlug[lastItem] || bySlug[SITE.flagship];
-      // Push: the old section slides out one way as the new one slides in from the other.
-      // Work sits to the left of About, so going to About pushes left and back pushes right.
-      const push = !reduce && panel.getBoundingClientRect().top < window.innerHeight;
-      finishPush();
-      const outP = panel.querySelector('.pane[data-pane="' + from + '"]');
-      let inP = panel.querySelector('.pane[data-pane="' + tab + '"]');
-      const oldTop = outP ? (outP.firstElementChild || outP).getBoundingClientRect().top : 0;
-      if (!inP) {
-        inP = document.createElement('div'); inP.className = 'pane off'; inP.dataset.pane = tab;
-        inP.innerHTML = panelHTML(tab, active); panel.appendChild(inP);
-        if (tab === 'work') initWorkPanel(active);
-        initVideos(inP);
-      }
-      panel.className = 'panel is-' + tab;
-      inP.getAnimations().forEach(a => a.cancel());
-      inP.classList.remove('off'); inP.inert = false; inP.removeAttribute('aria-hidden');
-      if (outP) {
-        outP.querySelectorAll('video').forEach(v => v.pause());
-        if (push) { holdVideos(400); window.LR.calmUntil = performance.now() + 800; pushRun = { panel, outP, inP, oldTop, dir: tab === 'about' ? 1 : -1 }; }
-        else paneOff(outP);
-      }
-    }
+    finishPush();
+    const from = homeTab, changing = tab !== homeTab;
+    homeTab = tab;
     current = '#' + tab;
     if (location.hash !== current) location.hash = current;
-    const home = main.querySelector('.home');
-    if (inSection) {
-      // Already in a section: switch in place, no scrolling animation. A tab you've scrolled in
-      // before opens where you left it; otherwise at its top.
-      mem.at = 'section';
-      jump(panelTop() + (mem.tab[tab] || 0));
-    } else if (scroll) {
-      // From the hero, both tabs start fresh: scroll to the top of the section and forget
-      // where you were in either tab.
-      mem.at = 'section'; mem.tab.work = mem.tab.about = null;
-      window.scrollTo({ top: panelTop(), behavior: reduce ? 'instant' : 'smooth' });
+    if (home && home._mark) home._mark();   // the tab fill starts moving straight away
+
+    // Where the page should end up once the new section is showing.
+    const land = () => {
+      if (inSection) { mem.at = 'section'; jump(panelTop() + (mem.tab[tab] || 0)); }
+      else if (scroll) {
+        // From the hero, both tabs start fresh at the top of the section.
+        mem.at = 'section'; mem.tab.work = mem.tab.about = null;
+        window.scrollTo({ top: panelTop(), behavior: reduce ? 'instant' : 'smooth' });
+      }
+      if (home && home._mark) home._mark();
+    };
+    if (!changing) { land(); return; }
+
+    const active = bySlug[lastItem] || bySlug[SITE.flagship];
+    const outP = panel.querySelector('.pane[data-pane="' + from + '"]');
+    let inP = panel.querySelector('.pane[data-pane="' + tab + '"]');
+    if (!inP) {
+      inP = document.createElement('div'); inP.className = 'pane off'; inP.dataset.pane = tab;
+      inP.innerHTML = panelHTML(tab, active); panel.appendChild(inP);
+      if (tab === 'work') initWorkPanel(active);
+      initVideos(inP);
     }
-    startPush();
-    if (home && home._mark) home._mark();
+    const dir = tab === 'about' ? 1 : -1;
+    const swap = () => {
+      if (outP) paneOff(outP);
+      panel.className = 'panel is-' + tab;
+      paneOn(inP);
+    };
+    // Only animate when you're in the section and can see it; from the hero, swap and scroll.
+    if (reduce || !inSection || !outP) { if (outP) outP.querySelectorAll('video').forEach(v => v.pause()); swap(); land(); return; }
+
+    const id = switchId;
+    const d = Math.round(Math.min(64, Math.max(28, panel.offsetWidth * 0.06)));
+    panel.style.setProperty('--push', d + 'px'); panel.style.setProperty('--dir', dir);
+    outP.querySelectorAll('video').forEach(v => v.pause());
+    holdVideos(OUT_MS + IN_MS); window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 200;
+    outP.classList.add('is-out');
+    switchT = setTimeout(() => {
+      if (id !== switchId) return;
+      inP.classList.add('is-in-start');      // waiting just off to the side, transparent
+      swap(); land();
+      void inP.offsetWidth;                   // let that starting point take effect first
+      let went = false;
+      const go = () => {
+        if (went || id !== switchId) return; went = true;
+        inP.classList.add('is-in'); inP.classList.remove('is-in-start');
+        switchT = setTimeout(() => { if (id === switchId) inP.classList.remove('is-in'); }, IN_MS + 60);
+      };
+      requestAnimationFrame(go); setTimeout(go, 50);   // the timer covers a frame that never comes
+    }, OUT_MS);
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-tab]');
