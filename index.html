@@ -72,6 +72,7 @@ html.entering .home .tabs-in{transition-delay:.32s}
 /* Work preview: the old visual fades away over the new one. */
 #vstage{display:grid}
 #vstage>.stage{grid-area:1/1}
+#vstage>.stage.off{visibility:hidden;pointer-events:none}
 #vstage>.stage.leaving{z-index:1;pointer-events:none;animation:fade-away .34s var(--ease-io) forwards}
 @keyframes fade-away{to{opacity:0}}
 /* Press feedback on touch. */
@@ -161,7 +162,8 @@ body.splash-open{overflow:hidden}
 .panel .about-head h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.04;letter-spacing:-.03em;font-weight:600;max-width:14em;text-wrap:balance}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
-.panel-out{position:absolute;left:0;right:0;pointer-events:none}
+.pane.off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
+.pane.leaving{position:absolute;left:0;right:0;pointer-events:none}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -709,7 +711,7 @@ const SITE = {
   // transition new videos wait until the motion has finished, so decoding doesn't stutter it.
   const near = new Set();
   let holdUntil = 0, holdT = 0;
-  const canPlay = v => { const st = v.closest('.stage'); return v.isConnected && st && !st.dataset.paused && !st.classList.contains('leaving') && !v.closest('.panel-out'); };
+  const canPlay = v => { const st = v.closest('.stage'); return v.isConnected && st && !st.dataset.paused && !st.classList.contains('leaving') && !st.classList.contains('off') && !v.closest('.pane.off, .pane.leaving'); };
   const playV = v => { if (!v.paused) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
   const vio = (!reduce && 'IntersectionObserver' in window) ? new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -874,19 +876,20 @@ const SITE = {
       if (slug === now) return;
       now = slug; lastItem = slug;
       rows.forEach(r => r.classList.toggle('is-active', r.dataset.p === slug));
-      holder.querySelectorAll('.stage.leaving').forEach(el => { el.classList.remove('leaving'); el.remove(); });
-      const old = holder.querySelector('.stage');
+      // Every visual stays in the stage once made; the others are just hidden, so none of them
+      // reloads or flashes when you come back to it.
+      holder.querySelectorAll('.stage.leaving').forEach(el => { el.classList.remove('leaving'); el.classList.add('off'); });
+      const old = holder.querySelector('.stage:not(.off)');
       let el = made[slug];
-      if (!el) { const t = document.createElement('div'); t.innerHTML = stage(device(bySlug[slug].hero), slug); el = made[slug] = t.firstElementChild; }
-      el.classList.remove('leaving');
-      holder.appendChild(el);
-      initVideos(el);
+      if (!el) { const t = document.createElement('div'); t.innerHTML = stage(device(bySlug[slug].hero), slug); el = made[slug] = t.firstElementChild; holder.appendChild(el); initVideos(el); }
+      el.classList.remove('off', 'leaving');
       if (old && old !== el) {
-        if (reduce) old.remove();
-        else { old.classList.add('leaving'); old.querySelectorAll('video').forEach(v => v.pause()); setTimeout(() => { if (old.classList.contains('leaving')) { old.classList.remove('leaving'); old.remove(); } }, 360); }
+        old.querySelectorAll('video').forEach(v => v.pause());
+        if (reduce) old.classList.add('off');
+        else { old.classList.add('leaving'); setTimeout(() => { if (old.classList.contains('leaving')) { old.classList.remove('leaving'); old.classList.add('off'); } }, 360); }
       }
       const sum = document.getElementById('vsum'); if (sum) { sum.textContent = bySlug[slug].summary; sum.classList.remove('swap'); void sum.offsetWidth; sum.classList.add('swap'); }
-      const v = holder.querySelector('video');
+      const v = el.querySelector('video');
       if (v && !reduce) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
     };
     rows.forEach(r => {
@@ -900,7 +903,7 @@ const SITE = {
       '<header class="hero"><div class="mark" role="img" aria-label="Liam Rayner">' + LOGO + '</div>' +
       '<h1 class="intro-line" tabindex="-1">' + esc(SITE.intro.text).replace('Liam Rayner', '<span class="me">Liam Rayner</span>') + '</h1></header>' +
       '<nav class="tabs" aria-label="Sections"><div class="tabs-in"><span class="tab-ind" aria-hidden="true"></span><a href="#work" data-tab="work">Work</a><a href="#about" data-tab="about">About</a></div></nav>' +
-      '<div class="panel is-' + tab + '" id="panel">' + panelHTML(tab, active) + '</div></div>';
+      '<div class="panel is-' + tab + '" id="panel"><div class="pane" data-pane="' + tab + '">' + panelHTML(tab, active) + '</div></div></div>';
   }
   const panelTop = () => { const p = document.getElementById('panel'), t = main.querySelector('.tabs'); return p ? Math.max(0, p.getBoundingClientRect().top + window.scrollY - (t ? t.offsetHeight + tabsTop() + 12 : 0)) : 0; };
   const tabsTop = () => { const t = main.querySelector('.tabs'); return t ? parseFloat(getComputedStyle(t).top) || 12 : 12; };
@@ -937,36 +940,33 @@ const SITE = {
     if (homeTab === 'work') initWorkPanel(active);
     home._mark = mark;
   }
-  // Work and About are each built once per visit to the home page and kept while the other is
-  // showing, so switching back doesn't rebuild the section or reload its videos.
-  let kept = {};
-  const keep = (tab, nodes) => { const f = document.createDocumentFragment(); nodes.forEach(n => f.appendChild(n)); kept[tab] = f; };
-  let pushRun = null, pushAnims = [], pushOut = null, pushFrom = null;
+  // Work and About each live in their own pane, built once per visit to the home page. The pane
+  // that isn't showing stays in the page, hidden, rather than being taken out: a video that
+  // leaves the page drops its picture and flashes when it comes back, one that stays doesn't.
+  let pushAnims = [], pushRun = null;
+  const paneOff = el => { el.classList.remove('leaving'); el.style.top = ''; el.style.transform = ''; el.style.opacity = ''; el.style.willChange = ''; el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
   function finishPush(){
     pushAnims.forEach(a => { try { a.finish(); } catch (e) {} });
     pushAnims = [];
-    if (pushOut) { keep(pushFrom, [...pushOut.childNodes]); pushOut.remove(); pushOut = null; }
+    document.querySelectorAll('.pane.leaving').forEach(paneOff);
   }
   function startPush(){
     if (!pushRun) return;
-    const { panel, out, oldTop, dir, from } = pushRun; pushRun = null; pushFrom = from;
-    // Pin the old content where it was on screen, even if the page has just jumped.
-    panel.appendChild(out);
-    out.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
-    pushOut = out;
+    const { panel, outP, inP, oldTop, dir } = pushRun; pushRun = null;
+    // Pin the old section exactly where it was on screen, even if the page has just jumped.
+    outP.classList.add('leaving');
+    outP.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
     const d = Math.min(120, Math.max(40, panel.offsetWidth * 0.1));
-    const inEls = [...panel.children].filter(el => el !== out);
-    [out, ...inEls].forEach(el => { el.style.willChange = 'transform, opacity'; });
     const tx = x => 'translate3d(' + x + 'px,0,0)';
+    outP.style.willChange = inP.style.willChange = 'transform, opacity';
     pushAnims = [
       // The old section eases away quickly; the new one glides in a beat later and settles slowly.
-      out.animate([{ transform: tx(0), opacity: 1 }, { transform: tx(-dir * d), opacity: 0 }], { duration: 280, easing: 'cubic-bezier(.4,0,.7,.2)', fill: 'forwards' }),
-      ...inEls.map(el => el.animate([{ transform: tx(dir * d), opacity: 0 }, { transform: tx(0), opacity: 1 }], { duration: 600, delay: 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }))
+      outP.animate([{ transform: tx(0), opacity: 1 }, { transform: tx(-dir * d), opacity: 0 }], { duration: 280, easing: 'cubic-bezier(.4,0,.7,.2)', fill: 'forwards' }),
+      inP.animate([{ transform: tx(dir * d), opacity: 0 }, { transform: tx(0), opacity: 1 }], { duration: 600, delay: 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' })
     ];
-    Promise.all(pushAnims.slice(1).map(a => a.finished)).then(() => inEls.forEach(el => { el.style.willChange = ''; }), () => {});
-    const done = () => { if (pushOut === out) { keep(from, [...out.childNodes]); out.remove(); pushOut = null; } };
-    pushAnims[0].finished.then(done, () => {});
-    setTimeout(done, 700);   // belt and braces if the animation is interrupted
+    const outDone = () => { if (outP.classList.contains('leaving')) paneOff(outP); };
+    pushAnims[0].finished.then(outDone, () => {}); setTimeout(outDone, 600);
+    pushAnims[1].finished.then(() => { inP.style.willChange = ''; }, () => {});
   }
   function setTab(tab, scroll){
     const panel = document.getElementById('panel'); if (!panel) return;
@@ -981,20 +981,22 @@ const SITE = {
       // Work sits to the left of About, so going to About pushes left and back pushes right.
       const push = !reduce && panel.getBoundingClientRect().top < window.innerHeight;
       finishPush();
-      let out = null, oldTop = 0;
-      if (push) {
-        oldTop = (panel.firstElementChild || panel).getBoundingClientRect().top;
-        panel.querySelectorAll('video').forEach(v => v.pause());
-        holdVideos(640); window.LR.calmUntil = performance.now() + 800;
-        out = document.createElement('div');
-        out.className = 'panel-out'; out.setAttribute('aria-hidden', 'true'); out.inert = true;
-        while (panel.firstChild) out.appendChild(panel.firstChild);
-      } else keep(from, [...panel.childNodes]);
+      const outP = panel.querySelector('.pane[data-pane="' + from + '"]');
+      let inP = panel.querySelector('.pane[data-pane="' + tab + '"]');
+      const oldTop = outP ? (outP.firstElementChild || outP).getBoundingClientRect().top : 0;
+      if (!inP) {
+        inP = document.createElement('div'); inP.className = 'pane off'; inP.dataset.pane = tab;
+        inP.innerHTML = panelHTML(tab, active); panel.appendChild(inP);
+        if (tab === 'work') initWorkPanel(active);
+        initVideos(inP);
+      }
       panel.className = 'panel is-' + tab;
-      if (kept[tab]) { panel.appendChild(kept[tab]); delete kept[tab]; }
-      else { panel.innerHTML = panelHTML(tab, active); if (tab === 'work') initWorkPanel(active); }
-      initVideos(panel);
-      if (push) pushRun = { panel, out, oldTop, from, dir: tab === 'about' ? 1 : -1 };
+      inP.classList.remove('off'); inP.inert = false; inP.removeAttribute('aria-hidden');
+      if (outP) {
+        outP.querySelectorAll('video').forEach(v => v.pause());
+        if (push) { holdVideos(400); window.LR.calmUntil = performance.now() + 800; pushRun = { panel, outP, inP, oldTop, dir: tab === 'about' ? 1 : -1 }; }
+        else paneOff(outP);
+      }
     }
     current = '#' + tab;
     if (location.hash !== current) location.hash = current;
@@ -1227,7 +1229,7 @@ const SITE = {
   function render(hash, opts){
     const r = parse(hash), first = current === null;
     cleanup.forEach(f => f()); cleanup = [];
-    finishPush(); kept = {};
+    finishPush();
     current = hash;
     if (r.name === 'home') {
       const active = bySlug[lastItem] || bySlug[SITE.flagship];
@@ -1254,7 +1256,7 @@ const SITE = {
     if (r.name === 'home') { const hm = main.querySelector('.home'); if (hm && hm._mark) hm._mark(); }
     if (!first && r.name !== 'home') { const h = main.querySelector('h1'); if (h) h.focus({ preventScroll: true }); }
   }
-  const visibleStage = slug => [...document.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => el.offsetParent !== null);
+  const visibleStage = slug => [...document.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => el.offsetParent !== null && !el.closest('.off'));
   function show(hash, history){
     const from = parse(current), to = parse(hash);
     saveScroll();
