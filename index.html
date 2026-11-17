@@ -157,8 +157,8 @@ body.splash-open{overflow:hidden}
 .tabs a[aria-current="page"],.tabs a[aria-current="page"]:hover{color:var(--primary-ink)}
 .tab-ind{position:absolute;left:0;top:3px;bottom:3px;width:0;border-radius:8px;background:var(--primary);opacity:0;transform:translateX(0);transition:transform var(--t-move) var(--ease),width var(--t-move) var(--ease),opacity .2s}
 .tabs.live .tab-ind{opacity:1}
-.panel{position:relative;min-height:70vh;overflow-x:visible;overflow-y:clip}
-.pane{padding-top:clamp(20px,3vw,36px);padding-bottom:clamp(80px,12vw,140px)}
+.panel{position:relative;min-height:70vh;margin-inline:calc(-1 * var(--bleed,0px));overflow:hidden;overflow:clip}
+.pane{padding:clamp(20px,3vw,36px) var(--bleed,0px) clamp(80px,12vw,140px)}
 .pane[data-pane="work"]{--side:-1}
 .pane[data-pane="about"]{--side:1}
 .panel .reel{margin-top:0}
@@ -166,18 +166,17 @@ body.splash-open{overflow:hidden}
 .panel .about-head h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.04;letter-spacing:-.03em;font-weight:600;max-width:14em;text-wrap:balance}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
-/* The section that isn't showing is fully built and drawn, parked just off screen to its side
-   and lined up with where it will sit once it's showing, so a switch only ever moves things that
-   are already there. The panel clips it vertically so it never adds to the page's length. */
+/* The panel runs edge to edge (it bleeds out over the page margins and pads its content back in)
+   and clips everything inside it, so the hidden section parked off screen can never be scrolled
+   to sideways and never adds to the page's length. */
 .pane.off{position:absolute;left:0;right:0;top:var(--k,0px);transform:translate3d(calc(var(--side) * 100vw),0,0);pointer-events:none}
-.pane.pushing-out{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:transform .46s cubic-bezier(.65,0,.35,1);pointer-events:none}
-.pane.off.pushing-in{transform:translate3d(0,0,0);transition:transform .52s .32s cubic-bezier(.45,0,.15,1)}
-/* While sections move under the tabs, the tabs drop their live blur (it flickers on iPhone). */
-html.switching .tabs-in{-webkit-backdrop-filter:none;backdrop-filter:none;background:color-mix(in srgb,var(--paper) 94%,transparent)}
+.pane.pushing-out{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:transform .42s cubic-bezier(.6,0,.8,.35);pointer-events:none}
+.pane.arriving{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:none}
+.pane.landing{transform:translate3d(0,0,0);transition:transform .52s cubic-bezier(.16,.9,.24,1)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
-  .pane[data-pane="work"]{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 0 12px;display:grid;align-content:center}
+  .pane[data-pane="work"]{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 var(--bleed,0px) 12px;display:grid;align-content:center}
   .pane[data-pane="work"] .viewer .stage{height:clamp(440px,62vh,640px)}
 }
 .plist{display:grid;align-content:center}
@@ -930,6 +929,8 @@ const SITE = {
       const pad = Math.max(40, (vh - hero.offsetHeight - tabs.offsetHeight - parseFloat(getComputedStyle(tabs).marginTop)) / 2);
       home.style.setProperty('--pad', pad + 'px');
       home.style.setProperty('--tabs-h', tabs.offsetHeight + 'px');
+      // How far the panel reaches past the content column to touch both screen edges.
+      home.style.setProperty('--bleed', Math.max(0, (document.documentElement.clientWidth - home.clientWidth) / 2) + 'px');
     };
     // In the hero neither tab is selected. Once the tabs reach the top they stick and show which is open.
     const ind = tabs.querySelector('.tab-ind');
@@ -959,27 +960,45 @@ const SITE = {
     prepOff();
   }
   // Work and About are both built when the home page is, each in its own pane. The one that
-  // isn't showing is parked just off screen to its side, already drawn, and kept lined up with the
-  // spot it will land in (see prepOff). Switching is then a full push of things that already
-  // exist: the current section slides away to its side, the new one follows a beat later and
-  // settles. Only when it has landed does the page quietly hand over (the new section takes its
-  // place in the layout and the scroll position moves to match), with nothing visibly changing.
-  const PUSH_MS = 860;
+  // isn't showing waits off screen to its side (Work on the left, About on the right), already
+  // drawn, and is kept lined up with the spot it will land in (prepOff), so when it arrives
+  // everything in it is ready.
+  //
+  // A switch is a full push in three beats:
+  //   1. the current section slides off to its side;
+  //   2. with the screen clear, the sections trade places in the layout and the page jumps to the
+  //      new scroll position (nothing is showing, so nothing can be seen to jump);
+  //   3. the new section slides in and settles, and that's the end: no hand-over afterwards.
+  // During the switch the floating tabs are held in place on the screen rather than stuck to the
+  // page, because on iPhone a sticky element can be drawn a frame out of place when the page jumps.
+  const OUT_MS = 420, IN_MS = 520;
   let switchId = 0, switchT = 0, pending = null;
-  const paneOff = el => { el.classList.remove('pushing-out', 'pushing-in'); el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
-  const paneOn = el => { el.classList.remove('off', 'pushing-in', 'pushing-out'); el.inert = false; el.removeAttribute('aria-hidden'); };
-  // Where the page will scroll to when a tab is shown, and the matching place to park it.
+  const paneOff = el => { el.classList.remove('pushing-out', 'arriving', 'landing'); el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
+  const paneOn = el => { el.classList.remove('off'); el.inert = false; el.removeAttribute('aria-hidden'); };
   function landingY(tab){
     const panel = document.getElementById('panel'); if (!panel) return 0;
     const on = panel.querySelector('.pane:not(.off)'), off = panel.querySelector('.pane[data-pane="' + tab + '"]');
-    const docH = document.documentElement.scrollHeight - (on ? on.offsetHeight : 0) + (off ? off.offsetHeight : 0);
+    const docH = document.documentElement.scrollHeight - (on && on !== off ? on.offsetHeight : 0) + (off && on !== off ? off.offsetHeight : 0);
     return Math.max(0, Math.min(panelTop() + (mem.tab[tab] || 0), docH - window.innerHeight));
   }
   function prepOff(){
     const panel = document.getElementById('panel'), tabs = main.querySelector('.tabs');
     if (!panel || pending || !tabs || !tabs.classList.contains('live')) return;
     const off = panel.querySelector('.pane.off'); if (!off) return;
-    off.style.setProperty('--k', (window.scrollY - landingY(off.dataset.pane)) + 'px');
+    off.style.setProperty('--k', Math.round(window.scrollY - landingY(off.dataset.pane)) + 'px');
+  }
+  // Hold the tabs exactly where they are on screen, keeping their space in the layout.
+  function pinTabs(on){
+    const tabs = main.querySelector('.tabs'), pill = tabs && tabs.querySelector('.tabs-in'); if (!pill) return;
+    if (on) {
+      if (!tabs.classList.contains('live')) return;
+      // Measured from the layout, not the drawn box, so a transform still easing out can't skew it.
+      const r = tabs.getBoundingClientRect();
+      tabs.style.height = tabs.offsetHeight + 'px';
+      pill.style.position = 'fixed'; pill.style.top = r.top + 'px'; pill.style.left = (r.left + (parseFloat(getComputedStyle(pill).marginLeft) || 0)) + 'px'; pill.style.marginLeft = '0';
+    } else {
+      tabs.style.height = ''; pill.style.position = ''; pill.style.top = ''; pill.style.left = ''; pill.style.marginLeft = '';
+    }
   }
   function finishPush(){
     clearTimeout(switchT); switchId++;
@@ -1000,7 +1019,6 @@ const SITE = {
     if (location.hash !== current) { try { history.replaceState(history.state, '', current); } catch (e) { location.hash = current; } }
     if (home && home._mark) home._mark();   // the tab fill starts moving straight away
 
-    // Where the page should end up once the new section is showing.
     const land = y => {
       if (inSection) { mem.at = 'section'; jump(y); }
       else if (scroll) {
@@ -1013,33 +1031,43 @@ const SITE = {
     const outP = panel.querySelector('.pane[data-pane="' + from + '"]');
     const inP = panel.querySelector('.pane[data-pane="' + tab + '"]');
     if (!changing || !inP) { land(landingY(tab)); return; }
-    const settle = () => {
-      outP.querySelectorAll('video').forEach(v => v.pause());
-      paneOn(inP);
-      panel.className = 'panel is-' + tab;
-    };
+    // Videos that leave go back to their first frame, which is what their still image shows, so
+    // next time they come into view the still and the moving picture line up exactly.
+    const rewind = el => el.querySelectorAll('video').forEach(v => { v.pause(); try { v.currentTime = 0; } catch (e) {} });
+    const trade = y => { paneOff(outP); paneOn(inP); panel.className = 'panel is-' + tab; land(y); };
     // From the hero, or with reduced motion, simply swap and scroll.
-    if (reduce || !inSection || !outP) { const y = landingY(tab); if (outP) paneOff(outP); settle(); land(y); prepOff(); return; }
+    if (reduce || !inSection || !outP) { const y = landingY(tab); if (outP) rewind(outP); trade(y); prepOff(); return; }
 
     const id = switchId;
     const y = landingY(tab);
-    inP.style.setProperty('--k', (window.scrollY - y) + 'px');   // already there unless you just scrolled
-    window.LR.calmUntil = performance.now() + PUSH_MS + 400;
-    document.documentElement.classList.add('switching');
-    outP.classList.add('pushing-out');
-    inP.classList.add('pushing-in');
-    inP.inert = false; inP.removeAttribute('aria-hidden');
-    pending = () => {
-      // The hand-over: the old section is parked in its place off screen, the new one takes its
-      // place in the layout, and the scroll moves so that it stays exactly where it is on screen.
-      paneOff(outP);
-      settle();
-      land(y);
-      document.documentElement.classList.remove('switching');
+    window.LR.calmUntil = performance.now() + OUT_MS + IN_MS + 400;
+    pinTabs(true);
+    outP.classList.add('pushing-out');                                         // beat 1
+    const done = () => {
+      inP.classList.remove('landing', 'arriving');
+      pinTabs(false);
+      if (home && home._mark) home._mark();
       near.forEach(v => { if (canPlay(v)) playV(v); });
       requestAnimationFrame(prepOff);
     };
-    switchT = setTimeout(() => { if (id === switchId && pending) { const p = pending; pending = null; p(); } }, PUSH_MS + 40);
+    pending = () => {                                                          // tapped again: jump to the end
+      if (!outP.classList.contains('off')) { rewind(outP); trade(y); }
+      done();
+    };
+    switchT = setTimeout(() => {
+      if (id !== switchId) return;
+      rewind(outP);
+      inP.classList.add('arriving');                                           // beat 2: trade places
+      trade(y);
+      void inP.offsetWidth;
+      let went = false;
+      const go = () => {                                                       // beat 3
+        if (went || id !== switchId) return; went = true;
+        inP.classList.add('landing'); inP.classList.remove('arriving');
+        switchT = setTimeout(() => { if (id === switchId && pending) { pending = null; done(); } }, IN_MS + 40);
+      };
+      requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 70);
+    }, OUT_MS);
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-tab]');
