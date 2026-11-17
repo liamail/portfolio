@@ -51,6 +51,8 @@
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+:root{--ease:cubic-bezier(.22,1,.36,1);--t-move:.52s}
+body{overflow-x:clip}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.55 var(--font);-webkit-font-smoothing:antialiased}
 h1,h2,h3,p,ul,ol,dl,dd,figure,blockquote{margin:0;padding:0}
 ul,ol{list-style:none}
@@ -124,14 +126,15 @@ body.splash-open{overflow:hidden}
 .tabs a{position:relative;z-index:1;font-size:1rem;font-weight:600;text-decoration:none;color:var(--ink);padding:9px 18px;border-radius:7px;transition:color .2s}
 .tabs a:hover{color:var(--primary)}
 .tabs a[aria-current="page"],.tabs a[aria-current="page"]:hover{color:var(--primary-ink)}
-.tab-ind{position:absolute;left:0;top:3px;bottom:3px;width:0;border-radius:8px;background:var(--primary);opacity:0;transform:translateX(0);transition:transform .34s cubic-bezier(.3,.9,.25,1),width .34s cubic-bezier(.3,.9,.25,1),opacity .2s}
+.tab-ind{position:absolute;left:0;top:3px;bottom:3px;width:0;border-radius:8px;background:var(--primary);opacity:0;transform:translateX(0);transition:transform var(--t-move) var(--ease),width var(--t-move) var(--ease),opacity .2s}
 .tabs.live .tab-ind{opacity:1}
-.panel{min-height:70vh;padding-top:clamp(20px,3vw,36px);padding-bottom:clamp(80px,12vw,140px)}
+.panel{position:relative;min-height:70vh;padding-top:clamp(20px,3vw,36px);padding-bottom:clamp(80px,12vw,140px)}
 .panel .reel{margin-top:0}
 .panel .about-head{padding-top:0}
 .panel .about-head h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.04;letter-spacing:-.03em;font-weight:600;max-width:14em;text-wrap:balance}
 
 /* Project list with hover preview. Rows never change height: the active title only scales. */
+.panel-out{position:absolute;left:0;right:0;pointer-events:none}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -887,18 +890,55 @@ const SITE = {
     if (homeTab === 'work') initWorkPanel(active);
     home._mark = mark;
   }
+  let pushRun = null, pushAnims = [], pushOut = null;
+  function finishPush(){
+    pushAnims.forEach(a => { try { a.finish(); } catch (e) {} });
+    pushAnims = [];
+    if (pushOut) { pushOut.remove(); pushOut = null; }
+  }
+  function startPush(){
+    if (!pushRun) return;
+    const { panel, out, oldTop, dir } = pushRun; pushRun = null;
+    // Pin the old content where it was on screen, even if the page has just jumped.
+    panel.appendChild(out);
+    out.style.top = (oldTop - panel.getBoundingClientRect().top) + 'px';
+    pushOut = out;
+    const d = Math.min(220, Math.max(64, panel.offsetWidth * 0.18));
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    const inEls = [...panel.children].filter(el => el !== out);
+    pushAnims = [
+      out.animate([{ transform: 'translateX(0)', opacity: 1 }, { transform: 'translateX(' + (-dir * d) + 'px)', opacity: 0 }], { duration: 360, easing: ease, fill: 'forwards' }),
+      ...inEls.map(el => el.animate([{ transform: 'translateX(' + (dir * d) + 'px)', opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], { duration: 520, delay: 60, easing: ease, fill: 'backwards' }))
+    ];
+    const done = () => { if (pushOut === out) { out.remove(); pushOut = null; } };
+    pushAnims[0].finished.then(done, () => {});
+    setTimeout(done, 700);   // belt and braces if the animation is interrupted
+  }
   function setTab(tab, scroll){
     const panel = document.getElementById('panel'); if (!panel) return;
     const tabs = main.querySelector('.tabs');
     const inSection = tabs && tabs.classList.contains('live');
     saveScroll();
     if (tab !== homeTab) {
+      const from = homeTab;
       homeTab = tab;
       const active = bySlug[lastItem] || bySlug[SITE.flagship];
+      // Push: the old section slides out one way as the new one slides in from the other.
+      // Work sits to the left of About, so going to About pushes left and back pushes right.
+      const push = !reduce && panel.getBoundingClientRect().top < window.innerHeight;
+      finishPush();
+      let out = null, oldTop = 0;
+      if (push) {
+        oldTop = panel.getBoundingClientRect().top;
+        out = document.createElement('div');
+        out.className = 'panel-out'; out.setAttribute('aria-hidden', 'true'); out.inert = true;
+        while (panel.firstChild) out.appendChild(panel.firstChild);
+      }
       panel.className = 'panel is-' + tab;
       panel.innerHTML = panelHTML(tab, active);
       if (tab === 'work') initWorkPanel(active);
       initVideos();
+      if (push) pushRun = { panel, out, oldTop, dir: tab === 'about' ? 1 : -1 };
     }
     current = '#' + tab;
     if (location.hash !== current) location.hash = current;
@@ -914,6 +954,7 @@ const SITE = {
       mem.at = 'section'; mem.tab.work = mem.tab.about = null;
       window.scrollTo({ top: panelTop(), behavior: reduce ? 'instant' : 'smooth' });
     }
+    startPush();
     if (home && home._mark) home._mark();
   }
   document.addEventListener('click', e => {
