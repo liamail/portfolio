@@ -63,12 +63,12 @@ html.entering .home .hero>:nth-child(1){transition-delay:.1s}
 html.entering .home .hero>:nth-child(2){transition-delay:.2s}
 html.entering .home .tabs-in{transition-delay:.32s}
 /* Project page: the title and intro follow the visual in. */
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.arrive .work-head>*{animation:rise .7s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translate3d(0,6px,0)}to{opacity:1;transform:none}}
+.arrive .work-head>*{animation:rise .5s var(--ease) both}
 .arrive .work-head>:nth-child(1){animation-delay:.08s}
 .arrive .work-head>:nth-child(2){animation-delay:.14s}
 .arrive .work-head>:nth-child(3){animation-delay:.2s}
-.arrive .chapters{animation:rise var(--t-slow) var(--ease) .3s both}
+.arrive .chapters{animation:rise .6s var(--ease) .24s both}
 /* Work preview: the old visual fades away over the new one. */
 #vstage{display:grid}
 #vstage>.stage{grid-area:1/1}
@@ -236,7 +236,12 @@ body.splash-open{overflow:hidden}
    recording's exact proportions. Corners are sized from the device's own width (cqw), which keeps
    them circular and keeps the frame's outer curve concentric with the screen's. */
 .device{position:relative;flex:none;container-type:inline-size}
-.device .scr{display:block;width:100%;height:100%;overflow:hidden;background:#000}
+.device .scr{position:relative;display:block;width:100%;height:100%;overflow:hidden;background:#000}
+/* A still of the first frame sits over each video and only fades once the video is actually
+   drawing frames. iPhone shows black while a video starts, and in page transitions, so the still
+   covers both. */
+.device .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .22s var(--ease-io)}
+.device .scr.live .still{opacity:0}
 .device video{display:block;width:100%;height:100%;object-fit:cover}
 .device.phone{width:min(100%,280px);--b:2.2cqw;--r:10cqw}
 .device.phone .scr{border-radius:var(--r);box-shadow:0 0 0 var(--b) var(--bezel),0 18px 50px rgba(0,0,0,.35)}
@@ -427,10 +432,9 @@ body.splash-open{overflow:hidden}
 
 /* View transitions */
 ::view-transition-group(hero-media){animation-duration:.5s;animation-timing-function:var(--ease)}
-::view-transition-group(tabs){z-index:5;animation:none}
-::view-transition-old(tabs){display:none}
-::view-transition-new(tabs){animation:tabs-in .28s .38s var(--ease) both}
-@keyframes tabs-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+/* Tabs returning to the home page: hidden through the page change, then eased in. */
+.tabs-in.wait{opacity:0;transform:translate3d(0,-8px,0)}
+.tabs-in.reveal{transition:opacity .35s var(--ease),transform .45s var(--ease)}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
@@ -704,7 +708,8 @@ const SITE = {
   function device(m){
     return '<div class="device ' + m.shape + '" style="aspect-ratio:' + m.w + ' / ' + m.h + '">' +
       '<span class="scr"><video src="media/' + m.src + '.mp4" poster="media/' + m.src + '.jpg" muted loop playsinline preload="metadata" data-auto' +
-      (reduce ? ' controls' : '') + ' aria-label="' + esc(m.alt) + '"></video></span></div>';
+      (reduce ? ' controls' : '') + ' aria-label="' + esc(m.alt) + '"></video>' +
+      '<img class="still" src="media/' + m.src + '.jpg" alt="" aria-hidden="true" decoding="async"></span></div>';
   }
   const pp = '<button class="pp" type="button" aria-label="Pause video" aria-pressed="false"></button>';
   function stage(inner, slug, extra){
@@ -726,9 +731,17 @@ const SITE = {
     entries.forEach(e => {
       const v = e.target;
       if (e.isIntersecting) { near.add(v); if (performance.now() >= holdUntil && canPlay(v)) playV(v); }
-      else { near.delete(v); v.pause(); }
+      else { near.delete(v); v.pause(); const sc = v.closest('.scr'); if (sc) sc.classList.remove('live'); }
     });
   }, { rootMargin: '50% 100% 50% 100%', threshold: 0 }) : null;
+  // Reveal a video only once it is drawing frames; cover it again whenever it is set aside.
+  const markLive = v => {
+    const scr = v.closest('.scr'); if (!scr) return;
+    const on = () => { if (!v.paused) scr.classList.add('live'); };
+    if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(() => requestAnimationFrame(on)); else setTimeout(on, 120);
+  };
+  document.addEventListener('playing', e => { if (e.target.tagName === 'VIDEO') markLive(e.target); }, true);
+  const cover = root => (root || document).querySelectorAll('.scr.live').forEach(el => el.classList.remove('live'));
   function holdVideos(ms){
     holdUntil = performance.now() + ms; clearTimeout(holdT);
     holdT = setTimeout(() => near.forEach(v => { if (canPlay(v)) playV(v); }), ms + 20);
@@ -1033,7 +1046,7 @@ const SITE = {
     if (!changing || !inP) { land(landingY(tab)); return; }
     // Videos that leave go back to their first frame, which is what their still image shows, so
     // next time they come into view the still and the moving picture line up exactly.
-    const rewind = el => el.querySelectorAll('video').forEach(v => { v.pause(); try { v.currentTime = 0; } catch (e) {} });
+    const rewind = el => { cover(el); el.querySelectorAll('video').forEach(v => { v.pause(); try { v.currentTime = 0; } catch (e) {} }); };
     const trade = y => { paneOff(outP); paneOn(inP); panel.className = 'panel is-' + tab; land(y); };
     // From the hero, or with reduced motion, simply swap and scroll.
     if (reduce || !inSection || !outP) { const y = landingY(tab); if (outP) rewind(outP); trade(y); prepOff(); return; }
@@ -1322,15 +1335,24 @@ const SITE = {
       const d = slug ? visibleStage(slug) : null;
       const pill = main.querySelector('.tabs-in');
       if (d) d.style.viewTransitionName = 'hero-media';
-      // The tabs get their own layer so they sit above the visual as it lands, and fade in once it has.
-      if (pill && document.startViewTransition && !reduce) pill.style.viewTransitionName = 'tabs';
+      // Back on the home page the tabs wait, then ease in once the page has settled.
+      if (pill && to.name === 'home' && !reduce) pill.classList.add('wait');
     };
+    const revealTabs = () => {
+      const pill = main.querySelector('.tabs-in.wait'); if (!pill) return;
+      let shown = false;
+      const show = () => { if (shown) return; shown = true; pill.classList.add('reveal'); pill.classList.remove('wait'); setTimeout(() => pill.classList.remove('reveal'), 600); };
+      requestAnimationFrame(show); setTimeout(show, 50);
+      const h = main.querySelector('.home'); if (h && h._mark) h._mark();
+    };
+    // Videos show their stills while the pages change over, so nothing goes black mid-transition.
+    cover(); document.querySelectorAll('video').forEach(v => v.pause());
     holdVideos(reduce ? 0 : 650); window.LR.calmUntil = performance.now() + 900;
-    if (!document.startViewTransition || reduce) { run(); return; }
+    if (!document.startViewTransition || reduce) { run(); setTimeout(revealTabs, reduce ? 0 : 200); return; }
     document.querySelectorAll('.stage').forEach(s => { s.style.viewTransitionName = ''; });
     if (slug) { const s = visibleStage(slug); if (s) s.style.viewTransitionName = 'hero-media'; }
     const vt = document.startViewTransition(run);
-    vt.finished.finally(() => { document.querySelectorAll('.stage').forEach(s => { s.style.viewTransitionName = ''; }); const p = main.querySelector('.tabs-in'); if (p) { p.style.viewTransitionName = ''; const h = main.querySelector('.home'); if (h && h._mark) h._mark(); } });
+    vt.finished.finally(() => { document.querySelectorAll('.stage').forEach(s => { s.style.viewTransitionName = ''; }); setTimeout(revealTabs, 80); });
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-route]');
