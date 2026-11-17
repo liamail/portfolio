@@ -611,7 +611,9 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false };
+  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false };
+  // Projects switched off here are left out of every list and link, and their pages don't open.
+  if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   { const f = document.querySelector('.foot'); if (f) f.hidden = !FLAGS.footer; }
   const LOGO = (document.getElementById('logo-tpl') || {}).innerHTML || '';
   const main = document.getElementById('main');
