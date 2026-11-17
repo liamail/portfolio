@@ -58,7 +58,8 @@ a{color:inherit}
 img,video{max-width:100%;display:block}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+:root{--gutter:clamp(16px,4vw,40px);--tabs-top:calc(var(--gutter) - 3px)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 var(--gutter)}
 .skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--paper);padding:8px 12px;border-radius:8px;z-index:50}
 .skip:focus{left:16px}
 .num{font-variant-numeric:tabular-nums}
@@ -115,7 +116,7 @@ body.splash-open{overflow:hidden}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .intro-line .me{color:var(--accent)}}
 .hero h1{font-size:clamp(2.6rem,7.4vw,5.6rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;max-width:11.5em;text-wrap:balance}
 .mark-base{color:var(--primary)}
-.tabs{position:sticky;top:12px;z-index:10;display:flex;margin-top:calc(clamp(22px,3vw,36px) + 24px);margin-bottom:var(--pad,22vh);pointer-events:none}
+.tabs{position:sticky;top:var(--tabs-top);z-index:10;display:flex;margin-top:calc(clamp(22px,3vw,36px) + 24px);margin-bottom:var(--pad,22vh);pointer-events:none}
 .tabs-in{position:relative;display:inline-flex;gap:2px;padding:3px;margin-left:-3px;border-radius:12px;pointer-events:auto;
   background:color-mix(in srgb,var(--paper) 42%,transparent);
   border:1px solid var(--primary);
@@ -134,7 +135,7 @@ body.splash-open{overflow:hidden}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
-  .panel.is-work{min-height:calc(100vh - var(--tabs-h,50px) - 24px);min-height:calc(100svh - var(--tabs-h,50px) - 24px);padding:0 0 12px;display:grid;align-content:center}
+  .panel.is-work{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 0 12px;display:grid;align-content:center}
   .panel.is-work .viewer .stage{height:clamp(440px,62vh,640px)}
 }
 .plist{display:grid;align-content:center}
@@ -308,6 +309,8 @@ body.splash-open{overflow:hidden}
 .dock{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(540px,calc(100% - 32px));z-index:20;color:var(--ink);border-radius:12px;padding:10px 12px 12px;
   background:color-mix(in srgb,var(--paper) 42%,transparent);border:1px solid var(--primary);
   -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04)}
+.dock{bottom:calc(16px + env(safe-area-inset-bottom, 0px))}
+@media (max-width:820px){.dock{bottom:calc(28px + env(safe-area-inset-bottom, 0px))}}
 .dock-top{display:flex;justify-content:space-between;gap:12px;font-size:.85rem;font-weight:600}
 .dock-top span:last-child{opacity:.6;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dock-track{position:relative;display:flex;gap:3px;margin-top:8px;height:16px}
@@ -849,7 +852,8 @@ const SITE = {
       '<nav class="tabs" aria-label="Sections"><div class="tabs-in"><span class="tab-ind" aria-hidden="true"></span><a href="#work" data-tab="work">Work</a><a href="#about" data-tab="about">About</a></div></nav>' +
       '<div class="panel is-' + tab + '" id="panel">' + panelHTML(tab, active) + '</div></div>';
   }
-  const panelTop = () => { const p = document.getElementById('panel'), t = main.querySelector('.tabs'); return p ? Math.max(0, p.getBoundingClientRect().top + window.scrollY - (t ? t.offsetHeight + 24 : 0)) : 0; };
+  const panelTop = () => { const p = document.getElementById('panel'), t = main.querySelector('.tabs'); return p ? Math.max(0, p.getBoundingClientRect().top + window.scrollY - (t ? t.offsetHeight + tabsTop() + 12 : 0)) : 0; };
+  const tabsTop = () => { const t = main.querySelector('.tabs'); return t ? parseFloat(getComputedStyle(t).top) || 12 : 12; };
   function initHome(active){
     const home = main.querySelector('.home'), hero = main.querySelector('.hero'), tabs = main.querySelector('.tabs');
     // Centre the logo, headline, intro and tabs as one group in the first screen.
@@ -865,7 +869,7 @@ const SITE = {
     // In the hero neither tab is selected. Once the tabs reach the top they stick and show which is open.
     const ind = tabs.querySelector('.tab-ind');
     const mark = () => {
-      const live = tabs.getBoundingClientRect().top <= 12.5, was = tabs.classList.contains('live');
+      const live = tabs.getBoundingClientRect().top <= tabsTop() + 0.5, was = tabs.classList.contains('live');
       const cur = tabs.querySelector('a[data-tab="' + homeTab + '"]');
       // The fill appears in place the first time, then slides between tabs.
       if (live && !was) ind.style.transition = 'opacity .2s';
