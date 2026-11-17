@@ -110,6 +110,9 @@ body.splash-open{overflow:hidden}
 .mark{margin-bottom:calc(clamp(22px,3vw,36px) + 24px);color:var(--ink)}
 .mark svg{display:block;height:clamp(40px,5vw,54px);width:auto}
 .hero h1.intro-line{font-size:clamp(1.95rem,4.1vw,3.3rem);line-height:1.18;letter-spacing:-.025em;font-weight:500;max-width:21em;text-wrap:pretty}
+.intro-line .me{color:var(--primary)}
+:root[data-theme=dark] .intro-line .me{color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .intro-line .me{color:var(--accent)}}
 .hero h1{font-size:clamp(2.6rem,7.4vw,5.6rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;max-width:11.5em;text-wrap:balance}
 .mark-base{color:var(--primary)}
 .tabs{position:sticky;top:12px;z-index:10;display:flex;margin-top:calc(clamp(22px,3vw,36px) + 24px);margin-bottom:var(--pad,22vh);pointer-events:none}
@@ -842,7 +845,7 @@ const SITE = {
   function homeHTML(active, tab){
     return '<div class="home">' +
       '<header class="hero"><div class="mark" role="img" aria-label="Liam Rayner">' + LOGO + '</div>' +
-      '<h1 class="intro-line" tabindex="-1">' + esc(SITE.intro.text) + '</h1></header>' +
+      '<h1 class="intro-line" tabindex="-1">' + esc(SITE.intro.text).replace('Liam Rayner', '<span class="me">Liam Rayner</span>') + '</h1></header>' +
       '<nav class="tabs" aria-label="Sections"><div class="tabs-in"><span class="tab-ind" aria-hidden="true"></span><a href="#work" data-tab="work">Work</a><a href="#about" data-tab="about">About</a></div></nav>' +
       '<div class="panel is-' + tab + '" id="panel">' + panelHTML(tab, active) + '</div></div>';
   }
