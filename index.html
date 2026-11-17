@@ -900,8 +900,10 @@ const SITE = {
       mem.at = 'section';
       jump(panelTop() + (mem.tab[tab] || 0));
     } else if (scroll) {
-      mem.at = 'section';
-      window.scrollTo({ top: panelTop() + (mem.tab[tab] || 0), behavior: reduce ? 'instant' : 'smooth' });
+      // From the hero, both tabs start fresh: scroll to the top of the section and forget
+      // where you were in either tab.
+      mem.at = 'section'; mem.tab.work = mem.tab.about = null;
+      window.scrollTo({ top: panelTop(), behavior: reduce ? 'instant' : 'smooth' });
     }
     if (home && home._mark) home._mark();
   }
