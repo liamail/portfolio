@@ -246,10 +246,14 @@ body.splash-open{overflow:hidden}
 .device.phone{width:min(100%,280px);--b:2.2cqw;--r:10cqw}
 .device.phone .scr{border-radius:var(--r);box-shadow:0 0 0 var(--b) var(--bezel),0 18px 50px rgba(0,0,0,.35)}
 .device.wide{width:100%}
+.device.card{width:min(100%,400px)}
+.device.card .scr{border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
 .device.wide .scr{border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
 .stage.row .device.phone{flex:1 1 0;min-width:0;max-width:250px;width:auto}
 .viewer .stage{height:440px;padding:28px}
 .viewer .stage .device.phone{height:100%;width:auto}
+.viewer .stage .device.card{height:100%;width:auto}
+.cards .device.card{width:min(100%,240px)}
 .pp{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;opacity:0;transition:opacity .18s,background-color .18s}
 .stage:hover .pp,.pp:focus-visible,.pp[aria-pressed="true"]{opacity:1}
 .pp:hover{background:rgba(255,255,255,.28)}
@@ -468,6 +472,99 @@ body.splash-open{overflow:hidden}
 .card h2,.viewer-text h2{letter-spacing:-.01em}
 .chapter h2{letter-spacing:-.005em;font-size:1.6rem}
 .prow .pt{letter-spacing:0;font-size:1.3rem}
+
+/* ---------- draft: new blocks ---------- */
+.device.pic .scr{background:#e9e9ef}
+.device.pic .still{object-fit:contain}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin:10px 0}
+.fgrid .fig{margin:0}
+.stage.tile{padding:clamp(12px,2vw,22px);border-radius:16px;min-height:0}
+.fgrid figcaption b{color:var(--ink);font-weight:600}
+@media (max-width:720px){.fgrid{grid-template-columns:minmax(0,1fr)}}
+.tbl{border-collapse:collapse;width:100%;max-width:44em;margin:6px 0;font-size:.98rem}
+.tbl th{text-align:left;font-weight:600;color:var(--muted);font-size:.85rem;padding:0 16px 8px 0;border-bottom:1px solid var(--line)}
+.tbl td{padding:11px 16px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td:first-child{font-weight:600;width:48%}
+.mdl{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:clamp(14px,2.4vw,28px);align-items:start;background:var(--stage);border-radius:20px;padding:clamp(18px,3.4vw,36px);color:#ececf6}
+.mdl-arrow{align-self:center;color:#918bff;padding-top:28px}
+@media (max-width:760px){.mdl{grid-template-columns:minmax(0,1fr)}.mdl-arrow{transform:rotate(90deg);justify-self:center;padding:0}}
+.mdl-h{margin:0 0 12px;font-weight:600;font-size:.95rem}
+.mdl-c{margin:14px 0 0;font-size:.86rem;color:#a0a2ba;line-height:1.45}
+.sx{position:relative;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.sx-l{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;font-weight:600;color:#c9cadb;margin-bottom:8px}
+.sx-l em{font-style:normal;font-weight:500;color:#918bff}
+.sx.doc{padding:10px}
+.sx-pages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.sx.page{padding:8px;background:rgba(255,255,255,.04);display:grid;gap:5px;align-content:start}
+.sx.page .sx-l{margin-bottom:2px}
+.sx-b{display:block;font-style:normal;font-size:.64rem;line-height:18px;padding:0 5px;border-radius:4px;color:#0c0c18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sx-b.bg,.sx-bar.bg{background:linear-gradient(160deg,#5b5f86,#34365a);color:#ececf6}
+.sx-b.t,.sx-bar.t{background:#7fdde6}
+.sx-b.g,.sx-bar.g{background:#c7b8f5}
+.sx-bar.a{background:#6a3fd1;color:#fff}
+.sx.page.one{padding:10px}
+.sx-tl{display:grid;gap:6px}
+.sx-row{position:relative;height:20px;border-radius:4px;background:rgba(255,255,255,.04)}
+.sx-row.scenes{height:30px}
+.sx-doca{margin-top:8px}
+.sx-row.sm{height:18px}
+.sx-row.sm .sx-bar span{line-height:18px;font-size:.62rem;padding:0 5px}
+.sx.page .sx-row{background:rgba(255,255,255,.03)}
+.sx-bar{position:absolute;top:0;bottom:0;border-radius:4px;overflow:hidden;color:#0c0c18;font-style:normal}
+.sx-bar span{display:block;font-size:.66rem;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sx-row.scenes .sx-bar span{line-height:30px}
+.pgrp{list-style:none;font-size:.72rem;font-weight:600;letter-spacing:.02em;color:var(--muted);opacity:.75;margin:14px 0 0;padding:0}
+.plist .pgrp:first-child{margin-top:0}
+.prow{padding:7px 0}
+
+/* ---------- draft: review layer ---------- */
+.chapter .body .rv{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;min-width:0}
+.rv-bar{margin:0!important}
+.rv{position:relative;outline:1.5px dashed color-mix(in srgb,var(--accent) 70%,transparent);outline-offset:8px;border-radius:6px;margin:22px 0}
+.rv.rv-input{outline-color:#d98a12}
+.rv[data-state=accepted]{outline-style:solid;outline-color:color-mix(in srgb,#1f9d6b 60%,transparent)}
+.rv[data-state=returned]{outline-style:solid;outline-color:#d0453a}
+.rv[data-state=revised]{outline-color:#d98a12}
+.rv[data-state=revised]>.rv-bar .rv-tag::after{content:" \00b7  revised, please re-check"}
+.rv .rv{outline-offset:4px}
+.rv-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font:500 .78rem/1.35 system-ui,sans-serif;margin:0 0 10px;color:var(--muted)}
+.rv-tag{background:var(--accent);color:var(--accent-ink,#fff);border-radius:999px;padding:2px 9px;font-weight:600}
+.rv-input>.rv-bar .rv-tag{background:#d98a12;color:#fff}
+.rv-what{flex:1 1 16em}
+.rv-acts{display:inline-flex;gap:4px}
+.rv-acts button,.rv-vd button{font:inherit;font-size:.76rem;border:1px solid var(--line);background:var(--paper,#fff);color:var(--ink);border-radius:7px;padding:3px 9px;cursor:pointer}
+.rv-acts button[aria-pressed=true][data-d=accepted]{background:#1f9d6b;border-color:#1f9d6b;color:#fff}
+.rv-acts button[aria-pressed=true][data-d=returned]{background:#d0453a;border-color:#d0453a;color:#fff}
+.rv-note{width:100%;font:inherit;font-size:.82rem;color:var(--ink);background:var(--paper,#fff);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:48px;resize:vertical}
+.rv-vd{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 0;font:500 .76rem/1.3 system-ui,sans-serif;color:var(--muted)}
+.rv-src{margin-right:4px}
+.rv-vd button[aria-pressed=true][data-v=ship]{background:#1f9d6b;border-color:#1f9d6b;color:#fff}
+.rv-vd button[aria-pressed=true][data-v=polish]{background:#d98a12;border-color:#d98a12;color:#fff}
+.rv-vd button[aria-pressed=true][data-v=cut]{background:#d0453a;border-color:#d0453a;color:#fff}
+.rv-vd .rv-note{flex-basis:100%}
+.rv-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:8px;vertical-align:middle}
+body.rv-off .rv{outline:0;margin:0}
+body.rv-off .chapter .body .rv{margin:0}
+body.rv-off .rv-bar,body.rv-off .rv-vd,body.rv-off .rv-dot{display:none}
+.rvp{position:fixed;right:var(--gutter);bottom:calc(var(--gutter) + 64px);z-index:60;font:500 .85rem/1.4 system-ui,sans-serif;color:var(--ink);max-width:min(380px,calc(100vw - 2*var(--gutter)))}
+.rvp-tog{display:flex;align-items:center;gap:8px;margin-left:auto;font:inherit;font-weight:600;border:1px solid var(--primary);border-radius:12px;padding:9px 14px;background:color-mix(in srgb,var(--paper,#fff) 80%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--ink);cursor:pointer}
+.rvp-tog b{font-variant-numeric:tabular-nums;color:var(--primary)}
+.rvp-dot{width:8px;height:8px;border-radius:50%;background:#d98a12}
+.rvp-body{margin-top:8px;max-height:min(70vh,640px);overflow:auto;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--paper,#fff);box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.rvp-lead{margin:0 0 6px;font-weight:600}
+.rvp-stats,.rvp-sync,.rvp-pub{margin:0 0 6px;color:var(--muted);font-size:.8rem}
+.rvp-h{margin:14px 0 6px;font-size:.72rem;font-weight:700;color:var(--muted)}
+.rvp-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.rvp-list li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:.8rem}
+.rvp-list li>span{flex:none;color:var(--muted)}
+.rvp-list li.accepted>span,.rvp-list li.ship>span{color:#1f9d6b}
+.rvp-list li.returned>span,.rvp-list li.cut>span{color:#d0453a}
+.rvp-list li.polish>span{color:#d98a12}
+.rvp-list a{color:var(--ink);text-decoration:none}
+.rvp-list a:hover{color:var(--primary)}
+.rvp-rm{display:grid;gap:4px}.rvp-rm small{color:var(--muted)}
+.rvp-hide{display:flex;gap:8px;align-items:center;margin:14px 0 10px;font-size:.8rem}
+.rvp-ready{width:100%;font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 14px;background:var(--primary);color:var(--primary-ink);cursor:pointer}
 </style>
 </head>
 <body>
@@ -515,43 +612,67 @@ const SITE = {
     {
       slug: "video-timeline", kind: "case", title: "Video timeline", short: "Video timeline",
       start: "2025-06", end: "2026-10", when: "2025 to 2026",
-      summary: "Turning the first release of Canva's multi-track video editor into one people liked.",
-      thesis: "Canva rebuilt its video editor around a real multi-track timeline. I joined as a clunky first version headed to launch, and spent the next year making it feel simple again.",
+      rv: { id: "tl-summary", type: "changed", what: "New summary and opening line for the three-act story." },
+      summary: "Taking Canva's video editor from a stack of pages to a real timeline, then making it simple again.",
+      thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined just before launch and spent the next year and a half making it simple by default.",
       meta: [["Role", "Senior product designer"], ["Team", "Video Editor, Canva"], ["When", "June 2025 to October 2026"], ["Platforms", "Web, iOS and Android"]],
-      hero: { src: "timeline-mobile", w: 498, h: 1080, shape: "phone", alt: "The multi-track timeline on mobile: text tracks above a main track of clips, with an audio track below.", caption: "The timeline on mobile. Text sits on tracks above the main track, with audio below." },
+      hero: { src: "cv-dragdrop", w: 1600, h: 900, shape: "wide", v: true, alt: "Clips dragged onto a multi-track timeline, with text and graphics on tracks above.", caption: "The multi-track timeline. From Canva's video editor page." },
+      heroRv: { id: "tl-hero", type: "changed", what: "Hero swapped to Canva's own marketing clip of the timeline." },
       chapters: [
-        { title: "Where it started", blocks: [
-          { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. Creators asked for real multi-track editing, so the team rebuilt the timeline. Timing moved from pages onto individual elements, and overlays could finally span scenes." },
-          { p: "I joined in June 2025, a few months before launch, during a change of designers on the team. The model was powerful. It was also rough, and harder to use than what it replaced." }
+        { title: "A more powerful model", rv: { id: "tl-act1", type: "changed", what: "Rewritten as act one, with a diagram of the old and new model." }, blocks: [
+          { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. Each page had a background and its own duration, and everything on it lived and died with the page. Creators wanted real editing, and that model couldn't give it to them." },
+          { diagram: "model", rv: { id: "tl-diagram", type: "new", what: "Simplified schema diagram, drawn from your description. No diagram existed in the docs." } },
+          { p: "The single-page video schema lifted pages up to the document level. Page backgrounds stayed on as video scenes, and every element got its own start and duration. That made timing across scenes possible, and with it a true multi-track editor." },
+          { p: "The new model was a big step up in power. It also changed what people had to understand. A video was no longer a row of pages but a main track with layers above it, and the old page controls didn't map cleanly onto it." },
+          { p: "I joined in June 2025, a few months before launch, during a change of designers on the team." }
         ]},
         { title: "Finding where it broke", blocks: [
           { p: "I co-led the beta research with 20 creators across personal, business and professional cohorts. Over two in-person sessions they edited their own footage, first freely and then against a brief, while we watched and asked why." },
           { p: "The sessions fed four decisions before launch: a main track that stays put, limits on vertical rearranging, onboarding for people arriving from the old editor, and the scope of our pre-launch test." },
           { quote: { text: "Liam was the lead designer who worked strategically to embed research insights into his designs.", who: "Najwa Alameddine, Design Researcher" } }
         ]},
-        { title: "Mobile first", blocks: [
-          { p: "On a phone the canvas and the timeline fight for the same screen. People told us there wasn't enough room to edit, and they still needed space for fine work on the canvas." },
-          { p: "I compared how CapCut, Edits and Reels handle it, then designed patterns that fit Canva: a timeline you can resize between two snap points, an Overlay action in place of drag and drop, and a toolbar that changes with your selection." },
+        { title: "Mobile first", rv: { id: "tl-mobile", type: "changed", what: "Revised: the third phone is now described as an unshipped toolbar exploration, not a shipped concept." }, blocks: [
+          { p: "On a phone the canvas and the timeline fight for the same screen. I compared how CapCut, Edits and Reels handle it, then designed patterns that fit Canva: a timeline you can resize, and an Overlay action in place of drag and drop." },
+          { p: "Along the way I explored a new mobile toolbar that moves between a deselected state, a set of options we called the object panel, and grouped tool sets. It didn't ship, but it was part of the work to make the editor fit for video." },
           { row: [
             { src: "timeline-resize", w: 496, h: 1080, shape: "phone", alt: "Resizing the mobile timeline between two heights." },
             { src: "mobile-overlay", w: 496, h: 1080, shape: "phone", alt: "Turning a main track clip into an overlay with a toolbar action." },
             { src: "mobile-ia", w: 492, h: 1080, shape: "phone", alt: "The mobile toolbar changing as different elements are selected." }
-          ], caption: "Resizing the timeline, making an overlay from the toolbar, and a toolbar that follows the selection." }
+          ], caption: "Resizing the timeline, making an overlay from the toolbar, and the unshipped toolbar exploration." }
         ]},
-        { title: "Launch and a loud minority", blocks: [
-          { p: "The new editor launched in October 2025. Most people adapted quietly. A small group did not, and said so in public. The team added a way to switch back, and I designed that flow and its copy within days." },
-          { facts: [["1 in 100", "people chose to switch back, roughly"], ["3 to 1", "praise to complaints in the months after launch"], ["20", "creators in the beta program"]] }
+        { title: "Bringing people across", rv: { id: "tl-across", type: "new", what: "New chapter on onboarding, changeboarding and the switch-back flow, all of which you led. Replaces \"Launch and a loud minority\"." }, blocks: [
+          { p: "Moving people to a new mental model is a design problem of its own. I led onboarding for the launch: coach marks for first-time users, and changeboarding for people arriving from the old editor with designs they'd already made." },
+          { row: [
+            { src: "tl-onboarding", w: 496, h: 1080, shape: "phone", v: true, alt: "A coach mark appearing as someone adds their first clip on mobile." },
+            { src: "tl-existing-mobile", w: 496, h: 1080, shape: "phone", v: true, alt: "An existing design opening in the new editor on mobile." },
+            { src: "tl-switch-mobile", w: 498, h: 1080, shape: "phone", v: true, alt: "Starting a new video from the Canva home screen on mobile." }
+          ], caption: "Onboarding on mobile: a coach mark on the first clip, an existing design in the new editor, and a new video from home.", rv: { id: "tl-across-row", type: "input", what: "Check these three recordings show what the caption says." } },
+          { p: "When the new editor launched in October 2025, most people adapted quietly. A small, vocal group did not. Within days I designed a way back: a setting in your profile, a banner inviting people to try the new editor again, and copy that explains what changes. Only new designs open in the new editor, so nothing anyone had made moved under them." },
+          { grid: [
+            { src: "fig-optin-setting", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Profile settings with a switch for the new multi-track video editor.", cap: "The switch, in profile settings." },
+            { src: "fig-optin-banner", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "A banner in the old editor inviting people to try the new one.", cap: "The invitation back, in the old editor." }
+          ] },
+          { p: "We also asked why, at the moment someone switched back, with a short survey in the flow. That gave the team reasons, not just a rate." },
+          { facts: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]], rv: { id: "tl-facts", type: "input", what: "New figures, stated as ranges and ratios. Confirm you're comfortable sharing them." } },
+          { p: "Even so, publishing was slower to recover than we hoped. The biggest confusion wasn't any one control. It was the model itself: the difference between the main track and everything above it. Our beta and pre-launch tests had been scoped around launch risks, and they missed it. That set up everything that came next.", rv: { id: "tl-lesson", type: "new", what: "Names the road bump plainly." } }
         ]},
-        { title: "A year of fixing", blocks: [
+        { title: "A year of fixing", rv: { id: "tl-fixing", type: "changed", what: "Revised: now says these are some of the improvements you led. The inventory has more, such as opt-in and opt-out, mobile resize and the overlay action, which appear elsewhere on the page." }, blocks: [
           { p: "After launch I worked through the paper cuts with engineering: playhead behaviour, selection, drag and drop, audio and transitions. I started weekly design office hours so engineers could bring problems in flight and we could solve them in the room." },
-          { media: { src: "overlay-drop", w: 992, h: 526, shape: "wide", alt: "Motion study of a clip lifting off the main track to become an overlay.", caption: "A motion study for lifting a clip off the main track. Engineers could feel the timing before building it." } },
-          { p: "I also led a proposal to simplify page timing. A page's toolbar could show Timing, Speed, Trim or nothing depending on its contents. We cut that to one control with a smart default." },
-          { media: { src: "auto-timing", w: 1600, h: 998, shape: "wide", alt: "One Timing control with an Auto default when a page contains video.", caption: "One Timing control. When a page holds video, it defaults to Auto." } }
+          { p: "Some of the improvements I led, most written up as specs that engineers built from directly." },
+          { grid: [
+            { src: "fig-slip-board", img: true, w: 1600, h: 1131, shape: "wide", v: true, alt: "Spec board for trim and slip on desktop and mobile.", cap: "<b>Trim and slip.</b> Slip moves the footage inside a clip without moving the clip, as audio already could. It shipped." },
+            { src: "fig-snap-board", img: true, w: 1341, h: 960, shape: "wide", v: true, alt: "Spec for the snapping indicator on desktop and mobile.", cap: "<b>Snapping indicators.</b> A line appears only when a dragged edge comes within reach of something real. Built from customer feedback." },
+            { src: "mm-btrack", w: 1600, h: 974, shape: "wide", v: true, alt: "Match and Move appearing between two overlay clips.", cap: "<b>Match and Move on overlay tracks.</b> A favourite transition, brought back where two clips meet." },
+            { src: "zoom-bar", w: 1600, h: 898, shape: "wide", v: true, alt: "The trimmed-down bottom bar with a segmented zoom control.", cap: "<b>Zoom you can find.</b> About 20% more people zoomed once it moved into the bottom bar." },
+            { src: "fig-trim-states", img: true, w: 772, h: 298, shape: "wide", v: true, alt: "A grid of clip states: deselected, selected, hover and edge hover.", cap: "<b>Trim handle states.</b> Every state for main and overlay tracks, with and without comments." },
+            { src: "overlay-drop", w: 992, h: 526, shape: "wide", alt: "Motion study of a clip lifting off the main track to become an overlay.", cap: "<b>Overlay drop.</b> A motion study for lifting a clip off the main track, so engineers could feel the timing before building it." }
+          ] }
         ]},
-        { title: "Simple by default", blocks: [
+        { title: "Simple by default", rv: { id: "tl-simple", type: "changed", what: "Credit reworded to collaborative ownership, with a line on the team's experiments." }, blocks: [
           { p: "Templates were the hard case. A graphic-heavy template became dozens of rows in the new timeline, and most people editing a template never need per-element timing." },
-          { p: "From February 2026 I led design on the answer, picking up early work from another designer. A simple view hides element tracks until you ask for them, and linking keeps overlays moving with their scene." },
+          { p: "From February 2026 I was the design owner for the answer, working alongside another designer who had started the early explorations. A simple view hides element tracks until you ask for them, and linking keeps overlays moving with their scene." },
           { media: { src: "simple-full", w: 1600, h: 898, shape: "wide", alt: "Switching between the simple timeline and the full multi-track timeline on desktop.", caption: "Simple view and full timeline. One control switches between them." } },
+          { p: "Before the big change, the team shipped a run of small experiments, from limiting how tall the timeline could grow to simplifying how tracks looked. We kept what helped and rolled back what didn't.", rv: { id: "tl-experiments", type: "changed", what: "Revised: the table is gone. One sentence about the team's experiments, with no names against them. Send it back again to cut it entirely." } },
           { p: "Testing taught us more than the designs did. People rated linking very useful, yet most couldn't find its control, and they couldn't tell what was linked or why. In the first experiment, people who landed in the simple view often stayed stuck there. Roughly one in four found the way back." },
           { p: "So we changed the defaults. The editor remembers the view you chose, and the way to see everything sits where people already look. That work shipped as an experiment in October 2026, after I handed over." }
         ]},
@@ -559,8 +680,10 @@ const SITE = {
           { p: "A small working model of the two ideas above, rebuilt for this page. It is a sketch of the behaviour, not Canva's code or interface." },
           { demo: "timeline", caption: "Drag a scene to reorder it, or drag its right edge to trim. In the simple view, elements always travel with their scene. Open the full timeline to see them, then switch Smart linking off and reorder again to see what it was protecting you from." }
         ]},
-        { title: "What I learned", blocks: [
-          { p: "Hidden behaviour needs a visible model. It came up three times: linking, the simple view, and the control that reveals every track. Each time the fix was the same. Put the control where people already look, and show the current state." },
+        { title: "What I learned", rv: { id: "tl-learned", type: "changed", what: "Reworded around what testing showed versus leadership's instinct. Was: \"Hidden behaviour needs a visible model...\"" }, blocks: [
+          { p: "Senior leadership saw the simple timeline as the answer. The full timeline, and the switch for smart linking, looked like lower priorities, and the instinct was to tuck them away for a cleaner editor." },
+          { p: "Testing told a more nuanced story. People liked the simple view, but they always needed a way back to full control of element timing. The linking switch was the same. With linking on by default and its control hidden, the editor suddenly behaved differently, and people couldn't see why or how to turn it off. Both findings backed the direction the team had proposed." },
+          { p: "The lesson I carry forward: simple should be the default, not the ceiling. Hide complexity until someone needs it, but keep the way to it in plain sight, and always show what the editor is doing on their behalf." },
           { quote: { text: "He pushed for testing multiple variants to find the best result, and kept iterating on proposed solutions even after landing on a direction.", who: "Software engineer, Canva" } }
         ]}
       ]
@@ -571,7 +694,7 @@ const SITE = {
       summary: "A prototype for improving a video by talking to it, while you stay the editor.",
       thesis: "An early concept for AI-assisted video editing. The goal was to let someone improve a video in plain language without losing the sense that they are still in charge.",
       meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2025"], ["Status", "Concept prototype, built in Figma"]],
-      hero: { src: "ai-mobile", w: 484, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype. Every change lands as something you can accept or reject." },
+      hero: { src: "ai-mobile", w: 478, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype. Every change lands as something you can accept or reject." },
       chapters: [
         { title: "The idea", blocks: [
           { p: "We surveyed 1,200 video editors to learn which AI features mattered to them. The answers pointed at a simple wish: make my video better without making me learn an editor." },
@@ -681,7 +804,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, morph: false };
+  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, morph: false, review: false, groups: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   { const f = document.querySelector('.foot'); if (f) f.hidden = !FLAGS.footer; }
@@ -700,7 +823,9 @@ const SITE = {
   const arrow = '<svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true"><path d="M1 6h15M11 1l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const arrowBig = '<svg width="44" height="28" viewBox="0 0 44 28" fill="none" aria-hidden="true"><path d="M2 14h38M28 2l12 12-12 12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const arrowBack = '<svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true"><path d="M17 6H2M7 1 2 6l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const kindLabel = w => w.kind === 'case' ? 'Case study' : 'Experiment';
+  const KINDS = { case: 'Case study', story: 'Project', note: 'Craft note', experiment: 'Experiment' };
+  const GROUPS = { case: 'Case studies', story: 'Projects', note: 'Craft notes', experiment: 'Experiments' };
+  const kindLabel = w => KINDS[w.kind] || 'Project';
 
   let current = null;       // hash last rendered
   let lastItem = null;      // slug of the last work page seen
@@ -725,6 +850,7 @@ const SITE = {
 
   /* ---------- media ---------- */
   function device(m){
+    if (m.img) return '<div class="device ' + m.shape + ' pic" style="aspect-ratio:' + m.w + ' / ' + m.h + '"><span class="scr"><img class="still" src="media/' + m.src + '.jpg" alt="' + esc(m.alt) + '" decoding="async"></span></div>';
     return '<div class="device ' + m.shape + '" style="aspect-ratio:' + m.w + ' / ' + m.h + '">' +
       '<span class="scr"><video src="media/' + m.src + '.mp4" poster="media/' + m.src + '.jpg" muted loop playsinline preload="metadata" data-auto' +
       (reduce ? ' controls' : '') + ' aria-label="' + esc(m.alt) + '"></video>' +
@@ -735,7 +861,24 @@ const SITE = {
     return '<div class="stage' + (extra ? ' ' + extra : '') + '"' + (slug ? ' data-slug="' + slug + '"' : '') + '>' + inner + (reduce ? '' : pp) + '</div>';
   }
   function figure(m, slug){
-    return '<figure class="fig">' + stage(device(m), slug) + (m.caption ? '<figcaption>' + esc(m.caption) + '</figcaption>' : '') + '</figure>';
+    return '<figure class="fig">' + stage(device(m), slug) + verdict(m) + (m.caption ? '<figcaption>' + esc(m.caption) + '</figcaption>' : '') + '</figure>';
+  }
+  const capHTML = c => esc(c).replace(/&lt;(\/?)b&gt;/g, '<$1b>');
+  // Review layer: a verdict bar under every visual pulled in for this draft.
+  function verdict(m){
+    if (!FLAGS.review || !m.v) return '';
+    return '<div class="rv-vd" data-vd="' + m.src + '"><span class="rv-src">' + (m.src.startsWith('fig-') ? 'From Figma' : 'Recording') + ': ' + m.src.replace(/^fig-/, '') + '</span>' +
+      ['ship:Ship','polish:Needs polish','cut:Cut'].map(x => { const [k, l] = x.split(':'); return '<button type="button" data-v="' + k + '">' + l + '</button>'; }).join('') +
+      '<button type="button" class="rv-notebtn" data-note>Note</button><textarea class="rv-note" hidden placeholder="What needs changing?"></textarea></div>';
+  }
+  // Review layer: a marked wrapper around anything new or rewritten.
+  const RVT = { new: 'New', changed: 'Rewritten', input: 'Needs your input' };
+  function rvWrap(rv, html, tag){
+    if (!FLAGS.review || !rv) return html;
+    return '<' + (tag || 'div') + ' class="rv rv-' + rv.type + '" data-rv="' + rv.id + '" id="rv-' + rv.id + '">' +
+      '<div class="rv-bar"><span class="rv-tag">' + RVT[rv.type] + '</span><span class="rv-what">' + esc(rv.what || '') + '</span>' +
+      '<span class="rv-acts"><button type="button" data-d="accepted">Accept</button><button type="button" data-d="returned">Send back</button></span>' +
+      '<textarea class="rv-note" hidden placeholder="What should change?"></textarea></div>' + html + '</' + (tag || 'div') + '>';
   }
   // One observer for the whole visit, so a video kept aside and shown again carries on
   // where it was instead of loading from scratch.
@@ -893,14 +1036,18 @@ const SITE = {
   /* ---------- home: hero, tabs, and a simple project list with hover preview ---------- */
   function workPanelHTML(active){
     if (FLAGS.timelinePicker) return timelinePickerHTML(active);
-    const rows = SITE.work.map(w =>
-      '<li><a class="prow' + (w === active ? ' is-active' : '') + '" href="#work-' + w.slug + '" data-route data-p="' + w.slug + '">' +
-      '<span class="pt">' + esc(w.title) + '</span><span class="pg" aria-hidden="true">' + esc(w.title) + '</span><span class="pk">' + kindLabel(w) + ', ' + esc(w.when) + '</span></a></li>').join('') +
+    let lastKind = null;
+    const rows = SITE.work.map(w => {
+      const head = FLAGS.groups && w.kind !== lastKind ? '<li class="pgrp" aria-hidden="true">' + GROUPS[w.kind] + '</li>' : ''; lastKind = w.kind;
+      const badge = FLAGS.review && w.rv ? ' <i class="rv-dot" title="' + RVT[w.rv.type] + '"></i>' : '';
+      return head + '<li><a class="prow' + (w === active ? ' is-active' : '') + '" href="#work-' + w.slug + '" data-route data-p="' + w.slug + '">' +
+      '<span class="pt">' + esc(w.title) + badge + '</span><span class="pg" aria-hidden="true">' + esc(w.title) + '</span><span class="pk">' + kindLabel(w) + ', ' + esc(w.when) + '</span></a></li>';
+    }).join('') +
       SITE.soon.map(x => '<li><span class="prow soon"><span class="pt">' + esc(x.title) + '</span><span class="pk">Write-up in progress</span></span></li>').join('');
     const cards = SITE.work.map(w =>
       '<li class="card"><a href="#work-' + w.slug + '" data-route>' + stage(device(w.hero), w.slug) +
       '<div><p class="kind">' + kindLabel(w) + ', ' + esc(w.when) + '</p><h2>' + esc(w.title) + '</h2><p class="sum">' + esc(w.summary) + '</p></div></a></li>').join('');
-    const soon = '<li class="soon"><p>Write-ups in progress</p>' + SITE.soon.map(x => '<p><strong>' + esc(x.title) + '.</strong> ' + esc(x.note) + ' ' + esc(x.when) + '.</p>').join('') + '</li>';
+    const soon = SITE.soon.length ? '<li class="soon"><p>Write-ups in progress</p>' + SITE.soon.map(x => '<p><strong>' + esc(x.title) + '.</strong> ' + esc(x.note) + ' ' + esc(x.when) + '.</p>').join('') + '</li>' : '';
     return '<section class="reel" aria-label="Selected work">' +
       '<div class="viewer" id="viewer"><ul class="plist">' + rows + '</ul><div><div id="vstage">' + stage(device(active.hero), active.slug) + '</div><p class="vsum" id="vsum">' + esc(active.summary) + '</p></div></div>' +
       '<ul class="cards">' + cards + soon + '</ul></section>';
@@ -1108,10 +1255,37 @@ const SITE = {
   });
 
   /* ---------- work page ---------- */
-  function block(b){
+
+  // Act one diagram: the page-based schema beside the single-page video schema.
+  function modelDiagram(){
+    const bar = (cls, l, w, label) => '<i class="sx-bar ' + cls + '" style="left:' + l + '%;width:' + w + '%"><span>' + label + '</span></i>';
+    // Elements can be retimed inside a page, but never past its edges.
+    const page = (n, d, t, g) => '<div class="sx page"><span class="sx-l">Page ' + n + '<em>' + d + '</em></span>' +
+      '<div class="sx-row sm">' + bar('t', t[0], t[1], 'Text') + '</div><div class="sx-row sm">' + bar('g', g[0], g[1], 'Graphic') + '</div>' +
+      '<div class="sx-row sm">' + bar('bg', 0, 100, 'Background') + '</div></div>';
+    return '<figure class="fig"><div class="mdl">' +
+      '<div class="mdl-col"><p class="mdl-h">Before: page-based</p>' +
+        '<div class="sx doc"><span class="sx-l">Document</span><div class="sx-pages">' + page(1, '4s', [0, 100], [30, 70]) + page(2, '3s', [0, 100], [0, 100]) + page(3, '6s', [15, 60], [32, 68]) + '</div><div class="sx-row sx-doca">' + bar('a', 0, 92, 'Audio') + '</div></div>' +
+        '<p class="mdl-c">Each page has its own duration. Text and graphics can be retimed within a page, but never past its edges.</p></div>' +
+      '<div class="mdl-arrow" aria-hidden="true"><svg viewBox="0 0 40 16" width="40" height="16"><path d="M1 8h36M30 2l7 6-7 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+      '<div class="mdl-col"><p class="mdl-h">After: single-page video</p>' +
+        '<div class="sx doc"><span class="sx-l">Document</span>' +
+          '<div class="sx page one"><span class="sx-l">One video page</span><div class="sx-tl">' +
+            '<div class="sx-row">' + bar('t', 3, 38, 'Text') + '</div>' +
+            '<div class="sx-row">' + bar('g', 22, 52, 'Graphic, across scenes') + '</div>' +
+            '<div class="sx-row scenes">' + bar('bg', 0, 29.4, 'Scene 1') + bar('bg', 30, 27.4, 'Scene 2') + bar('bg', 58, 42, 'Scene 3') + '</div>' +
+          '</div></div><div class="sx-row sx-doca">' + bar('a', 0, 92, 'Audio') + '</div></div>' +
+        '<p class="mdl-c">Page backgrounds become video scenes on a single page. Every element gets its own start and duration, so timing can run across scenes on as many tracks as you need.</p></div>' +
+      '</div><figcaption>The schema change behind the new editor, simplified.</figcaption></figure>';
+  }
+  function block(b){ return rvWrap(b.rv, blockInner(b)); }
+  function blockInner(b){
     if (b.p) return '<p>' + esc(b.p) + '</p>';
+    if (b.grid) return '<div class="fgrid' + (b.grid.length === 2 ? ' two' : '') + '">' + b.grid.map(m => '<figure class="fig">' + stage(device(m), null, 'tile') + verdict(m) + (m.cap ? '<figcaption>' + capHTML(m.cap) + '</figcaption>' : '') + '</figure>').join('') + '</div>';
+    if (b.table) return '<table class="tbl"><thead><tr>' + b.table.head.map(h => '<th>' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' + b.table.rows.map(r => '<tr>' + r.map(c => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+    if (b.diagram === 'model') return modelDiagram();
     if (b.media) return figure(b.media);
-    if (b.row) return '<figure class="fig">' + stage(b.row.map(device).join(''), null, 'row') + (b.caption ? '<figcaption>' + esc(b.caption) + '</figcaption>' : '') + '</figure>';
+    if (b.row) return '<figure class="fig">' + stage(b.row.map(device).join(''), null, 'row') + b.row.map(verdict).join('') + (b.caption ? '<figcaption>' + esc(b.caption) + '</figcaption>' : '') + '</figure>';
     if (b.quote) return '<blockquote class="quote"><p>' + esc(b.quote.text) + '</p><cite>' + esc(b.quote.who) + '</cite></blockquote>';
     if (b.list) return '<ul class="pts">' + b.list.map(l => '<li><strong>' + esc(l[0]) + '</strong> ' + esc(l[1]) + '</li>').join('') + '</ul>';
     if (b.demo) return '<figure class="fig"><div class="tdemo" data-demo></div>' + (b.caption ? '<figcaption>' + esc(b.caption) + '</figcaption>' : '') + '</figure>';
@@ -1124,12 +1298,12 @@ const SITE = {
       '<a class="navback back" href="#work" data-route aria-label="All work">' + arrowBack + '</a>' +
       '<header class="work-head">' +
         '<h1 tabindex="-1">' + esc(w.title) + '<sub class="yr"><span class="vh">, </span>' + esc(w.when) + '</sub></h1>' +
-        '<p class="thesis">' + esc(w.thesis) + '</p>' +
+        rvWrap(w.rv, '<p class="thesis">' + esc(w.thesis) + '</p>') +
         (FLAGS.projectMeta ? '<dl class="meta">' + w.meta.map(m => '<div><dt>' + esc(m[0]) + '</dt><dd>' + esc(m[1]) + '</dd></div>').join('') + '</dl>' : '') +
       '</header>' +
-      '<div class="hero">' + figure(w.hero, w.slug) + '</div>' +
+      '<div class="hero">' + rvWrap(w.heroRv, figure(w.hero, w.slug)) + '</div>' +
       '<div class="chapters">' + w.chapters.map((c, n) =>
-        '<section class="chapter" id="ch' + n + '" data-title="' + esc(c.title) + '"><h2>' + esc(c.title) + '</h2><div class="body">' + c.blocks.map(block).join('') + '</div></section>').join('') +
+        '<section class="chapter' + (FLAGS.review && c.rv ? ' rv-ch' : '') + '" id="ch' + n + '" data-title="' + esc(c.title) + '"><h2>' + esc(c.title) + '</h2><div class="body">' + rvWrap(c.rv, c.blocks.map(block).join('')) + '</div></section>').join('') +
       '</div>' +
       '<a class="next" href="#work-' + nx.slug + '" data-route><small>Next, ' + kindLabel(nx).toLowerCase() + '</small><strong>' + esc(nx.title) + ' ' + arrowBig + '</strong></a>' +
     '</article>';
@@ -1312,6 +1486,132 @@ const SITE = {
     if (h.indexOf('work-') === 0 && bySlug[h.slice(5)]) return { name: 'item', item: bySlug[h.slice(5)] };
     return { name: 'home', tab: h === 'about' ? 'about' : 'work', named: h === 'work' || h === 'about' };
   }
+
+  /* ---------- draft review layer (FLAGS.review) ----------
+     Marks what's new or rewritten, collects a verdict on every pulled-in visual, and records
+     approval. Choices save to the artifact's store when it's available, else to this browser. */
+  if (FLAGS.review) (function(){
+    const entries = [];
+    SITE.work.forEach(w => {
+      const add = (rv, where) => { if (rv) entries.push({ rv, slug: w.slug, title: w.title, where }); };
+      add(w.rv, 'Summary'); add(w.heroRv, 'Hero');
+      w.chapters.forEach(c => { add(c.rv, c.title); c.blocks.forEach(b => add(b.rv, c.title)); });
+    });
+    const visuals = [];
+    const seen = new Set();
+    const addV = (m, w) => { if (m && m.v && !seen.has(m.src)) { seen.add(m.src); visuals.push({ src: m.src, slug: w.slug, title: w.title }); } };
+    SITE.work.forEach(w => { addV(w.hero, w); w.chapters.forEach(c => c.blocks.forEach(b => { addV(b.media, w); (b.grid || []).forEach(m => addV(m, w)); (b.row || []).forEach(m => addV(m, w)); })); });
+    const removed = SITE.removed || [];
+    const state = { review: {}, visual: {}, publish: null };
+    let db = null, local = true;
+    try { Object.assign(state, JSON.parse(localStorage.getItem('lr-draft-review') || '{}')); } catch (e) {}
+    const saveLocal = () => { try { localStorage.setItem('lr-draft-review', JSON.stringify(state)); } catch (e) {} };
+
+    const panel = document.createElement('div');
+    panel.className = 'rvp'; panel.id = 'rvp';
+    panel.innerHTML = '<button type="button" class="rvp-tog" aria-expanded="false"><span class="rvp-dot"></span>Draft <b id="rvp-n"></b></button>' +
+      '<div class="rvp-body" hidden><p class="rvp-lead">This is a draft. Nothing here is live until you publish.</p>' +
+      '<p class="rvp-stats" id="rvp-stats"></p><p class="rvp-sync" id="rvp-sync"></p>' +
+      '<p class="rvp-h">Changes</p><ol class="rvp-list" id="rvp-list"></ol>' +
+      '<p class="rvp-h">Visuals</p><ol class="rvp-list" id="rvp-vis"></ol>' +
+      '<label class="rvp-hide"><input type="checkbox" id="rvp-hide"> Hide review marks</label>' +
+      '<button type="button" class="rvp-ready" id="rvp-ready">Ready to publish</button><p class="rvp-pub" id="rvp-pub"></p></div>';
+    document.body.appendChild(panel);
+    const $ = id => document.getElementById(id);
+    panel.querySelector('.rvp-tog').addEventListener('click', e => {
+      const b = panel.querySelector('.rvp-body'); b.hidden = !b.hidden; e.currentTarget.setAttribute('aria-expanded', String(!b.hidden));
+    });
+    $('rvp-hide').addEventListener('change', e => document.body.classList.toggle('rv-off', e.target.checked));
+
+    const D = { accepted: 'Accepted', returned: 'Sent back' }, V = { ship: 'Ship', polish: 'Needs polish', cut: 'Cut' };
+    const link = (slug, id, label) => '<a href="#work-' + slug + '" data-route data-goto="' + id + '">' + label + '</a>';
+    function paintPanel(){
+      const done = entries.filter(e => state.review[e.rv.id] && state.review[e.rv.id].d).length + removed.filter(r => state.review[r.id] && state.review[r.id].d).length;
+      const total = entries.length + removed.length;
+      const rated = visuals.filter(v => state.visual[v.src] && state.visual[v.src].v).length;
+      $('rvp-n').textContent = done + '/' + total;
+      $('rvp-stats').textContent = done + ' of ' + total + ' changes reviewed. ' + rated + ' of ' + visuals.length + ' visuals rated.';
+      $('rvp-sync').textContent = local ? 'Saving in this browser only.' : 'Saving with the page.';
+      $('rvp-list').innerHTML = entries.map(e => { const st = state.review[e.rv.id] || {};
+        return '<li class="' + (st.d || '') + '">' + link(e.slug, 'rv-' + e.rv.id, esc(e.title + ': ' + e.where)) + '<span>' + (st.d ? D[st.d] : st.revised ? 'Revised' : RVT[e.rv.type]) + '</span></li>'; }).join('') +
+        removed.map(r => { const st = state.review[r.id] || {};
+          return '<li class="' + (st.d || '') + '"><span class="rvp-rm">Removed: ' + esc(r.title) + '<small>' + esc(r.what) + '</small><span class="rv-acts" data-rm="' + r.id + '"><button type="button" data-d="accepted">Accept</button><button type="button" data-d="returned">Keep it</button></span></span><span>' + (st.d ? D[st.d] : 'Removed') + '</span></li>'; }).join('');
+      $('rvp-vis').innerHTML = visuals.map(v => { const st = state.visual[v.src] || {};
+        return '<li class="' + (st.v || '') + '">' + link(v.slug, 'vd-' + v.src, esc(v.title + ': ' + v.src.replace(/^fig-/, ''))) + '<span>' + (st.v ? V[st.v] : 'Not rated') + '</span></li>'; }).join('');
+      const p = state.publish;
+      $('rvp-pub').textContent = p && p.ready ? 'Marked ready on ' + new Date(p.at).toLocaleString() + '. Tell Claude in chat to publish.' : 'When you’re happy, mark it ready, then tell Claude in chat.';
+      $('rvp-ready').textContent = p && p.ready ? 'Marked ready' : 'Ready to publish';
+    }
+    function paintMarks(){
+      document.querySelectorAll('[data-rv]').forEach(el => {
+        const st = state.review[el.dataset.rv] || {};
+        el.dataset.state = st.d || (st.revised ? 'revised' : '');
+        el.querySelectorAll(':scope > .rv-bar [data-d]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === st.d)));
+        const ta = el.querySelector(':scope > .rv-bar .rv-note');
+        if (ta && document.activeElement !== ta) { ta.value = st.note || ''; ta.hidden = !(st.d === 'returned' || st.note); }
+      });
+      document.querySelectorAll('[data-vd]').forEach(el => {
+        el.id = 'vd-' + el.dataset.vd;
+        const st = state.visual[el.dataset.vd] || {};
+        el.dataset.state = st.v || '';
+        el.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === st.v)));
+        const ta = el.querySelector('.rv-note');
+        if (ta && document.activeElement !== ta) { ta.value = st.note || ''; ta.hidden = !(st.v === 'polish' || st.note || el.classList.contains('noting')); }
+      });
+      panel.querySelectorAll('[data-rm]').forEach(el => { const st = state.review[el.dataset.rm] || {}; el.querySelectorAll('[data-d]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === st.d))); });
+    }
+    const paint = () => { paintMarks(); paintPanel(); };
+
+    const writing = new Map();
+    async function write(col, id, data){
+      saveLocal();
+      if (!db) return;
+      if (writing.get(col + id)) { writing.set(col + id, 'again'); return; }
+      writing.set(col + id, true);
+      try { do { if (writing.get(col + id) === 'again') writing.set(col + id, true); await db.collection(col).doc(id).set(state[col === 'review' ? 'review' : 'visual'][id] || {}); } while (writing.get(col + id) === 'again'); }
+      catch (e) { local = true; paintPanel(); }
+      finally { writing.delete(col + id); }
+    }
+    function setReview(id, patch){ state.review[id] = Object.assign({}, state.review[id], patch, { at: new Date().toISOString() }); paint(); write('review', id); }
+    function setVisual(id, patch){ state.visual[id] = Object.assign({}, state.visual[id], patch, { at: new Date().toISOString() }); paint(); write('visual', id); }
+
+    document.addEventListener('click', e => {
+      const g = e.target.closest('[data-goto]');
+      if (g) { const id = g.dataset.goto; setTimeout(() => { const el = document.getElementById(id); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 900); return; }
+      const d = e.target.closest('.rv-bar [data-d]');
+      if (d) { const id = d.closest('[data-rv]').dataset.rv; const cur = (state.review[id] || {}).d; setReview(id, { d: cur === d.dataset.d ? '' : d.dataset.d }); if (d.dataset.d === 'returned') setTimeout(() => { const ta = d.closest('.rv-bar').querySelector('.rv-note'); if (ta) ta.focus(); }, 30); return; }
+      const rm = e.target.closest('[data-rm] [data-d]');
+      if (rm) { const id = rm.closest('[data-rm]').dataset.rm; const cur = (state.review[id] || {}).d; setReview(id, { d: cur === rm.dataset.d ? '' : rm.dataset.d }); return; }
+      const v = e.target.closest('[data-vd] [data-v]');
+      if (v) { const id = v.closest('[data-vd]').dataset.vd; const cur = (state.visual[id] || {}).v; setVisual(id, { v: cur === v.dataset.v ? '' : v.dataset.v }); return; }
+      const nb = e.target.closest('[data-vd] [data-note]');
+      if (nb) { const box = nb.closest('[data-vd]'); box.classList.add('noting'); const ta = box.querySelector('.rv-note'); ta.hidden = false; ta.focus(); return; }
+      if (e.target.closest('#rvp-ready')) {
+        state.publish = { ready: true, at: new Date().toISOString() }; paint(); saveLocal();
+        if (db) db.collection('meta').doc('publish').set(state.publish).catch(() => {});
+      }
+    });
+    document.addEventListener('focusout', e => {
+      const ta = e.target.closest && e.target.closest('.rv-note'); if (!ta) return;
+      const r = ta.closest('[data-rv]'), vd = ta.closest('[data-vd]');
+      if (vd) { vd.classList.remove('noting'); if ((state.visual[vd.dataset.vd] || {}).note !== ta.value) setVisual(vd.dataset.vd, { note: ta.value }); }
+      else if (r && (state.review[r.dataset.rv] || {}).note !== ta.value) setReview(r.dataset.rv, { note: ta.value });
+    });
+    let mt = 0;
+    new MutationObserver(() => { clearTimeout(mt); mt = setTimeout(paintMarks, 60); }).observe(main, { childList: true, subtree: true });
+    paint();
+
+    (async () => {
+      try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+      if (!db) { paintPanel(); return; }
+      local = false; paintPanel();
+      const fill = col => snap => { if (snap.metadata.fromCache) return; const next = {}; snap.docs.forEach(d => { next[d.id] = d.data() || {}; }); writing.forEach((_, k) => { if (k.startsWith(col)) { const id = k.slice(col.length); if (state[col][id]) next[id] = state[col][id]; } }); state[col] = next; saveLocal(); paint(); };
+      db.collection('review').onSnapshot(fill('review'), () => { local = true; paintPanel(); });
+      db.collection('visual').onSnapshot(fill('visual'), () => {});
+      db.collection('meta').doc('publish').onSnapshot(snap => { if (snap.exists) { state.publish = snap.data(); paintPanel(); } }, () => {});
+    })();
+  })();
+
   function render(hash, opts){
     const r = parse(hash), first = current === null;
     cleanup.forEach(f => f()); cleanup = [];
