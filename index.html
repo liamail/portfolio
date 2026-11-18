@@ -349,18 +349,17 @@ body.splash-open{overflow:hidden}
 .quote{border-left:3px solid var(--accent);padding-left:20px;max-width:34em}
 .quote p{font-size:1.35rem;line-height:1.35;font-weight:500;letter-spacing:-.01em}
 .quote cite{display:block;margin-top:10px;font-style:normal;font-size:.9rem;color:var(--muted)}
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px 28px;max-width:44em}
-.facts b{display:block;font-size:2.1rem;line-height:1;letter-spacing:-.03em;font-weight:600;font-variant-numeric:tabular-nums}
-.facts span{display:block;margin-top:8px;color:var(--muted);font-size:.95rem}
+.facts{display:grid;max-width:40em;border-bottom:1px solid var(--line)}
+.facts div{display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);gap:24px;align-items:baseline;padding:16px 0;border-top:1px solid var(--line)}
+.facts b{display:block;font-size:1.9rem;line-height:1.1;letter-spacing:-.025em;font-weight:600;font-variant-numeric:tabular-nums}
+.facts span{display:block;color:var(--muted);font-size:.98rem;line-height:1.4}
 @media (max-width:760px){
   .chapter{grid-template-columns:minmax(0,1fr)}
   .chapter h2{position:static}
 }
 @media (max-width:560px){
-  .facts{grid-template-columns:minmax(0,1fr);gap:14px}
-  .facts div{display:grid;grid-template-columns:7.6rem minmax(0,1fr);gap:14px;align-items:baseline}
-  .facts b{font-size:1.7rem;white-space:nowrap}
-  .facts span{margin-top:0}
+  .facts div{grid-template-columns:minmax(0,1fr);gap:6px;padding:14px 0}
+  .facts b{font-size:1.6rem}
 }
 .cards .device.phone{width:min(100%,210px)}
 .next{display:block;text-decoration:none;border-top:1px solid var(--line);padding:clamp(36px,6vw,72px) 0}
