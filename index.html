@@ -721,18 +721,33 @@ const SITE = {
       summary: "Cut a video to the beat of its music in one click.",
       thesis: "Cutting video to music is slow, fiddly work. Beat Sync finds the beats in a track and snaps your edit to them. It began as a hackathon idea and launched at Canva Create.",
       meta: [["Role", "Product designer"], ["Team", "Video, Canva"], ["When", "October 2022 to March 2023"], ["Launched", "Canva Create 2023"]],
-      hero: { src: "beat-sync", w: 492, h: 1080, shape: "phone", alt: "Beat Sync on mobile: beat markers on the audio track and a button to sync visuals with beats.", caption: "Beat Sync on mobile, from a later exploration." },
+      hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", v: true, alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor. From Canva's video editor page." },
       chapters: [
         { title: "From hackathon to launch", blocks: [
           { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind and we could test it quickly." },
           { p: "It reached staff in February 2023, a fifth of users two weeks later, and everyone by mid March, in time to launch at Canva Create." }
         ]},
         { title: "Snap points, not a cage", blocks: [
-          { p: "Beat markers work as snap points. Nothing forces a snap, so you can still drag a cut between beats when a transition needs to land off the beat. Zoomed out, markers show the first beat of each bar. Zoom in and every beat appears." }
+          { p: "Beat markers work as snap points. Nothing forces a snap, so you can still drag a cut between beats when a transition needs to land off the beat." }
         ]},
         { title: "The toggle that became a button", blocks: [
           { p: "The first design had an auto-sync switch. Then an engineer asked what happens when two people edit the same video at once. The switch's state couldn't be stored safely, and deriving it would not ship in time." },
           { p: "I pushed on it, then agreed the honest answer was a one-way button. Press it and everything syncs. If pages drift, a message tells you. When everything is on the beat, the button gets out of the way." }
+        ]},
+        { title: "Sweating the beat markers", blocks: [
+          { p: "A beat marker is a tiny notch on the audio track. It had to read at every zoom level, feel exact when a clip lands on it, and stay out of the way the rest of the time." },
+          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", v: true, alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "The snap. Drag a clip edge onto a beat and the marker stretches to confirm it landed. Recreated for this page, as the animation no longer works in the product." } },
+          { list: [
+            ["A snap you can feel.", "The marker stretches and pulses the moment a clip edge lands on a beat, with haptic feedback where the device supports it. It was one of the most praised details inside Canva."],
+            ["Pointier marks.", "After a co-founder's review, the notches got sharper so the exact beat is never in doubt."],
+            ["Density follows zoom.", "Zoomed out, you see only the first beat of each bar. Zoom in and the minor beats fade in between them."]
+          ] },
+          { media: { src: "bs-zoom", w: 1044, h: 486, shape: "wide", v: true, alt: "Zooming the timeline in and out: minor beat markers appear between the major ones, then hide again.", caption: "Zoom in and the minor beats appear between the major ones. Zoom out and they step back." } }
+        ]},
+        { title: "After launch", blocks: [
+          { p: "Launch was the start of the feedback. A co-founder's review was sharp: the tooltip should take you into the feature, the card felt unclickable, resyncing should read as its own action, and the markers should be pointier. With a content designer, I turned the Beat Sync button from a description into a clear call to action and made Show beats secondary." },
+          { p: "Later I came back to it with the machine learning engineer I'd built it with. Beat Sync 2.0 would pair key moments in the music with moments in your footage, not just beats. It was well received, then deprioritised." },
+          { row: [{ src: "beat-sync", w: 492, h: 1080, shape: "phone", alt: "Beat Sync 2.0 on mobile: beat markers on the audio track and a button to sync visuals with beats." }], caption: "Beat Sync 2.0, exploring moment sync on mobile." }
         ]},
         { title: "Outcome", blocks: [
           { p: "Beat Sync grew to hundreds of thousands of monthly users in its first year. Beat markers are free and one-click sync is part of Pro." },
