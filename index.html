@@ -171,6 +171,8 @@ body.splash-open{overflow:hidden}
    to sideways and never adds to the page's length. */
 .pane.off{position:absolute;left:0;right:0;top:var(--k,0px);transform:translate3d(calc(var(--side) * 100vw),0,0);pointer-events:none}
 .pane.pushing-out{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:transform .3s cubic-bezier(.55,0,.75,.3);pointer-events:none}
+.pane.pushing-out.flung{transition:transform .26s cubic-bezier(.25,.6,.4,1)}
+.panel{touch-action:pan-y pinch-zoom}
 .pane.arriving{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:none}
 .pane.landing{transform:translate3d(0,0,0);transition:transform .4s cubic-bezier(.16,.9,.24,1)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
@@ -1186,7 +1188,7 @@ const SITE = {
   // page, because on iPhone a sticky element can be drawn a frame out of place when the page jumps.
   const OUT_MS = 300, IN_MS = 400;
   let switchId = 0, switchT = 0, pending = null;
-  const paneOff = el => { el.classList.remove('pushing-out', 'arriving', 'landing'); el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
+  const paneOff = el => { el.classList.remove('pushing-out', 'flung', 'arriving', 'landing'); el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
   const paneOn = el => { el.classList.remove('off'); el.inert = false; el.removeAttribute('aria-hidden'); };
   function landingY(tab){
     const panel = document.getElementById('panel'); if (!panel) return 0;
@@ -1287,6 +1289,58 @@ const SITE = {
     if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
     e.preventDefault(); setTab(a.dataset.tab, true);
   });
+  // On touch screens, swipe sideways across the section to move between Work and About. The
+  // section follows your finger, and a long enough or quick enough swipe finishes the same push
+  // the tabs use; anything less eases back. Swipes starting at the very edge of the screen are
+  // left to the browser's own back gesture.
+  (() => {
+    let sx = 0, sy = 0, st = 0, pane = null, lock = 0, dx = 0, dir = 0, eatClick = 0;
+    const SKIP = 'input,textarea,select,[data-no-swipe],.td-tracks';
+    const ease = 'transform .32s cubic-bezier(.22,1,.36,1)';
+    const reset = p => { p.style.transition = ease; p.style.transform = ''; setTimeout(() => { if (!p.style.transform) p.style.transition = ''; }, 340); };
+    window.addEventListener('touchstart', e => {
+      pane = null;
+      if (e.touches.length !== 1 || pending) return;
+      const panel = document.getElementById('panel'), tabs = main.querySelector('.tabs');
+      if (!panel || !tabs || !tabs.classList.contains('live')) return;
+      const t = e.touches[0];
+      if (t.clientX < 24 || t.clientX > window.innerWidth - 24) return;
+      const on = panel.querySelector('.pane:not(.off)');
+      if (!on || !on.contains(e.target) || (e.target.closest && e.target.closest(SKIP))) return;
+      sx = t.clientX; sy = t.clientY; st = performance.now(); pane = on; lock = 0; dx = 0;
+      dir = homeTab === 'work' ? -1 : 1;   // Work: swipe left for About. About: swipe right for Work.
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (!pane) return;
+      const t = e.touches[0]; if (!t) return;
+      const mx = t.clientX - sx, my = t.clientY - sy;
+      if (!lock) {
+        if (Math.abs(mx) < 10 && Math.abs(my) < 10) return;
+        // A press held long enough belongs to the background effect, and a mostly-vertical move is a scroll.
+        if (performance.now() - st > 450 || Math.abs(mx) < Math.abs(my) * 1.4) { pane = null; return; }
+        lock = 1; pane.style.transition = 'none';
+      }
+      if (e.cancelable) e.preventDefault();
+      dx = mx * dir > 0 ? mx : mx * 0.15;   // the way there's nothing to go to only gives a little
+      if (!reduce) pane.style.transform = 'translate3d(' + dx + 'px,0,0)';
+    }, { passive: false });
+    const end = cancel => {
+      if (!pane) return;
+      const p = pane; pane = null;
+      if (!lock) return;
+      eatClick = performance.now() + 450;
+      const along = dx * dir, speed = along / Math.max(1, performance.now() - st);
+      if (!cancel && (along > window.innerWidth * 0.22 || (along > 30 && speed > 0.35))) {
+        p.style.transition = ''; p.style.transform = '';
+        p.classList.add('flung');
+        setTab(homeTab === 'work' ? 'about' : 'work', true);
+      } else reset(p);
+    };
+    window.addEventListener('touchend', () => end(false), { passive: true });
+    window.addEventListener('touchcancel', () => end(true), { passive: true });
+    // A swipe that started on a project link shouldn't also open it.
+    document.addEventListener('click', e => { if (performance.now() < eatClick) { e.preventDefault(); e.stopPropagation(); } }, true);
+  })();
 
   /* ---------- work page ---------- */
 
