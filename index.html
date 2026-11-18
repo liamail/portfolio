@@ -170,9 +170,9 @@ body.splash-open{overflow:hidden}
    and clips everything inside it, so the hidden section parked off screen can never be scrolled
    to sideways and never adds to the page's length. */
 .pane.off{position:absolute;left:0;right:0;top:var(--k,0px);transform:translate3d(calc(var(--side) * 100vw),0,0);pointer-events:none}
-.pane.pushing-out{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:transform .42s cubic-bezier(.6,0,.8,.35);pointer-events:none}
+.pane.pushing-out{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:transform .3s cubic-bezier(.55,0,.75,.3);pointer-events:none}
 .pane.arriving{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:none}
-.pane.landing{transform:translate3d(0,0,0);transition:transform .52s cubic-bezier(.16,.9,.24,1)}
+.pane.landing{transform:translate3d(0,0,0);transition:transform .4s cubic-bezier(.16,.9,.24,1)}
 .panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
@@ -858,7 +858,27 @@ const SITE = {
     else { mem.at = 'hero'; mem.heroY = window.scrollY; }
   }
   const homeY = () => mem.at === 'section' ? panelTop() + (mem.tab[homeTab] || 0) : mem.heroY;
-  const jump = y => window.scrollTo({ top: Math.max(0, y), behavior: 'instant' });
+  // One scroll glide for the whole site: eases in and out, and takes a little longer for longer
+  // trips (about 0.6 to 0.85s), so moving down from the hero feels as measured as a tab switch.
+  // Any wheel, touch or key from the person hands control straight back to them.
+  let glideRaf = 0;
+  const stopGlide = () => { if (glideRaf) { cancelAnimationFrame(glideRaf); glideRaf = 0; } };
+  ['wheel', 'touchstart', 'keydown'].forEach(t => window.addEventListener(t, stopGlide, { passive: true }));
+  const glide = y => {
+    stopGlide();
+    const to = Math.max(0, Math.min(y, document.documentElement.scrollHeight - window.innerHeight));
+    const from = window.scrollY, d = to - from;
+    if (reduce || Math.abs(d) < 2) { window.scrollTo({ top: to, behavior: 'instant' }); return; }
+    const ms = Math.min(850, 560 + Math.abs(d) * 0.22), t0 = performance.now();
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const step = now => {
+      const t = Math.min(1, (now - t0) / ms);
+      window.scrollTo({ top: from + d * ease(t), behavior: 'instant' });
+      glideRaf = t < 1 ? requestAnimationFrame(step) : 0;
+    };
+    glideRaf = requestAnimationFrame(step);
+  };
+  const jump = y => { stopGlide(); window.scrollTo({ top: Math.max(0, y), behavior: 'instant' }); };
   let firstHome = true;
   let cleanup = [];
 
@@ -1164,7 +1184,7 @@ const SITE = {
   //   3. the new section slides in and settles, and that's the end: no hand-over afterwards.
   // During the switch the floating tabs are held in place on the screen rather than stuck to the
   // page, because on iPhone a sticky element can be drawn a frame out of place when the page jumps.
-  const OUT_MS = 420, IN_MS = 520;
+  const OUT_MS = 300, IN_MS = 400;
   let switchId = 0, switchT = 0, pending = null;
   const paneOff = el => { el.classList.remove('pushing-out', 'arriving', 'landing'); el.classList.add('off'); el.inert = true; el.setAttribute('aria-hidden', 'true'); };
   const paneOn = el => { el.classList.remove('off'); el.inert = false; el.removeAttribute('aria-hidden'); };
@@ -1217,7 +1237,7 @@ const SITE = {
       else if (scroll) {
         // From the hero, both tabs start fresh at the top of the section.
         mem.at = 'section'; mem.tab.work = mem.tab.about = null;
-        window.scrollTo({ top: panelTop(), behavior: reduce ? 'instant' : 'smooth' });
+        glide(panelTop());
       }
       if (home && home._mark) home._mark();
     };
@@ -1351,7 +1371,7 @@ const SITE = {
     const onResize = () => { size(); onScroll(); };
     segs.forEach(sg => sg.addEventListener('click', () => {
       const s = secs[+sg.dataset.n];
-      window.scrollTo({ top: s.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.18, behavior: reduce ? 'auto' : 'smooth' });
+      glide(s.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.18);
     }));
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
@@ -1690,7 +1710,7 @@ const SITE = {
     if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
     e.preventDefault();
     const hash = a.getAttribute('href');
-    if (hash === current || (parse(hash).name === 'home' && parse(current).name === 'home')) { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return; }
+    if (hash === current || (parse(hash).name === 'home' && parse(current).name === 'home')) { glide(0); return; }
     show(hash);
   });
   window.addEventListener('hashchange', () => {
