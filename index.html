@@ -242,9 +242,11 @@ body.splash-open{overflow:hidden}
 /* A still of the first frame sits over each video and only fades once the video is actually
    drawing frames. iPhone shows black while a video starts, and in page transitions, so the still
    covers both. */
-.device .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.device .scr.live .still{opacity:0;transition:opacity .22s var(--ease-io)}
-.device video{display:block;width:100%;height:100%;object-fit:cover}
+.device .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;z-index:0}
+/* The still is always painted underneath, so it is decoded and ready the instant a video is set
+   aside. The video sits on top and only shows once it is drawing frames. */
+.device video{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover;opacity:0}
+.device .scr.live video{opacity:1;transition:opacity .22s var(--ease-io)}
 .device.phone{width:min(100%,280px);--b:2.2cqw;--r:10cqw}
 .device.phone .scr{border-radius:var(--r);box-shadow:0 0 0 var(--b) var(--bezel),0 18px 50px rgba(0,0,0,.35)}
 .device.wide{width:100%}
@@ -451,7 +453,17 @@ body.splash-open{overflow:hidden}
 .foot .contact-line{color:var(--ink)}
 
 /* View transitions */
-::view-transition-group(hero-media){animation-duration:.5s;animation-timing-function:var(--ease)}
+/* Between a project card and its page, the artwork flies to its new spot and size while the box
+   behind it reshapes; everything else fades. The artwork is the same picture at both ends, so it
+   moves as one solid thing with no double image. */
+::view-transition-group(hero-media),::view-transition-group(hero-stage){animation-duration:var(--t-move);animation-timing-function:var(--ease)}
+::view-transition-group(hero-media){z-index:2}
+::view-transition-group(hero-stage){z-index:1}
+::view-transition-old(hero-media),::view-transition-new(hero-media){animation:none}
+::view-transition-old(hero-media){opacity:0}
+::view-transition-old(hero-stage),::view-transition-new(hero-stage){height:100%;object-fit:fill;animation:none}
+::view-transition-old(hero-stage){opacity:0}
+html.vt-solo::view-transition-old(hero-media),html.vt-solo::view-transition-old(hero-stage){opacity:1;animation:fade-away .3s var(--ease-io) both}
 /* Tabs returning to the home page: hidden through the page change, then eased in. */
 .tabs-in.wait{opacity:0;transform:translate3d(0,-8px,0)}
 .tabs-in.reveal{transition:opacity .35s var(--ease),transform .45s var(--ease)}
@@ -462,6 +474,7 @@ body.splash-open{overflow:hidden}
 @keyframes page-in{from{opacity:0}}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+  .device video{opacity:1}
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
   .wash i{animation:none!important}
 }
@@ -820,7 +833,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, morph: false, review: false, groups: false };
+  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, morph: true, review: false, groups: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   { const f = document.querySelector('.foot'); if (f) f.hidden = !FLAGS.footer; }
@@ -886,11 +899,11 @@ const SITE = {
 
   /* ---------- media ---------- */
   function device(m){
-    if (m.img) return '<div class="device ' + m.shape + ' pic" style="aspect-ratio:' + m.w + ' / ' + m.h + '"><span class="scr"><img class="still" src="media/' + m.src + '.jpg" alt="' + esc(m.alt) + '" decoding="async"></span></div>';
+    if (m.img) return '<div class="device ' + m.shape + ' pic" style="aspect-ratio:' + m.w + ' / ' + m.h + '"><span class="scr"><img class="still" src="media/' + m.src + '.jpg" alt="' + esc(m.alt) + '"></span></div>';
     return '<div class="device ' + m.shape + '" style="aspect-ratio:' + m.w + ' / ' + m.h + '">' +
       '<span class="scr"><video src="media/' + m.src + '.mp4" poster="media/' + m.src + '.jpg" muted loop playsinline preload="metadata" data-auto' +
       (reduce ? ' controls' : '') + ' aria-label="' + esc(m.alt) + '"></video>' +
-      '<img class="still" src="media/' + m.src + '.jpg" alt="" aria-hidden="true" decoding="async"></span></div>';
+      '<img class="still" src="media/' + m.src + '.jpg" alt="" aria-hidden="true"></span></div>';
   }
   const pp = '<button class="pp" type="button" aria-label="Pause video" aria-pressed="false"></button>';
   function stage(inner, slug, extra){
@@ -1713,7 +1726,7 @@ const SITE = {
     } else {
       lastItem = r.item.slug;
       main.innerHTML = itemHTML(r.item);
-      if (!first && !reduce) { const art = main.querySelector('article'); if (art) art.classList.add('arrive'); }
+      if (!first && !reduce && !document.startViewTransition) { const art = main.querySelector('article'); if (art) art.classList.add('arrive'); }
       initDock();
       initDemo();
     }
@@ -1730,18 +1743,38 @@ const SITE = {
     if (r.name === 'home') { const hm = main.querySelector('.home'); if (hm && hm._mark) hm._mark(); }
     if (!first && r.name !== 'home') { const h = main.querySelector('h1'); if (h) h.focus({ preventScroll: true }); }
   }
-  const visibleStage = slug => [...document.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => el.offsetParent !== null && !el.closest('.off'));
+  // The project's visual on screen right now: in the open section, at least partly in view.
+  const visibleStage = slug => [...document.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => {
+    if (el.offsetParent === null || el.closest('.off')) return false;
+    const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+  });
+  const nameMorph = st => {
+    if (!st) return;
+    const dv = st.querySelector('.device');
+    st.style.viewTransitionName = 'hero-stage'; if (dv) dv.style.viewTransitionName = 'hero-media';
+  };
+  const clearMorph = () => document.querySelectorAll('.stage, .device').forEach(el => { el.style.viewTransitionName = ''; });
+  // Wait (briefly) until the pictures on screen are decoded, so the new page is never captured with
+  // a blank where an image is about to appear.
+  const decoded = () => {
+    const imgs = [...main.querySelectorAll('img.still')].filter(im => { const r = im.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; });
+    const all = Promise.all(imgs.map(im => im.decode ? im.decode().catch(() => {}) : Promise.resolve()));
+    return Promise.race([all, new Promise(r => setTimeout(r, 250))]);
+  };
   function show(hash, history){
     const from = parse(current), to = parse(hash);
     saveScroll();
     const slug = !FLAGS.morph ? null : to.name === 'item' ? to.item.slug : (from.name === 'item' ? from.item.slug : null);
     const opts = { restore: from.name === 'item' && to.name === 'home', history: !!history };
+    let morphing = false;
     const run = () => {
       if (location.hash !== hash) location.hash = hash;
       render(hash, opts);
-      const d = slug ? visibleStage(slug) : null;
-      const pill = main.querySelector('.tabs-in');
-      if (d) d.style.viewTransitionName = 'hero-media';
+      if (morphing) {
+        const to = visibleStage(slug);
+        // Only the start is on screen: the old visual simply fades with the page.
+        if (to) nameMorph(to); else document.documentElement.classList.add('vt-solo');
+      }
     };
     const revealTabs = () => {
       const pill = main.querySelector('.tabs-in.wait'); if (!pill) return;
@@ -1754,10 +1787,11 @@ const SITE = {
     cover(); document.querySelectorAll('video').forEach(v => v.pause());
     holdVideos(reduce ? 0 : 650); window.LR.calmUntil = performance.now() + 900;
     if (!document.startViewTransition || reduce) { run(); setTimeout(revealTabs, reduce ? 0 : 200); return; }
-    document.querySelectorAll('.stage').forEach(s => { s.style.viewTransitionName = ''; });
-    if (slug) { const s = visibleStage(slug); if (s) s.style.viewTransitionName = 'hero-media'; }
-    const vt = document.startViewTransition(run);
-    vt.finished.finally(() => { document.querySelectorAll('.stage').forEach(s => { s.style.viewTransitionName = ''; }); setTimeout(revealTabs, 80); });
+    clearMorph();
+    const from0 = slug ? visibleStage(slug) : null; morphing = !!from0;
+    nameMorph(from0);
+    const vt = document.startViewTransition(() => { clearMorph(); run(); return decoded(); });
+    vt.finished.finally(() => { clearMorph(); document.documentElement.classList.remove('vt-solo'); setTimeout(revealTabs, 80); });
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-route]');
