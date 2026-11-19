@@ -275,6 +275,8 @@ body.splash-open{overflow:hidden}
 .pp:hover .pp-ring .tr{stroke:rgba(255,255,255,.32)}
 .pp-ring .pg{stroke:#fff;stroke-dasharray:100;stroke-dashoffset:100}
 .pp::before{content:"";width:3px;height:11px;border-left:2.5px solid currentColor;border-right:2.5px solid currentColor}
+@keyframes pp-pulse{40%{transform:scale(1.14)}}
+.pp.pulse{animation:pp-pulse .32s var(--ease)}
 .pp[aria-pressed="true"]::before{width:0;height:0;border:0;border-left:10px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:3px}
 .stage:hover .pp,.pp:focus-visible,.pp[aria-pressed="true"]{opacity:1}
 @media (hover:none){.pp{opacity:1}}
@@ -1051,8 +1053,8 @@ const SITE = {
     holdUntil = performance.now() + ms; clearTimeout(holdT);
     holdT = setTimeout(() => near.forEach(v => { if (canPlay(v)) playV(v); }), ms + 20);
   }
-  // Nestle each play button into the bottom-right corner of its media: centred just inside the
-  // corner's curve (on the bezel's curve for phones), so it hangs slightly off the media, with a
+  // Nestle each play button into the bottom-right corner of its media: centred on the corner's
+  // curve (on the bezel's curve for phones), so it hangs slightly off the media, with a
   // ring in the frame colour carving a notch, and always clear of the frame's outer edge.
   function placePP(st){
     const b = st.querySelector(':scope > .pp'); if (!b) return;
@@ -1065,7 +1067,7 @@ const SITE = {
     const m = /0px 0px 0px ([\d.]+)px/.exec(best.scr.closest('.device.phone') ? cs.boxShadow : '');
     const bez = m ? parseFloat(m[1]) : 0;
     const R = rad + bez, k = R * (1 - Math.SQRT1_2);               // the corner's 45° point
-    const half = b.offsetWidth / 2, inset = 4;                      // centre sits just inside the curve
+    const half = b.offsetWidth / 2, inset = 0;                      // centre sits on the curve
     const cx = best.r.right + bez - k - inset, cy = best.r.bottom + bez - k - inset;
     const gap = 8;                                                  // never closer than this to the frame's edge
     st.style.setProperty('--pp-r', Math.max(gap, sr.right - cx - half).toFixed(1) + 'px');
@@ -1077,14 +1079,43 @@ const SITE = {
     if (vio) (root || main).querySelectorAll('video[data-auto]').forEach(v => vio.observe(v));
     (root || main).querySelectorAll('.stage').forEach(st => { if (!st.querySelector(':scope > .pp')) return; placePP(st); if (ppRO) ppRO.observe(st); });
   }
-  main.addEventListener('click', e => {
-    const b = e.target.closest('.pp'); if (!b) return;
-    e.preventDefault(); e.stopPropagation();
-    const st = b.closest('.stage'); const paused = !st.dataset.paused;
+  // Play and pause, from the button anywhere, or by tapping the video itself on touch screens.
+  // Each toggle gives one quick pulse of the button and, on phones, a light haptic tick.
+  const touchUI = matchMedia('(hover: none)').matches;
+  const haptic = (() => {
+    let lab = null;
+    return () => {
+      try {
+        if (navigator.vibrate) { navigator.vibrate(8); return; }
+        // iOS has no vibrate(); toggling a native switch gives its light system tick (iOS 18+).
+        if (!lab) {
+          lab = document.createElement('label'); lab.setAttribute('aria-hidden', 'true');
+          lab.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none';
+          const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1;
+          lab.appendChild(i); document.body.appendChild(lab);
+        }
+        lab.click();
+      } catch (err) {}
+    };
+  })();
+  function togglePlay(st){
+    const b = st.querySelector(':scope > .pp'); if (!b) return;
+    const paused = !st.dataset.paused;
     if (paused) st.dataset.paused = '1'; else delete st.dataset.paused;
     b.setAttribute('aria-pressed', String(paused));
     b.setAttribute('aria-label', paused ? 'Play video' : 'Pause video');
     st.querySelectorAll('video').forEach(v => { if (paused) v.pause(); else playV(v); });
+    if (touchUI) haptic();
+    if (!reduce) { b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); }
+  }
+  main.addEventListener('animationend', e => { if (e.target.classList && e.target.classList.contains('pp')) e.target.classList.remove('pulse'); });
+  main.addEventListener('click', e => {
+    const b = e.target.closest('.pp');
+    if (b) { e.preventDefault(); e.stopPropagation(); togglePlay(b.closest('.stage')); return; }
+    if (!touchUI || e.defaultPrevented) return;
+    const st = e.target.closest('.stage');
+    if (!st || e.target.closest('a, button') || !st.querySelector(':scope > .pp')) return;
+    togglePlay(st);
   });
 
   /* ---------- home ---------- */
