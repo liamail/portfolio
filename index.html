@@ -85,6 +85,11 @@ html.entering .home .tabs-in{transition-delay:.32s}
 .prow:active .pt{opacity:.6}
 .tabs a:active{transform:scale(.96)}
 .linkish:active,.back:active{opacity:.6}
+/* A press only shows for a tap: it waits a beat before dimming, and a sideways swipe between
+   Work and About cancels it (see swiping in the swipe code). */
+@media (hover:none){.card a:active,.card a:active .stage,.prow:active .pt{transition-delay:70ms}}
+.swiping .card a:active,.swiping .prow:active .pt,.swiping .linkish:active{opacity:1}
+.swiping .card a:active .stage{transform:none}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.55 var(--font);-webkit-font-smoothing:antialiased}
 h1,h2,h3,p,ul,ol,dl,dd,figure,blockquote{margin:0;padding:0}
 ul,ol{list-style:none}
@@ -112,6 +117,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   background:radial-gradient(30% 34% at 40% 50%,var(--glow-3),transparent),radial-gradient(26% 24% at 62% 46%,var(--glow-1),transparent)}
 .veil{position:fixed;inset:0;z-index:0;pointer-events:none}
 #bg,#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+@supports (height:100lvh){#fx{bottom:auto;height:100lvh}}
 #fx{display:none}
 .fx #fx{display:block}
 .fx .wash,.fx .veil{display:none}
@@ -1481,9 +1487,11 @@ const SITE = {
       const t = e.touches[0]; if (!t) return;
       const mx = t.clientX - sx, my = t.clientY - sy;
       if (!lock) {
+        // Moving sideways at all means this isn't a tap, so the pressed look is cancelled straight away.
+        if (Math.abs(mx) >= 4 && Math.abs(mx) > Math.abs(my)) document.documentElement.classList.add('swiping');
         if (Math.abs(mx) < 10 && Math.abs(my) < 10) return;
         // A press held long enough belongs to the background effect, and a mostly-vertical move is a scroll.
-        if (performance.now() - st > 450 || Math.abs(mx) < Math.abs(my) * 1.4) { pane = null; return; }
+        if (performance.now() - st > 450 || Math.abs(mx) < Math.abs(my) * 1.4) { pane = null; document.documentElement.classList.remove('swiping'); return; }
         lock = 1; pane.style.transition = 'none';
       }
       if (e.cancelable) e.preventDefault();
@@ -1491,6 +1499,7 @@ const SITE = {
       if (!reduce) pane.style.transform = 'translate3d(' + dx + 'px,0,0)';
     }, { passive: false });
     const end = cancel => {
+      document.documentElement.classList.remove('swiping');
       if (!pane) return;
       const p = pane; pane = null;
       if (!lock) return;
@@ -2160,8 +2169,13 @@ const SITE = {
     }
   }
   function size(){
-    w = window.innerWidth; h = window.innerHeight;
-    if (fx) { dprFx = Math.min(matchMedia('(pointer: coarse)').matches ? 1 : 2, window.devicePixelRatio || 1); fxc.width = Math.round(w * dprFx); fxc.height = Math.round(h * dprFx); }
+    // On phones the browser's toolbar slides in and out as pages change and scroll, which changes
+    // the window height. The background keeps the tallest height seen at this width, so that
+    // never clears it or shifts the glows; only a real change (rotating, resizing) redraws it.
+    const nw = window.innerWidth, nh = window.innerHeight, coarse = matchMedia('(pointer: coarse)').matches;
+    if (coarse && nw === w && nh <= h) return false;
+    w = nw; h = nh;
+    if (fx) { dprFx = Math.min(coarse ? 1 : 2, window.devicePixelRatio || 1); fxc.width = Math.round(w * dprFx); fxc.height = Math.round(h * dprFx); }
     if (!GRAIN) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
@@ -2317,7 +2331,10 @@ const SITE = {
     // The glows move slowly, so every other frame is enough until a hole is open.
     // The glows move slowly, so the background simply holds still while the page scrolls or
     // animates, leaving the frame budget to the content.
-    const quiet = !GRAIN && hl === 0 && ((++tick & 1) === 1 || now < window.LR.calmUntil);
+    // While the page is busy (scrolling, changing page) the background holds completely still:
+    // its clock stops too, so it carries on from the same spot afterwards instead of jumping ahead.
+    if (!GRAIN && hl === 0 && now < window.LR.calmUntil) return;
+    const quiet = !GRAIN && hl === 0 && (++tick & 1) === 1;
     const t0 = performance.now();
     step(dt, quiet);
     ema = ema ? ema * 0.9 + (performance.now() - t0) * 0.1 : performance.now() - t0;
@@ -2336,7 +2353,7 @@ const SITE = {
   }
   if (!GRAIN) c.style.display = 'none';
   colours(); veil(); size(); step(0);
-  window.addEventListener('resize', () => { size(); step(0); });
+  window.addEventListener('resize', () => { if (size() !== false) step(0); });
   const scheme = matchMedia('(prefers-color-scheme: dark)');
   if (scheme.addEventListener) scheme.addEventListener('change', () => { colours(); veil(); step(0); });
   if (reduce) return;
