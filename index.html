@@ -2079,7 +2079,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       target.style.visibility = 'hidden';
     } else if (box) { box.remove(); d0.style.transition = 'opacity .2s'; box = null; }
     const morphing = !!d1;
-    const inAt = morphing ? 300 : 120;
+    const inAt = morphing ? 260 : 120;
 
     // 3. One clock drives everything. The landing spot is read every frame, so it stays true
     //    even if the page shifts while the artwork is in the air.
@@ -2127,7 +2127,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       raf = requestAnimationFrame(tick);
     };
     tick(t0);
-    setTimeout(revealTabs, morphing ? 560 : 400);
+    // The floating controls (tabs, back button) come in once the artwork has been handed back to
+    // the page, never while its copy is still above them in flight.
     setTimeout(finish, total + 400);   // a safety net if frames stop (hidden tab)
   }
   document.addEventListener('click', e => {
