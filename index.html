@@ -497,6 +497,8 @@ body.splash-open{overflow:hidden}
 #xf .xf-box,#xf .xf-dev{position:fixed;left:0;top:0;margin:0;transform-origin:0 0;will-change:transform,opacity}
 #xf .xf-box{background:var(--stage)}
 #xf .xf-dev{flex:none;max-width:none}
+/* The exact frame a video was showing, held in place while the page changes over. */
+.xf-frame{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
 /* The floating controls wait out the page change, then ease in. */
 .tabs-in.wait,.navback.wait{opacity:0;transform:translate3d(0,-6px,0)}
 .tabs-in.reveal,.navback.reveal{transition:opacity .4s var(--ease),transform .5s var(--ease)}
@@ -1007,7 +1009,14 @@ const SITE = {
   const near = new Set();
   let holdUntil = 0, holdT = 0;
   const canPlay = v => { const st = v.closest('.stage'); return v.isConnected && st && !st.dataset.paused && !st.classList.contains('leaving') && !st.classList.contains('off') && !v.closest('.pane.off, .pane.leaving'); };
-  const playV = v => { if (!v.paused || v._held) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  // If the browser refuses to autoplay (Low Power Mode on iPhone, for one), the frame's button
+  // shows play rather than pretending it's playing, and a tap starts it.
+  const refused = v => {
+    const st = v.closest('.stage'); if (!st || st.dataset.paused) return;
+    st.dataset.paused = '1';
+    const b = st.querySelector(':scope > .pp'); if (b) { b.setAttribute('aria-pressed', 'true'); b.setAttribute('aria-label', 'Play video'); }
+  };
+  const playV = v => { if (!v.paused || v._held) return; const p = v.play(); if (p && p.catch) p.catch(err => { if (err && err.name === 'NotAllowedError') refused(v); }); };
   // A frame with several videos plays as one timeline. Its videos don't loop on their own: one
   // that finishes early holds on its last frame, and when the longest finishes they all start
   // again together. A frame with one video simply loops.
@@ -1023,8 +1032,24 @@ const SITE = {
     const v = e.target; if (v.tagName !== 'VIDEO' || !v._grp) return;
     const st = v._grp;
     if (v !== lead(st)) { v._held = true; return; }
-    st._group.forEach(x => { x._held = false; try { x.currentTime = 0; } catch (err) {} if (canPlay(x)) playV(x); });
+    restartGroup(st);
   }, true);
+  function restartGroup(st){ st._group.forEach(x => { x._held = false; try { x.currentTime = 0; } catch (err) {} if (canPlay(x)) playV(x); }); }
+  // A watchdog for videos that should be playing but aren't: the browser pauses them when you
+  // leave the tab or the site, and a start can be interrupted. Coming back, or every couple of
+  // seconds, each one that ought to be running is started again.
+  const revive = () => {
+    if (document.hidden || performance.now() < holdUntil) return;
+    near.forEach(v => {
+      if (!v.paused || !canPlay(v)) return;
+      if (v._grp) { if (v._held) return; if (v.ended) { if (v === lead(v._grp)) restartGroup(v._grp); return; } }
+      playV(v);
+    });
+  };
+  setInterval(revive, 2000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(revive, 80); });
+  window.addEventListener('pageshow', () => setTimeout(revive, 80));
+  window.addEventListener('focus', () => setTimeout(revive, 80));
   // The ring follows the frame's timeline: its longest video.
   if (!reduce) {
     const ring = () => {
@@ -1919,13 +1944,42 @@ const SITE = {
   const T_OUT = 200, T_MOVE = 520, T_X = 200, T_IN = 340;
   let xfStop = null;   // finishes a page change still in progress, if another one starts
   // A frozen copy of the page as it is on screen right now, laid over the top.
-  function ghostOf(wrap, from0){
+  // The frame a video is showing right now, as a picture. A page change carries it across, so
+  // the artwork never jumps back to the recording's first frame mid-move.
+  const frameOf = v => {
+    if (!v || v.readyState < 2 || !v.videoWidth || !v.closest('.scr.live')) return null;
+    const r = v.getBoundingClientRect(); if (!r.width || r.bottom < 0 || r.top > window.innerHeight) return null;
+    try {
+      const k = Math.min(1, 1600 / v.videoWidth), c = document.createElement('canvas');
+      c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      c.className = 'xf-frame'; return c;
+    } catch (e) { return null; }
+  };
+  const copyFrame = c => { const n = document.createElement('canvas'); n.width = c.width; n.height = c.height; n.getContext('2d').drawImage(c, 0, 0); n.className = 'xf-frame'; return n; };
+  // Swap each video in a copied element for the frame its original was showing.
+  const framesInto = (orig, copy, frames) => {
+    const vs = [...copy.querySelectorAll('video')];
+    [...orig.querySelectorAll('video')].forEach((v, i) => { const c = vs[i]; if (!c) return; const fr = frames.get(v); if (fr) c.replaceWith(copyFrame(fr)); else c.remove(); });
+  };
+  function ghostOf(wrap, from0, frames){
     const r = wrap.getBoundingClientRect();
     if (from0) from0.setAttribute('data-xf', '');
     const g = wrap.cloneNode(true);
     if (from0) from0.removeAttribute('data-xf');
-    g.querySelectorAll('video,canvas,script,template,.splash,.foot').forEach(n => n.remove());
-    g.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+    // A copied element would replay any animation from its start (a project fading out of the
+    // viewer would come back, for one). Each one is frozen at the point it had reached.
+    const all0 = [...wrap.querySelectorAll('*')], all1 = [...g.querySelectorAll('*')], at = new Map(all0.map((e, i) => [e, i]));
+    (document.getAnimations ? document.getAnimations() : []).forEach(a => {
+      const t = a.effect && a.effect.target; if (!t || a.effect.pseudoElement || !at.has(t)) return;
+      const c = all1[at.get(t)], cs = getComputedStyle(t);
+      c.style.animation = 'none'; c.style.transition = 'none'; c.style.opacity = cs.opacity;
+      if (cs.transform !== 'none') c.style.transform = cs.transform;
+    });
+    framesInto(wrap, g, frames);
+    g.querySelectorAll('canvas:not(.xf-frame),script,template,.splash,.foot').forEach(n => n.remove());
+    // IDs stay: some styles depend on them (the viewer hides its inactive projects by ID). The
+    // copy sits after the real page, so lookups by ID still find the real elements first.
     g.querySelectorAll('[data-route],a,button').forEach(n => { n.removeAttribute('data-route'); n.removeAttribute('href'); });
     const src = g.querySelector('[data-xf]'); if (src) { src.removeAttribute('data-xf'); src.style.visibility = 'hidden'; }
     g.setAttribute('aria-hidden', 'true'); g.inert = true;
@@ -1935,9 +1989,9 @@ const SITE = {
   const rectOf = el => { const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; };
   const radius = el => parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
   // A copy of one device frame, fixed at the given spot; moved afterwards with a transform.
-  function devCopy(dev, r){
+  function devCopy(dev, r, frames, from){
     const c = dev.cloneNode(true);
-    c.querySelectorAll('video').forEach(n => n.remove());
+    framesInto(from || dev, c, frames);
     c.querySelectorAll('.scr').forEach(n => n.classList.remove('live'));
     c.removeAttribute('id'); c.classList.add('xf-dev');
     c.style.width = r.w + 'px'; c.style.height = r.h + 'px';
@@ -1963,8 +2017,11 @@ const SITE = {
       requestAnimationFrame(show); setTimeout(show, 50);
     };
     const go = () => { if (location.hash !== hash) location.hash = hash; render(hash, opts); };
-    // Videos show their stills while the pages change over, so nothing goes black mid-transition.
-    cover(); document.querySelectorAll('video').forEach(v => v.pause());
+    // Each playing video's current frame is kept, to carry across the change (see frameOf).
+    const frames = new Map();
+    document.querySelectorAll('video').forEach(v => { v.pause(); if (!reduce) { const fr = frameOf(v); if (fr) frames.set(v, fr); } });
+    // Videos show their stills (or those frames) while the pages change over, so nothing goes black.
+    cover();
     holdVideos(reduce ? 0 : 650); window.LR.calmUntil = performance.now() + 900;
     if (reduce) { go(); revealTabs(); return; }
 
@@ -1973,7 +2030,7 @@ const SITE = {
     const from0 = slug ? visibleStage(slug) : null;
     const fromDev = from0 && from0.querySelector('.device');
     const layer = document.createElement('div'); layer.id = 'xf'; layer.setAttribute('aria-hidden', 'true');
-    const ghost = ghostOf(wrap, from0);
+    const ghost = ghostOf(wrap, from0, frames);
     layer.appendChild(ghost);
     // The chapter bar on a project lives outside the page, so it gets its own copy.
     const dk0 = document.querySelector('body > .dock');
@@ -1982,7 +2039,7 @@ const SITE = {
     if (from0 && fromDev) {
       b0 = rectOf(from0); m0 = rectOf(fromDev); rad0 = radius(from0);
       box = document.createElement('div'); box.className = 'xf-box';
-      d0 = devCopy(fromDev, m0);
+      d0 = devCopy(fromDev, m0, frames);
       layer.append(box, d0);
     }
     document.body.appendChild(layer);
@@ -1996,9 +2053,19 @@ const SITE = {
     const target = box ? visibleStage(slug) : null;
     const toDev = target && target.querySelector('.device');
     let d1 = null, rad1 = 0;
+    // The same recording on both pages carries on from the moment it had reached, and its frame
+    // stays over the new video until that video is actually drawing.
+    const handoff = [];
     if (target && toDev) {
+      const vs0 = [...fromDev.querySelectorAll('video')], vs1 = [...toDev.querySelectorAll('video')];
+      const tf = new Map();
+      vs1.forEach((v, i) => {
+        const v0 = vs0[i]; if (!v0 || v0.getAttribute('src') !== v.getAttribute('src')) return;
+        try { v.currentTime = v0.currentTime; } catch (e) {}
+        const fr = frames.get(v0); if (fr) { tf.set(v, fr); handoff.push([v, fr]); }
+      });
       rad1 = radius(target);
-      d1 = devCopy(toDev, rectOf(toDev)); d1.style.opacity = '0';
+      d1 = devCopy(toDev, rectOf(toDev), tf); d1.style.opacity = '0';
       layer.appendChild(d1);
       target.style.visibility = 'hidden';
     } else if (box) { box.remove(); d0.style.transition = 'opacity .2s'; box = null; }
@@ -2012,6 +2079,18 @@ const SITE = {
       if (done) return; done = true; cancelAnimationFrame(raf); xfStop = null;
       layer.remove(); main.style.opacity = ''; if (dk1) dk1.style.opacity = '';
       if (target) target.style.visibility = '';
+      handoff.forEach(([v, fr]) => {
+        const scr = v.closest('.scr'); if (!scr || !v.isConnected) return;
+        const c = copyFrame(fr); scr.appendChild(c);
+        const t1 = performance.now();
+        const wait = () => {
+          if (!c.isConnected) return;
+          if (scr.classList.contains('live') || performance.now() - t1 > 3000) {
+            c.style.transition = 'opacity .2s'; c.style.opacity = '0'; setTimeout(() => c.remove(), 240);
+          } else requestAnimationFrame(wait);
+        };
+        requestAnimationFrame(wait);
+      });
       revealTabs();
     };
     xfStop = finish;
