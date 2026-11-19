@@ -521,7 +521,7 @@ html.vt-plain::view-transition-new(root){animation-delay:.12s}
 .sx-l em{font-style:normal;font-weight:500;color:#918bff}
 .sx.doc{padding:10px}
 .sx-pages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.sx.page{padding:8px;background:rgba(255,255,255,.04);display:grid;gap:5px;align-content:start}
+.sx.page{padding:10px;background:rgba(255,255,255,.04);display:grid;gap:5px;align-content:start}
 .sx.page .sx-l{margin-bottom:2px}
 .sx-b{display:block;font-style:normal;font-size:.64rem;line-height:18px;padding:0 5px;border-radius:4px;color:#0c0c18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sx-b.bg,.sx-bar.bg{background:linear-gradient(160deg,#5b5f86,#34365a);color:#ececf6}
@@ -1373,9 +1373,9 @@ const SITE = {
   function modelDiagram(){
     const bar = (cls, l, w, label) => '<i class="sx-bar ' + cls + '" style="left:' + l + '%;width:' + w + '%"><span>' + label + '</span></i>';
     // Elements can be retimed inside a page, but never past its edges.
-    const page = (n, d, t, g) => '<div class="sx page"><span class="sx-l">Page ' + n + '</span>' +
-      '<div class="sx-row sm">' + bar('t', t[0], t[1], 'Text') + '</div><div class="sx-row sm">' + bar('g', g[0], g[1], 'Graphic') + '</div>' +
-      '<div class="sx-row sm">' + bar('bg', 0, 100, 'Background') + '</div></div>';
+    const page = (n, d, t, g) => '<div class="sx page"><span class="sx-l">Page ' + n + '</span><div class="sx-tl">' +
+      '<div class="sx-row">' + bar('t', t[0], t[1], 'Text') + '</div><div class="sx-row">' + bar('g', g[0], g[1], 'Graphic') + '</div>' +
+      '<div class="sx-row scenes">' + bar('bg', 0, 100, 'Background') + '</div></div></div>';
     return '<figure class="fig"><div class="mdl">' +
       '<div class="mdl-col"><p class="mdl-h">Before: page-based</p>' +
         '<div class="sx doc"><span class="sx-l">Document</span><div class="sx-pages">' + page(1, '4s', [0, 100], [30, 70]) + page(2, '3s', [0, 100], [0, 100]) + page(3, '6s', [15, 60], [32, 68]) + '</div><div class="sx-row sx-doca">' + bar('a', 0, 92, 'Audio') + '</div></div>' +
