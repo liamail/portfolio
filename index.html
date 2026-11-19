@@ -716,22 +716,22 @@ const SITE = {
       slug: "ai-editing", kind: "story", title: "AI in the editor", short: "AI in the editor",
       start: "2023-01", end: "2026-06", when: "2023 to 2026",
       summary: "From bolting AI features onto the editor to designing early agentic workflows.",
-      thesis: "In the early days of AI at Canva, we shipped it as features, one tool at a time. That taught us to put workflows over features, and led me into early agentic explorations: a precursor to the AI assistant being built for Canva Video today.",
+      thesis: "In the early days of AI at Canva, we shipped it as features, one tool at a time. Before long, a bloating editor and our own research pointed the same way: people wanted help with the whole job, not more tools to find. From there I began exploring early agentic flows, a precursor to the AI assistant being built for Canva Video today.",
       meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2023 to 2026"], ["Status", "Shipped features, then concepts and prototypes"]],
       hero: { src: "cv-bgremove", w: 600, h: 600, shape: "card", alt: "Background Remover applied to a video of two people, the sky turning transparent.", caption: "Background Remover on video, the first AI tool I shipped." },
       chapters: [
         { title: "Bolting on AI", blocks: [
           { p: "When machine learning models first arrived at Canva, we did the natural thing and added AI one feature at a time. Video Background Remover lifts a person off their background in one click. Smart Trim finds the moments worth keeping in a long clip. Beat Sync cuts a video to its music." },
-          { p: "Each one paired a powerful model with one obvious action and a result you could see straight away. Each one also lived somewhere different in the editor." },
+          { p: "Each one paired a powerful model with one obvious action and a result you could see straight away. They all landed in the same nested surface in the editor, which wasn't easy to discover and was filling up fast." },
           { grid: [
             { src: "cv-highlights", w: 1600, h: 900, shape: "wide", alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", cap: "<b>Smart Trim.</b> Picking highlights from a long clip." },
             { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", cap: "<b>Beat Sync.</b> Cutting a video to its music." }
           ] }
         ]},
         { title: "Workflows over features", blocks: [
-          { p: "It wasn't long before we saw the problem. Every new tool was another button tucked into the editor's information architecture. People had to know it existed, find it, and stitch the results together themselves." },
-          { p: "The principle we landed on was workflows over features. Instead of bolting on more tools, we needed to explore AI editing as a whole, starting from what someone is trying to make." },
-          { p: "We surveyed 1,200 video editors to learn which AI features mattered to them. The answers pointed at a simple wish: make my video better without making me learn an editor." }
+          { p: "It wasn't long before that became a problem. People had to know a tool existed, dig for it, and stitch the results together themselves." },
+          { p: "Research said the same. We surveyed 1,200 video editors to learn which AI features mattered to them, and the answers pointed at a simple wish: make my video better without making me learn an editor." },
+          { p: "So we set a principle: workflows over features. Instead of bolting on more tools, we needed to explore AI editing as a whole, starting from what someone is trying to make." }
         ]},
         { title: "An assistant that edits with you", blocks: [
           { p: "That led me into early agentic explorations: tell the editor what you want, let it do the work, and stay in charge of the result. I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you review." },
