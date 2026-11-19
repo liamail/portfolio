@@ -2061,8 +2061,13 @@ const SITE = {
       const tf = new Map();
       vs1.forEach((v, i) => {
         const v0 = vs0[i]; if (!v0 || v0.getAttribute('src') !== v.getAttribute('src')) return;
-        try { v.currentTime = v0.currentTime; } catch (e) {}
-        const fr = frames.get(v0); if (fr) { tf.set(v, fr); handoff.push([v, fr]); }
+        // Only carried on when there's a captured frame to bridge with. Otherwise the video starts
+        // from the beginning, which is what its still shows, so nothing jumps.
+        const fr = frames.get(v0); if (!fr) return;
+        const at = v0.currentTime;
+        const seek = () => { try { v.currentTime = at; } catch (e) {} };
+        if (v.readyState >= 1) seek(); else v.addEventListener('loadedmetadata', seek, { once: true });
+        tf.set(v, fr); handoff.push([v, fr, at]);
       });
       rad1 = radius(target);
       d1 = devCopy(toDev, rectOf(toDev), tf); d1.style.opacity = '0';
@@ -2079,15 +2084,20 @@ const SITE = {
       if (done) return; done = true; cancelAnimationFrame(raf); xfStop = null;
       layer.remove(); main.style.opacity = ''; if (dk1) dk1.style.opacity = '';
       if (target) target.style.visibility = '';
-      handoff.forEach(([v, fr]) => {
+      // The carried frame stays over the new video until that video is actually showing the same
+      // moment. If the browser didn't take the jump (or the clip has looped), it eases out more
+      // slowly instead of snapping.
+      handoff.forEach(([v, fr, at]) => {
         const scr = v.closest('.scr'); if (!scr || !v.isConnected) return;
         const c = copyFrame(fr); scr.appendChild(c);
         const t1 = performance.now();
+        const out = ms => { c.style.transition = 'opacity ' + ms + 'ms'; c.style.opacity = '0'; setTimeout(() => c.remove(), ms + 40); };
         const wait = () => {
           if (!c.isConnected) return;
-          if (scr.classList.contains('live') || performance.now() - t1 > 3000) {
-            c.style.transition = 'opacity .2s'; c.style.opacity = '0'; setTimeout(() => c.remove(), 240);
-          } else requestAnimationFrame(wait);
+          const live = scr.classList.contains('live');
+          if (live && v.currentTime >= at - 0.05 && v.currentTime < at + 1.5) out(200);
+          else if ((live && performance.now() - t1 > 400) || performance.now() - t1 > 3000) out(420);
+          else requestAnimationFrame(wait);
         };
         requestAnimationFrame(wait);
       });
