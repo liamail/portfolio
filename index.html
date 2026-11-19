@@ -780,6 +780,29 @@ const SITE = {
       ]
     },
     {
+      slug: "smart-trim", kind: "story", title: "Smart Trim", short: "Smart Trim",
+      start: "2023-11", end: "2024-07", when: "2023 to 2024",
+      summary: "Two AI trimming tools, Highlights and Auto Trim, shaped through rounds of user testing.",
+      thesis: "Smart Trim was our internal name for a set of AI trimming features. Highlights finds the moments worth keeping in a long clip. Auto Trim trims a single clip to its most engaging moment in one tap.",
+      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2023 to 2024"]],
+      hero: { src: "cv-highlights", w: 1600, h: 900, shape: "wide", v: true, alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", caption: "Picking highlights from a long clip. From Canva's video editor page." },
+      chapters: [
+        { title: "Two ways to trim", blocks: [
+          { p: "Highlights was the smarter and more useful of the two. It looks through a long clip, describes the moments it finds, and lets you choose which to keep." },
+          { p: "Auto Trim, which was also its name in the product, was a quick one-tap button. It trims a single clip to its most engaging moment, based on a machine learning model's guess at the most representative frames." }
+        ]},
+        { title: "Testing what good looks like", blocks: [
+          { p: "I explored five concepts, from a one-off action on a single clip to trimming many clips at once as they're added, and tested four prototypes. Each round changed something real: where you start it, how you see what was kept, and how the result is announced." },
+          { p: "I ran extensive moderated testing on these concepts, mostly to understand how good people felt the results were. For a tool that makes the cut for you, perceived quality decides whether anyone trusts it." }
+        ]},
+        { title: "Evolving the feature", blocks: [
+          { p: "I also worked with machine learning engineers on a concept for the next generation of the tool, which we called progressive trimming. You simply start trimming a clip. Instead of cutting from the end, it takes out the least interesting frames from all through the clip, based on how much footage there is and how long you want it to be." },
+          { p: "The technology to do it was real and within reach. We didn't build it, so it stayed a vision for where the tool could go." },
+          { media: { src: "smart-trim", w: 1600, h: 996, shape: "wide", v: true, alt: "A long clip being trimmed down to its highlights on the timeline.", caption: "Progressive trimming: as you trim, the dull frames drop out from across the clip. A concept, not shipped." } }
+        ]}
+      ]
+    },
+    {
       slug: "match-and-move", kind: "experiment", title: "Match and Move", short: "Match and Move",
       start: "2025-11", end: "2025-11", when: "2025",
       summary: "A coded prototype that offers a transition at the moment two clips meet.",
@@ -809,7 +832,6 @@ const SITE = {
     }
   ],
   soon: [
-    { title: "Smart Trim", start: "2023-11", end: "2024-07", when: "2023 to 2024", note: "AI highlights for long videos." },
     { title: "Audio tools", start: "2024-09", end: "2025-05", when: "2024 to 2025", note: "Enhance Voice, levelling and ducking on one toolbar." }
   ],
   about: {
