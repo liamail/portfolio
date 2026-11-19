@@ -713,18 +713,29 @@ const SITE = {
       ]
     },
     {
-      slug: "ai-editing", kind: "case", title: "AI-assisted editing", short: "AI editing",
-      start: "2025-01", end: "2025-05", when: "2025",
-      summary: "A prototype for improving a video by talking to it, while you stay the editor.",
-      thesis: "An early concept for AI-assisted video editing. The goal was to let someone improve a video in plain language without losing the sense that they are still in charge.",
-      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2025"], ["Status", "Concept prototype, built in Figma"]],
-      hero: { src: "ai-mobile", w: 478, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype. Every change lands as something you can accept or reject." },
+      slug: "ai-editing", kind: "story", title: "AI in the editor", short: "AI in the editor",
+      start: "2023-01", end: "2026-06", when: "2023 to 2026",
+      summary: "From bolting AI features onto the editor to designing early agentic workflows.",
+      thesis: "In the early days of AI at Canva, we shipped it as features, one tool at a time. That taught us to put workflows over features, and led me into early agentic explorations: a precursor to the AI assistant being built for Canva Video today.",
+      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2023 to 2026"], ["Status", "Shipped features, then concepts and prototypes"]],
+      hero: { src: "cv-bgremove", w: 600, h: 600, shape: "card", alt: "Background Remover applied to a video of two people, the sky turning transparent.", caption: "Background Remover on video, the first AI tool I shipped." },
       chapters: [
-        { title: "The idea", blocks: [
-          { p: "We surveyed 1,200 video editors to learn which AI features mattered to them. The answers pointed at a simple wish: make my video better without making me learn an editor." },
-          { p: "I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you review." }
+        { title: "Bolting on AI", blocks: [
+          { p: "When machine learning models first arrived at Canva, we did the natural thing and added AI one feature at a time. Video Background Remover lifts a person off their background in one click. Smart Trim finds the moments worth keeping in a long clip. Beat Sync cuts a video to its music." },
+          { p: "Each one paired a powerful model with one obvious action and a result you could see straight away. Each one also lived somewhere different in the editor." },
+          { grid: [
+            { src: "cv-highlights", w: 1600, h: 900, shape: "wide", alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", cap: "<b>Smart Trim.</b> Picking highlights from a long clip." },
+            { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", cap: "<b>Beat Sync.</b> Cutting a video to its music." }
+          ] }
         ]},
-        { title: "Details I sweated", blocks: [
+        { title: "Workflows over features", blocks: [
+          { p: "It wasn't long before we saw the problem. Every new tool was another button tucked into the editor's information architecture. People had to know it existed, find it, and stitch the results together themselves." },
+          { p: "The principle we landed on was workflows over features. Instead of bolting on more tools, we needed to explore AI editing as a whole, starting from what someone is trying to make." },
+          { p: "We surveyed 1,200 video editors to learn which AI features mattered to them. The answers pointed at a simple wish: make my video better without making me learn an editor." }
+        ]},
+        { title: "An assistant that edits with you", blocks: [
+          { p: "That led me into early agentic explorations: tell the editor what you want, let it do the work, and stay in charge of the result. I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you review." },
+          { media: { src: "ai-mobile", w: 478, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype. Every change lands as something you can accept or reject." } },
           { list: [
             ["Keep the video the hero.", "The editor collapses to a compact preview with playback always in reach. Pull down for full screen."],
             ["Review is a first-class step.", "Every change arrives with Accept and Reject. Nothing is applied behind your back."],
@@ -733,9 +744,19 @@ const SITE = {
             ["Progress is honest.", "The assistant says what it's doing, and when it trims the video the cuts stay on the beat."]
           ]}
         ]},
-        { title: "On desktop", blocks: [
-          { p: "The same model stretches to desktop. The conversation sits beside the canvas, and each change shows up on the timeline where you can see and adjust it." },
+        { title: "On the timeline", blocks: [
+          { p: "On desktop the question changed: where should you ask? I explored prompting right where you're working. Select some clips, say what you want, and the edit happens in place on the timeline." },
+          { media: { src: "fig-ai-prompt", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Clips selected on the timeline with a prompt field reading Make it shorter.", caption: "Prompting from a selection." } },
+          { p: "The same model stretches to a conversation beside the canvas. Each change shows up on the timeline, where you can see and adjust it." },
           { media: { src: "ai-desktop", w: 1600, h: 910, shape: "wide", alt: "Desktop concept: a chat panel beside the canvas, with sound effects appearing as clips on the timeline.", caption: "Ask for sound effects and they appear as clips on the timeline." } }
+        ]},
+        { title: "In comments", blocks: [
+          { p: "Teams already leave notes on each other's videos. In a core flows sprint in early 2026, I designed a way to tag Canva AI in a comment on the timeline and have it act on the note, so feedback can turn straight into an edit." },
+          { media: { src: "ai-comments", w: 1600, h: 898, shape: "wide", v: true, alt: "Tagging Canva AI in a timeline comment and the edit being applied.", caption: "Tag Canva AI in a comment, and it acts on the note." } }
+        ]},
+        { title: "What comes next", blocks: [
+          { p: "These explorations were a precursor to the AI assistant now being built for Canva Video, much like the assistants appearing across the rest of Canva's workspace." },
+          { p: "The thread runs through all of it. I started out shipping AI as features, learned to design for whole workflows, and began working out how an agent can edit with you, not for you. What comes next is a product of much of that thinking." }
         ]}
       ]
     },
