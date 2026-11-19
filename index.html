@@ -157,6 +157,13 @@ body.splash-open{overflow:hidden}
 .hero h1{font-size:clamp(2.6rem,7.4vw,5.6rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;max-width:11.5em;text-wrap:balance}
 .mark-base{color:var(--primary)}
 .tabs{position:sticky;top:var(--tabs-top);z-index:10;display:flex;margin-top:calc(clamp(22px,3vw,36px) + 24px);margin-bottom:var(--pad,22vh);pointer-events:none}
+/* Frosted-glass controls. Safari draws the blur behind an element separately from its own
+   background, and while that background colour is animating it can paint a stray frame of the
+   end colour: a flicker on hover. So a glass control never animates its own background. Its
+   hover or active fill is a layer on top (::before below) that only fades in and out, with the
+   icon or label above it. Any new glass button should be added to this rule. */
+.navback::before,.rl-i::before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:var(--primary);opacity:0;pointer-events:none;transition:opacity var(--t-fast)}
+.rl-i{position:relative}
 .tabs-in{position:relative;display:inline-flex;gap:2px;padding:3px;margin-left:-3px;border-radius:12px;pointer-events:auto;
   background:color-mix(in srgb,var(--paper) 66%,transparent);
   border:1px solid var(--primary);
@@ -342,9 +349,10 @@ body.splash-open{overflow:hidden}
 .navback{position:fixed;z-index:30;top:var(--tabs-top);left:var(--navx);display:grid;place-items:center;width:var(--nav-h);height:var(--nav-h);border-radius:12px;color:var(--ink);text-decoration:none;
   background:color-mix(in srgb,var(--paper) 66%,transparent);border:1px solid var(--primary);
   -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);
-  transform:translateZ(0);transition:background-color var(--t-fast),color var(--t-fast),transform var(--t-fast) var(--ease)}
-.navback svg{transition:transform .22s var(--ease)}
-.navback:hover{background:var(--primary);color:var(--primary-ink)}
+  transform:translateZ(0);transition:color var(--t-fast),transform var(--t-fast) var(--ease)}
+.navback svg{position:relative;transition:transform .22s var(--ease)}
+.navback:hover{color:var(--primary-ink)}
+.navback:hover::before{opacity:1}
 .navback:hover svg{transform:translateX(-2px)}
 .navback:active{transform:scale(.94)}
 .navback:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
@@ -458,9 +466,11 @@ body.splash-open{overflow:hidden}
 .reach{list-style:none;display:grid;gap:14px;justify-items:start}
 .rl{display:inline-flex;align-items:center;gap:14px;font:inherit;color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
 .rl-t{font-family:var(--display);font-variation-settings:"opsz" 24;font-weight:400;font-size:clamp(1.6rem,2.6vw,2rem);line-height:1.1;overflow-wrap:anywhere;transition:color .2s}
-.rl-i{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;color:var(--ink);border:1px solid var(--primary);background:color-mix(in srgb,var(--paper) 42%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);transition:background-color .2s,color .2s,transform .25s var(--ease)}
+.rl-i{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;color:var(--ink);border:1px solid var(--primary);background:color-mix(in srgb,var(--paper) 42%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);transition:color .2s,transform .25s var(--ease)}
+.rl-i>*{position:relative}
 .rl:hover,.rl:focus-visible,.rl.done{color:var(--ink)}
-.rl:hover .rl-i,.rl:focus-visible .rl-i,.rl.done .rl-i{background:var(--primary);color:var(--primary-ink)}
+.rl:hover .rl-i,.rl:focus-visible .rl-i,.rl.done .rl-i{color:var(--primary-ink)}
+.rl:hover .rl-i::before,.rl:focus-visible .rl-i::before,.rl.done .rl-i::before{opacity:1}
 .rl:hover .rl-i{transform:translateX(3px)}
 .rl:active .rl-i{transform:scale(.94)}
 .rl:focus-visible{outline:none}
