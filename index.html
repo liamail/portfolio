@@ -116,8 +116,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .wash i:nth-child(4){transform:translate3d(18vw,16vh,0) rotate(-10deg);opacity:.6;
   background:radial-gradient(30% 34% at 40% 50%,var(--glow-3),transparent),radial-gradient(26% 24% at 62% 46%,var(--glow-1),transparent)}
 .veil{position:fixed;inset:0;z-index:0;pointer-events:none}
-#bg,#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-@supports (height:100lvh){#fx{bottom:auto;height:100lvh}}
+#bg,#fx,#fxsnap{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+@supports (height:100lvh){#fx,#fxsnap{bottom:auto;height:100lvh}}
+#fxsnap{display:none}
+html.vt-bg #fxsnap{display:block}
 #fx{display:none}
 .fx #fx{display:block}
 .fx .wash,.fx .veil{display:none}
@@ -485,11 +487,12 @@ body.splash-open{overflow:hidden}
 .veil{view-transition-name:bg-veil}
 #bg{view-transition-name:bg-canvas}
 #fx{view-transition-name:bg-fx}
+#fxsnap{view-transition-name:bg-snap}
 html.vt-run,html.vt-run body{background:transparent}
 ::view-transition{background:var(--paper)}
-::view-transition-old(bg-wash),::view-transition-old(bg-veil),::view-transition-old(bg-canvas),::view-transition-old(bg-fx){display:none}
-::view-transition-new(bg-wash),::view-transition-new(bg-veil),::view-transition-new(bg-canvas),::view-transition-new(bg-fx){animation:none;opacity:1}
-::view-transition-group(bg-wash),::view-transition-group(bg-veil),::view-transition-group(bg-canvas),::view-transition-group(bg-fx){z-index:0}
+::view-transition-old(bg-wash),::view-transition-old(bg-veil),::view-transition-old(bg-canvas),::view-transition-old(bg-fx),::view-transition-old(bg-snap){display:none}
+::view-transition-new(bg-wash),::view-transition-new(bg-veil),::view-transition-new(bg-canvas),::view-transition-new(bg-fx),::view-transition-new(bg-snap){animation:none;opacity:1}
+::view-transition-group(bg-wash),::view-transition-group(bg-veil),::view-transition-group(bg-canvas),::view-transition-group(bg-fx),::view-transition-group(bg-snap){z-index:0}
 ::view-transition-group(root){z-index:1}
 ::view-transition-group(hero-stage){z-index:2}
 ::view-transition-group(hero-media){z-index:3}
@@ -619,6 +622,7 @@ body.rv-off .rv-bar,body.rv-off .rv-vd,body.rv-off .rv-dot{display:none}
 <div class="wash" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="veil" aria-hidden="true"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
+<img id="fxsnap" alt="" aria-hidden="true" decoding="sync">
 <canvas id="bg" aria-hidden="true"></canvas>
 <div class="wrap">
   <div class="splash" id="splash" role="dialog" aria-modal="true" aria-labelledby="sp-title" aria-describedby="sp-text" hidden>
@@ -1953,6 +1957,13 @@ const SITE = {
     cover(); document.querySelectorAll('video').forEach(v => v.pause());
     holdVideos(reduce ? 0 : 650); window.LR.calmUntil = performance.now() + 900;
     if (!document.startViewTransition || reduce) { run(); setTimeout(revealTabs, reduce ? 0 : 200); return; }
+    // Safari can drop a WebGL canvas from a page transition, so the background goes blank and
+    // pops back afterwards. The glows are paused and a still of them stands in until the new
+    // page has settled, then the live canvas takes over again on the very same frame.
+    const snap = window.LR.snapBg ? window.LR.snapBg() : Promise.resolve(false);
+    let begun = false;
+    const begin = ok => { if (begun) return; begun = true;
+    if (ok) document.documentElement.classList.add('vt-bg');
     clearMorph();
     const from0 = slug ? visibleStage(slug) : null; morphing = !!from0; animating = true;
     if (!morphing) document.documentElement.classList.add('vt-plain');
@@ -1963,10 +1974,21 @@ const SITE = {
     const revealAt = morphing ? 560 : 400;
     vt.ready.then(() => setTimeout(revealTabs, revealAt), () => {});
     vt.finished.finally(() => {
-      clearMorph(); document.documentElement.classList.remove('vt-run', 'vt-plain');
+      clearMorph(); document.documentElement.classList.remove('vt-run', 'vt-plain', 'vt-bg');
+      if (window.LR.snapDone) window.LR.snapDone();
       revealTabs();
     });
+    };
+    snap.then(begin, () => begin(false)); setTimeout(() => begin(false), 300);
   }
+  // Make the background still as soon as a page link is pressed, so it is ready by the click.
+  document.addEventListener('pointerdown', e => {
+    const a = e.target.closest && e.target.closest('a[data-route]');
+    if (!a || e.button || !window.LR.snapBg) return;
+    const to = parse(a.getAttribute('href')), from = parse(current);
+    if (to.name === 'home' && from.name === 'home') return;
+    window.LR.snapBg();
+  }, true);
   document.addEventListener('click', e => {
     const a = e.target.closest('a[data-route]');
     if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
@@ -2345,6 +2367,33 @@ const SITE = {
   }
   const start = () => { if (!raf && !reduce && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } };
   const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+
+  // A still of the glows for page changes (see show()). Making it pauses the glows, so the live
+  // canvas is on exactly this frame when it takes over again.
+  const snapImg = document.getElementById('fxsnap');
+  let snapP = null, snapT = 0, snapURL = '';
+  window.LR.snapBg = () => {
+    if (!fx || !snapImg || !fxc.width) return Promise.resolve(false);
+    const now = performance.now();
+    window.LR.calmUntil = Math.max(window.LR.calmUntil, now + 1500);
+    if (snapP && now - snapT < 1200) return snapP;
+    snapT = now;
+    snapP = new Promise(res => {
+      try {
+        const cv = document.createElement('canvas'); cv.width = fxc.width; cv.height = fxc.height;
+        const x = cv.getContext('2d');
+        x.fillStyle = paper || '#000'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(fxc, 0, 0);
+        cv.toBlob(b => {
+          if (!b) return res(false);
+          if (snapURL) URL.revokeObjectURL(snapURL);
+          snapURL = URL.createObjectURL(b); snapImg.src = snapURL;
+          (snapImg.decode ? snapImg.decode() : Promise.resolve()).then(() => res(true), () => res(false));
+        }, 'image/jpeg', 0.96);
+      } catch (e) { res(false); }
+    });
+    return snapP;
+  };
+  window.LR.snapDone = () => { snapP = null; window.LR.calmUntil = performance.now() + 120; };
 
   fx = initGL();
   if (fx) {
