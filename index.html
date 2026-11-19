@@ -247,6 +247,9 @@ body.splash-open{overflow:hidden}
    drawing frames. iPhone shows black while a video starts, and in page transitions, so the still
    covers both. */
 .device .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;z-index:0}
+/* Media is drawn a touch oversize so the frame's rounded edge trims the 1 to 3px hairlines that
+   screen recordings and exports often carry, and no backing colour can peek through at an edge. */
+.device .still,.device video{transform:scale(1.008)}
 /* The still is always painted underneath, so it is decoded and ready the instant a video is set
    aside. The video sits on top and only shows once it is drawing frames. */
 .device video{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover;opacity:0}
@@ -501,7 +504,7 @@ html.vt-plain::view-transition-new(root){animation-delay:.12s}
 
 /* ---------- draft: new blocks ---------- */
 .device.pic .scr{background:#e9e9ef}
-.device.pic .still{object-fit:contain}
+.device.pic .still{object-fit:cover}
 .fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin:10px 0}
 .fgrid .fig{margin:0}
 .stage.tile{padding:clamp(12px,2vw,22px);border-radius:16px;min-height:0}
