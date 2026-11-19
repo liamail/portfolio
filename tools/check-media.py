@@ -6,24 +6,25 @@ Run from the site folder:  python3 tools/check-media.py [index.html]
 Flags, for each media src in the page:
   - a missing file;
   - declared w/h that don't match the file's proportions (would leave a gap or crop);
-  - a flat strip along any edge thicker than the frame's built-in trim (about 3px),
-    in the still and in three frames of the video. Hairlines up to 3px are trimmed
-    automatically by the .device overscale in the CSS, so they are not reported.
+  - a hairline (1 to 3px) along any edge, in the still and in four frames of the video:
+    screen recordings and exports often carry one. Crop it out of the file (and its
+    still) and scale back to the original size;
+  - a flat strip thicker than that along any edge.
 
-Strips that are real content (a board's own padding, the area under a phone's home
-indicator) are listed in REVIEWED with the reason, so they stop being reported.
+Edges that are real content (a board's own padding, the area under a phone's home
+indicator) are listed in REVIEWED with the reason, once checked by eye, so they stop
+being reported. Everything else gets fixed in the file, not hidden with CSS.
 """
 import io, os, re, subprocess, sys
 import numpy as np
 from PIL import Image
 
-TRIM = 3        # px the CSS overscale already hides on each edge
 REVIEWED = {    # src: reason the edge band is real content
     'ai-mobile': 'phone UI below the home indicator',
     'beat-sync': 'phone UI below the home indicator',
     'mobile-ia': 'phone UI below the home indicator',
     'mobile-overlay': 'phone UI below the home indicator',
-    'mobile-rearrange': 'phone UI below the home indicator',
+    'mobile-rearrange': 'phone UI below the home indicator; thumbnail strip at the left edge',
     'timeline-mobile': 'phone UI below the home indicator',
     'timeline-resize': 'phone UI below the home indicator',
     'tl-overview': 'phone UI below the home indicator',
@@ -36,6 +37,9 @@ REVIEWED = {    # src: reason the edge band is real content
     'cv-dragdrop': 'white editor UI along the bottom',
     'fig-bs-notch': 'white board area on the right',
     'fig-muteall-board': 'black board padding',
+    'fig-optin-setting': 'white page margin on the right',
+    'cv-highlights': 'white editor header in some frames',
+    'bs-zoom': 'light timeline area along the top',
 }
 
 def frames(path):
@@ -44,11 +48,24 @@ def frames(path):
         return
     d = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
                               '-of', 'csv=p=0', path], capture_output=True, text=True).stdout or 1)
-    for t in (0.0, d * 0.5, max(0, d - 0.2)):
+    for t in (0.0, d * 0.33, d * 0.66, max(0, d - 0.2)):
         out = subprocess.run(['ffmpeg', '-v', 'error', '-ss', str(t), '-i', path, '-frames:v', '1',
                               '-f', 'image2pipe', '-vcodec', 'png', '-'], capture_output=True).stdout
         if out:
             yield np.asarray(Image.open(io.BytesIO(out)).convert('RGB')).astype(float)
+
+def hairline(a, side):
+    """Edge lines (up to 3px) that differ from what sits just inside them."""
+    get = {'top': lambda i: a[i], 'bottom': lambda i: a[-1 - i],
+           'left': lambda i: a[:, i], 'right': lambda i: a[:, -1 - i]}[side]
+    def m(i):
+        line = get(i); n = len(line)
+        return line[int(n * .1):int(n * .9)].mean(0)
+    ref = np.mean([m(i) for i in range(5, 9)], axis=0)
+    k = 0
+    while k < 4 and np.abs(m(k) - ref).max() > 14:
+        k += 1
+    return k if k <= 3 else 0   # 4 or more is a band of real content, judged by band()
 
 def band(a, side):
     n_max = min(60, a.shape[0] if side in ('top', 'bottom') else a.shape[1])
@@ -87,16 +104,20 @@ def main():
             print(f'SIZE     {src}: declared {w}x{h}, file {W}x{H}'); issues += 1
         if src in REVIEWED:
             continue
-        found = {}
+        hair, strip = {}, {}
         for path in ([still] if img else [still, video]):
             for a in frames(path):
                 for side in ('top', 'bottom', 'left', 'right'):
+                    h = hairline(a, side)
+                    if h:
+                        hair[side] = max(hair.get(side, 0), h)
                     n = band(a, side)
-                    if n > TRIM:
-                        found[side] = max(found.get(side, 0), n)
-        if found:
-            print(f'STRIP    {src}: ' + ', '.join(f'{s} {n}px' for s, n in found.items()))
-            issues += 1
+                    if n > 3:
+                        strip[side] = max(strip.get(side, 0), n)
+        if hair:
+            print(f'HAIRLINE {src}: ' + ', '.join(f'{s} {n}px' for s, n in hair.items())); issues += 1
+        if strip:
+            print(f'STRIP    {src}: ' + ', '.join(f'{s} {n}px' for s, n in strip.items())); issues += 1
     print(f'{len(seen)} visuals checked, {issues} to fix' if issues else f'{len(seen)} visuals checked, all clean')
     sys.exit(1 if issues else 0)
 
