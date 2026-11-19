@@ -1373,7 +1373,7 @@ const SITE = {
   function modelDiagram(){
     const bar = (cls, l, w, label) => '<i class="sx-bar ' + cls + '" style="left:' + l + '%;width:' + w + '%"><span>' + label + '</span></i>';
     // Elements can be retimed inside a page, but never past its edges.
-    const page = (n, d, t, g) => '<div class="sx page"><span class="sx-l">Page ' + n + '<em>' + d + '</em></span>' +
+    const page = (n, d, t, g) => '<div class="sx page"><span class="sx-l">Page ' + n + '</span>' +
       '<div class="sx-row sm">' + bar('t', t[0], t[1], 'Text') + '</div><div class="sx-row sm">' + bar('g', g[0], g[1], 'Graphic') + '</div>' +
       '<div class="sx-row sm">' + bar('bg', 0, 100, 'Background') + '</div></div>';
     return '<figure class="fig"><div class="mdl">' +
