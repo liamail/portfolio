@@ -480,6 +480,9 @@ body.splash-open{overflow:hidden}
 #bg{view-transition-name:bg-canvas}
 #fx{view-transition-name:bg-fx}
 html.vt-run,html.vt-run body{background:transparent}
+::view-transition{background:var(--paper)}
+::view-transition-old(bg-wash),::view-transition-old(bg-veil),::view-transition-old(bg-canvas),::view-transition-old(bg-fx){display:none}
+::view-transition-new(bg-wash),::view-transition-new(bg-veil),::view-transition-new(bg-canvas),::view-transition-new(bg-fx){animation:none;opacity:1}
 ::view-transition-group(bg-wash),::view-transition-group(bg-veil),::view-transition-group(bg-canvas),::view-transition-group(bg-fx){z-index:0}
 ::view-transition-group(root){z-index:1}
 ::view-transition-group(hero-stage){z-index:2}
@@ -1947,9 +1950,12 @@ const SITE = {
     nameMorph(from0);
     document.documentElement.classList.add('vt-run');
     const vt = document.startViewTransition(() => { clearMorph(); run(); return decoded(); });
+    // The controls come in as the new page settles (about 0.2s sooner than waiting for the end).
+    const revealAt = morphing ? 560 : 400;
+    vt.ready.then(() => setTimeout(revealTabs, revealAt), () => {});
     vt.finished.finally(() => {
       clearMorph(); document.documentElement.classList.remove('vt-run', 'vt-plain');
-      setTimeout(revealTabs, 140);
+      revealTabs();
     });
   }
   document.addEventListener('click', e => {
@@ -2100,7 +2106,7 @@ const SITE = {
   let gl = null, fx = false, U = {}, dprFx = 1;
   const BT = new Float32Array(NB * 2), BM = new Float32Array(NB * 4), BO = new Float32Array(NB), BB = new Float32Array(NB);
   function initGL(){
-    try { gl = fxc.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false }); } catch (e) { gl = null; }
+    try { gl = fxc.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }); } catch (e) { gl = null; }
     if (!gl) return false;
     const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null; };
     const vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG);
