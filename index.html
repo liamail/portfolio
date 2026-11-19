@@ -73,11 +73,13 @@ html.entering .home .tabs-in{transition-delay:.32s}
 .arrive .work-head>:nth-child(2){animation-delay:.14s}
 .arrive .work-head>:nth-child(3){animation-delay:.2s}
 .arrive .chapters{animation:rise .6s var(--ease) .24s both}
-/* Work preview: the old visual fades away over the new one. */
+/* Work preview: the chosen project fades in on top. Whatever is underneath holds exactly as it
+   is until the new one fully covers it, then drops away unseen, so moving quickly down the list
+   never cuts. */
 #vstage{display:grid}
-#vstage>.stage{grid-area:1/1}
-#vstage>.stage.off{visibility:hidden;pointer-events:none}
-#vstage>.stage.leaving{z-index:1;pointer-events:none;animation:fade-away .34s var(--ease-io) forwards}
+#vstage>.stage{grid-area:1/1;opacity:1;transition:opacity .34s var(--ease-io)}
+#vstage>.stage.off{opacity:0;visibility:hidden;pointer-events:none;transition:opacity 0s linear .36s,visibility 0s linear .36s}
+#vstage>.stage.enter{opacity:0;transition:none}
 @keyframes fade-away{to{opacity:0}}
 /* Press feedback on touch. */
 .card a{transition:opacity var(--t-fast) var(--ease)}
@@ -1284,7 +1286,7 @@ const SITE = {
     if (FLAGS.timelinePicker) { initTimelinePicker(active); return; }
     const holder = document.getElementById('vstage'); if (!holder) return;
     const rows = [...main.querySelectorAll('.prow[data-p]')];
-    let now = active.slug;
+    let now = active.slug, vz = 1;
     // Each project's visual is built once and kept, so going back to one doesn't reload its video.
     const made = { [active.slug]: holder.querySelector('.stage') };
     // Hover or focus a project to preview it. The preview stays after the pointer leaves.
@@ -1294,16 +1296,14 @@ const SITE = {
       rows.forEach(r => r.classList.toggle('is-active', r.dataset.p === slug));
       // Every visual stays in the stage once made; the others are just hidden, so none of them
       // reloads or flashes when you come back to it.
-      holder.querySelectorAll('.stage.leaving').forEach(el => { el.classList.remove('leaving'); el.classList.add('off'); });
-      const old = holder.querySelector('.stage:not(.off)');
       let el = made[slug];
-      if (!el) { const t = document.createElement('div'); t.innerHTML = stage(device(bySlug[slug].hero), slug); el = made[slug] = t.firstElementChild; holder.appendChild(el); initVideos(el); }
-      el.classList.remove('off', 'leaving');
-      if (old && old !== el) {
-        old.querySelectorAll('video').forEach(v => v.pause());
-        if (reduce) old.classList.add('off');
-        else { old.classList.add('leaving'); setTimeout(() => { if (old.classList.contains('leaving')) { old.classList.remove('leaving'); old.classList.add('off'); } }, 360); }
-      }
+      if (!el) { const t = document.createElement('div'); t.innerHTML = stage(device(bySlug[slug].hero), slug); el = made[slug] = t.firstElementChild; el.classList.add('off'); holder.appendChild(el); initVideos(el); }
+      holder.querySelectorAll('.stage').forEach(o => { if (o === el || o.classList.contains('off')) return; o.classList.add('off'); o.querySelectorAll('video').forEach(v => v.pause()); });
+      // On top of everything, from transparent if it was hidden, easing in from where it is if it
+      // was still on its way out.
+      el.style.zIndex = String(++vz);
+      if (getComputedStyle(el).visibility === 'hidden' && !reduce) { el.classList.add('enter'); void el.offsetWidth; el.classList.remove('enter'); }
+      el.classList.remove('off');
       const sum = document.getElementById('vsum'); if (sum) { sum.textContent = bySlug[slug].summary; sum.classList.remove('swap'); void sum.offsetWidth; sum.classList.add('swap'); }
       const v = el.querySelector('video');
       if (v && !reduce) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
@@ -1973,7 +1973,7 @@ const SITE = {
     (document.getAnimations ? document.getAnimations() : []).forEach(a => {
       const t = a.effect && a.effect.target; if (!t || a.effect.pseudoElement || !at.has(t)) return;
       const c = all1[at.get(t)], cs = getComputedStyle(t);
-      c.style.animation = 'none'; c.style.transition = 'none'; c.style.opacity = cs.opacity;
+      c.style.animation = 'none'; c.style.transition = 'none'; c.style.opacity = cs.opacity; c.style.visibility = cs.visibility;
       if (cs.transform !== 'none') c.style.transform = cs.transform;
     });
     framesInto(wrap, g, frames);
