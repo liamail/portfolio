@@ -266,7 +266,7 @@ body.splash-open{overflow:hidden}
    early hold on their last frame, and all restart when the longest ends. The ring shows how far
    through that timeline the frame is. Frames are dark in both themes, so the control is always
    dark glass with a light icon, which keeps the mint ring readable over any footage. */
-.pp{position:absolute;z-index:3;right:12px;bottom:12px;width:34px;height:34px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;opacity:0;cursor:pointer;color:#fff;
+.pp{position:absolute;z-index:3;right:var(--pp-r,12px);bottom:var(--pp-b,12px);width:34px;height:34px;box-shadow:0 0 0 4px var(--stage);padding:0;border:0;border-radius:50%;display:grid;place-items:center;opacity:0;cursor:pointer;color:#fff;
   background:rgba(13,13,27,.86);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);transition:opacity .18s,background-color .18s}
 .pp:hover{background:rgba(13,13,27,.95)}
 .pp-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
@@ -1050,7 +1050,32 @@ const SITE = {
     holdUntil = performance.now() + ms; clearTimeout(holdT);
     holdT = setTimeout(() => near.forEach(v => { if (canPlay(v)) playV(v); }), ms + 20);
   }
-  function initVideos(root){ initGroups(root); if (vio) (root || main).querySelectorAll('video[data-auto]').forEach(v => vio.observe(v)); }
+  // Nestle each play button into the bottom-right corner of its media: centred just inside the
+  // corner's curve (on the bezel's curve for phones), so it hangs slightly off the media, with a
+  // ring in the frame colour carving a notch, and always clear of the frame's outer edge.
+  function placePP(st){
+    const b = st.querySelector(':scope > .pp'); if (!b) return;
+    const sr = st.getBoundingClientRect(); if (!sr.width) return;
+    let best = null, far = -Infinity;
+    st.querySelectorAll('.device .scr').forEach(scr => { const r = scr.getBoundingClientRect(); if (r.right + r.bottom > far) { far = r.right + r.bottom; best = { scr, r }; } });
+    if (!best) return;
+    const cs = getComputedStyle(best.scr);
+    const rad = parseFloat(cs.borderBottomRightRadius) || 0;
+    const m = /0px 0px 0px ([\d.]+)px/.exec(best.scr.closest('.device.phone') ? cs.boxShadow : '');
+    const bez = m ? parseFloat(m[1]) : 0;
+    const R = rad + bez, k = R * (1 - Math.SQRT1_2);               // the corner's 45° point
+    const half = b.offsetWidth / 2, inset = 4;                      // centre sits just inside the curve
+    const cx = best.r.right + bez - k - inset, cy = best.r.bottom + bez - k - inset;
+    const gap = 8;                                                  // never closer than this to the frame's edge
+    st.style.setProperty('--pp-r', Math.max(gap, sr.right - cx - half).toFixed(1) + 'px');
+    st.style.setProperty('--pp-b', Math.max(gap, sr.bottom - cy - half).toFixed(1) + 'px');
+  }
+  const ppRO = 'ResizeObserver' in window ? new ResizeObserver(es => es.forEach(e => placePP(e.target))) : null;
+  function initVideos(root){
+    initGroups(root);
+    if (vio) (root || main).querySelectorAll('video[data-auto]').forEach(v => vio.observe(v));
+    (root || main).querySelectorAll('.stage').forEach(st => { if (!st.querySelector(':scope > .pp')) return; placePP(st); if (ppRO) ppRO.observe(st); });
+  }
   main.addEventListener('click', e => {
     const b = e.target.closest('.pp'); if (!b) return;
     e.preventDefault(); e.stopPropagation();
