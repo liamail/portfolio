@@ -638,17 +638,15 @@ const SITE = {
     {
       slug: "video-timeline", kind: "case", title: "Video timeline", short: "Video timeline",
       start: "2025-06", end: "2026-10", when: "2025 to 2026",
-      rv: { id: "tl-summary", type: "changed", what: "New summary and opening line for the three-act story." },
       summary: "Taking Canva's video editor from a stack of pages to a real timeline, then making it simple again.",
       thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined just before launch and spent the next year and a half making it simple by default.",
       meta: [["Role", "Senior product designer"], ["Team", "Video Editor, Canva"], ["When", "June 2025 to October 2026"], ["Platforms", "Web, iOS and Android"]],
       hero: { src: "cv-dragdrop", w: 1600, h: 900, shape: "wide", v: true, alt: "Clips dragged onto a multi-track timeline, with text and graphics on tracks above.", caption: "The multi-track timeline. From Canva's video editor page." },
-      heroRv: { id: "tl-hero", type: "changed", what: "Hero swapped to Canva's own marketing clip of the timeline." },
       chapters: [
-        { title: "A more powerful model", rv: { id: "tl-act1", type: "changed", what: "Rewritten as act one, with a diagram of the old and new model." }, blocks: [
+        { title: "A more powerful model", blocks: [
           { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. Each page had a background and its own duration, and everything on it lived and died with the page. Creators wanted real editing, and that model couldn't give it to them." },
-          { diagram: "model", rv: { id: "tl-diagram", type: "new", what: "Simplified schema diagram, drawn from your description. No diagram existed in the docs." } },
-          { p: "The single-page video schema lifted pages up to the document level. Page backgrounds stayed on as video scenes, and every element got its own start and duration. That made timing across scenes possible, and with it a true multi-track editor." },
+          { diagram: "model" },
+          { p: "The single-page video schema changed two things. A video could only have one page, and that page could hold many backgrounds, which became its scenes. With everything on one page, every element got its own start and duration, so timing could run across scenes. That made a true multi-track editor possible." },
           { p: "The new model was a big step up in power. It also changed what people had to understand. A video was no longer a row of pages but a main track with layers above it, and the old page controls didn't map cleanly onto it." },
           { p: "I joined in June 2025, a few months before launch, during a change of designers on the team." }
         ]},
@@ -657,48 +655,48 @@ const SITE = {
           { p: "The sessions fed four decisions before launch: a main track that stays put, limits on vertical rearranging, onboarding for people arriving from the old editor, and the scope of our pre-launch test." },
           { quote: { text: "Liam was the lead designer who worked strategically to embed research insights into his designs.", who: "Najwa Alameddine, Design Researcher" } }
         ]},
-        { title: "Mobile first", rv: { id: "tl-mobile", type: "changed", what: "Revised: the third phone is now described as an unshipped toolbar exploration, not a shipped concept." }, blocks: [
+        { title: "Mobile first", blocks: [
           { p: "On a phone the canvas and the timeline fight for the same screen. I compared how CapCut, Edits and Reels handle it, then designed patterns that fit Canva: a timeline you can resize, and an Overlay action in place of drag and drop." },
-          { p: "Along the way I explored a new mobile toolbar that moves between a deselected state, a set of options we called the object panel, and grouped tool sets. It didn't ship, but it was part of the work to make the editor fit for video." },
+          { p: "Reordering clips on the main track was fiddly on a small screen. I designed a focused view for it, and it shipped: press and hold a clip, the main track collapses into thumbnails you can drag into a new order, and the timeline comes back with everything in place." },
           { row: [
             { src: "timeline-resize", w: 496, h: 1080, shape: "phone", alt: "Resizing the mobile timeline between two heights." },
             { src: "mobile-overlay", w: 496, h: 1080, shape: "phone", alt: "Turning a main track clip into an overlay with a toolbar action." },
-            { src: "mobile-ia", w: 492, h: 1080, shape: "phone", alt: "The mobile toolbar changing as different elements are selected." }
-          ], caption: "Resizing the timeline, making an overlay from the toolbar, and the unshipped toolbar exploration." }
+            { src: "mobile-rearrange", w: 496, h: 1076, shape: "phone", alt: "Press and hold a clip, the main track collapses into thumbnails, the clip is dragged to a new spot, and the timeline returns with it in place." }
+          ], caption: "Resizing the timeline, making an overlay from the toolbar, and rearranging the main track." }
         ]},
-        { title: "Bringing people across", rv: { id: "tl-across", type: "new", what: "New chapter on onboarding, changeboarding and the switch-back flow, all of which you led. Replaces \"Launch and a loud minority\"." }, blocks: [
+        { title: "Bringing people across", blocks: [
           { p: "Moving people to a new mental model is a design problem of its own. I led onboarding for the launch: coach marks for first-time users, and changeboarding for people arriving from the old editor with designs they'd already made." },
           { row: [
             { src: "tl-onboarding", w: 496, h: 1080, shape: "phone", v: true, alt: "A coach mark appearing as someone adds their first clip on mobile." },
             { src: "tl-existing-mobile", w: 496, h: 1080, shape: "phone", v: true, alt: "An existing design opening in the new editor on mobile." },
             { src: "tl-switch-mobile", w: 498, h: 1080, shape: "phone", v: true, alt: "Starting a new video from the Canva home screen on mobile." }
-          ], caption: "Onboarding on mobile: a coach mark on the first clip, an existing design in the new editor, and a new video from home.", rv: { id: "tl-across-row", type: "input", what: "Check these three recordings show what the caption says." } },
+          ], caption: "Onboarding on mobile: a coach mark on the first clip, an existing design in the new editor, and a new video from home." },
           { p: "When the new editor launched in October 2025, most people adapted quietly. A small, vocal group did not. Within days I designed a way back: a setting in your profile, a banner inviting people to try the new editor again, and copy that explains what changes. Only new designs open in the new editor, so nothing anyone had made moved under them." },
           { grid: [
             { src: "fig-optin-setting", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Profile settings with a switch for the new multi-track video editor.", cap: "The switch, in profile settings." },
             { src: "fig-optin-banner", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "A banner in the old editor inviting people to try the new one.", cap: "The invitation back, in the old editor." }
           ] },
           { p: "We also asked why, at the moment someone switched back, with a short survey in the flow. That gave the team reasons, not just a rate." },
-          { facts: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]], rv: { id: "tl-facts", type: "input", what: "New figures, stated as ranges and ratios. Confirm you're comfortable sharing them." } },
-          { p: "Even so, publishing was slower to recover than we hoped. The biggest confusion wasn't any one control. It was the model itself: the difference between the main track and everything above it. Our beta and pre-launch tests had been scoped around launch risks, and they missed it. That set up everything that came next.", rv: { id: "tl-lesson", type: "new", what: "Names the road bump plainly." } }
+          { facts: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]] },
+          { p: "Even so, publishing was slower to recover than we hoped. The biggest confusion wasn't any one control. It was the model itself: the difference between the main track and everything above it. Our beta and pre-launch tests had been scoped around launch risks, and they missed it. That set up everything that came next." }
         ]},
-        { title: "A year of fixing", rv: { id: "tl-fixing", type: "changed", what: "Revised: now says these are some of the improvements you led. The inventory has more, such as opt-in and opt-out, mobile resize and the overlay action, which appear elsewhere on the page." }, blocks: [
+        { title: "A year of fixing", blocks: [
           { p: "After launch I worked through the paper cuts with engineering: playhead behaviour, selection, drag and drop, audio and transitions. I started weekly design office hours so engineers could bring problems in flight and we could solve them in the room." },
           { p: "Some of the improvements I led, most written up as specs that engineers built from directly." },
           { grid: [
             { src: "fig-slip-board", img: true, w: 1600, h: 1131, shape: "wide", v: true, alt: "Spec board for trim and slip on desktop and mobile.", cap: "<b>Trim and slip.</b> Slip moves the footage inside a clip without moving the clip, as audio already could. It shipped." },
             { src: "fig-snap-board", img: true, w: 1341, h: 960, shape: "wide", v: true, alt: "Spec for the snapping indicator on desktop and mobile.", cap: "<b>Snapping indicators.</b> A line appears only when a dragged edge comes within reach of something real. Built from customer feedback." },
-            { src: "mm-btrack", w: 1600, h: 974, shape: "wide", v: true, alt: "Match and Move appearing between two overlay clips.", cap: "<b>Match and Move on overlay tracks.</b> A favourite transition, brought back where two clips meet." },
+            { src: "mm-btrack", w: 1600, h: 974, shape: "wide", v: true, alt: "Match and Move appearing between two overlay clips.", cap: "<b>Match and Move on overlay tracks.</b> An exploration that didn't ship. People told us they missed the page-based version, so I explored bringing it back where two clips meet." },
             { src: "zoom-bar", w: 1600, h: 898, shape: "wide", v: true, alt: "The trimmed-down bottom bar with a segmented zoom control.", cap: "<b>Zoom you can find.</b> About 20% more people zoomed once it moved into the bottom bar." },
             { src: "fig-trim-states", img: true, w: 772, h: 298, shape: "wide", v: true, alt: "A grid of clip states: deselected, selected, hover and edge hover.", cap: "<b>Trim handle states.</b> Every state for main and overlay tracks, with and without comments." },
-            { src: "overlay-drop", w: 992, h: 526, shape: "wide", alt: "Motion study of a clip lifting off the main track to become an overlay.", cap: "<b>Overlay drop.</b> A motion study for lifting a clip off the main track, so engineers could feel the timing before building it." }
+            { src: "fig-dropzone", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Dragging a video from the uploads panel. The main track in the timeline shows a dashed Drop media here zone.", cap: "<b>Drop zones you can see.</b> Start dragging and the main track shows exactly where media will land. Before, people couldn't see the target and dropped onto the track above by mistake." }
           ] }
         ]},
-        { title: "Simple by default", rv: { id: "tl-simple", type: "changed", what: "Credit reworded to collaborative ownership, with a line on the team's experiments." }, blocks: [
+        { title: "Simple by default", blocks: [
           { p: "Templates were the hard case. A graphic-heavy template became dozens of rows in the new timeline, and most people editing a template never need per-element timing." },
-          { p: "From February 2026 I was the design owner for the answer, working alongside another designer who had started the early explorations. A simple view hides element tracks until you ask for them, and linking keeps overlays moving with their scene." },
+          { p: "The answer had two parts. A simple view hides element tracks until you ask for them, and linking keeps overlays moving with their scene." },
           { media: { src: "simple-full", w: 1600, h: 898, shape: "wide", alt: "Switching between the simple timeline and the full multi-track timeline on desktop.", caption: "Simple view and full timeline. One control switches between them." } },
-          { p: "Before the big change, the team shipped a run of small experiments, from limiting how tall the timeline could grow to simplifying how tracks looked. We kept what helped and rolled back what didn't.", rv: { id: "tl-experiments", type: "changed", what: "Revised: the table is gone. One sentence about the team's experiments, with no names against them. Send it back again to cut it entirely." } },
+          { p: "Before the big change, the team shipped a run of small experiments, from limiting how tall the timeline could grow to simplifying how tracks looked. We kept what helped and rolled back what didn't." },
           { p: "Testing taught us more than the designs did. People rated linking very useful, yet most couldn't find its control, and they couldn't tell what was linked or why. In the first experiment, people who landed in the simple view often stayed stuck there. Roughly one in four found the way back." },
           { p: "So we changed the defaults. The editor remembers the view you chose, and the way to see everything sits where people already look. That work shipped as an experiment in October 2026, after I handed over." }
         ]},
@@ -706,7 +704,7 @@ const SITE = {
           { p: "A small working model of the two ideas above, rebuilt for this page. It is a sketch of the behaviour, not Canva's code or interface." },
           { demo: "timeline", caption: "Drag a scene to reorder it, or drag its right edge to trim. In the simple view, elements always travel with their scene. Open the full timeline to see them, then switch Smart linking off and reorder again to see what it was protecting you from." }
         ]},
-        { title: "What I learned", rv: { id: "tl-learned", type: "changed", what: "Reworded around what testing showed versus leadership's instinct. Was: \"Hidden behaviour needs a visible model...\"" }, blocks: [
+        { title: "What I learned", blocks: [
           { p: "Senior leadership saw the simple timeline as the answer. The full timeline, and the switch for smart linking, looked like lower priorities, and the instinct was to tuck them away for a cleaner editor." },
           { p: "Testing told a more nuanced story. People liked the simple view, but they always needed a way back to full control of element timing. The linking switch was the same. With linking on by default and its control hidden, the editor suddenly behaved differently, and people couldn't see why or how to turn it off. Both findings backed the direction the team had proposed." },
           { p: "The lesson I carry forward: simple should be the default, not the ceiling. Hide complexity until someone needs it, but keep the way to it in plain sight, and always show what the editor is doing on their behalf." },
@@ -776,7 +774,7 @@ const SITE = {
           { row: [{ src: "beat-sync", w: 492, h: 1080, shape: "phone", alt: "Beat Sync 2.0 on mobile: beat markers on the audio track and a button to sync visuals with beats." }], caption: "Beat Sync 2.0, exploring moment sync on mobile." }
         ]},
         { title: "Outcome", blocks: [
-          { p: "Beat Sync grew to hundreds of thousands of monthly users in its first year. Beat markers are free and one-click sync is part of Pro." },
+          { p: "Soon after launch, monthly usage reached approximately 400,000 people, and beat detection worked 99.99% of the time. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment." },
           { quote: { text: "Beat Sync would not have been brought to life [if] it weren't for his skill and ability to work under pressure.", who: "Beat Sync teammate, Canva" } }
         ]}
       ]
