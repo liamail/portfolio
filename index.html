@@ -2338,8 +2338,11 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     // On phones the browser's toolbar slides in and out as pages change and scroll, which changes
     // the window height. The background keeps the tallest height seen at this width, so that
     // never clears it or shifts the glows; only a real change (rotating, resizing) redraws it.
-    const nw = window.innerWidth, nh = window.innerHeight, coarse = matchMedia('(pointer: coarse)').matches;
-    if (coarse && nw === w && nh <= h) return false;
+    // The height is the canvas's own height on screen (the tallest, toolbar-hidden viewport on
+    // phones), so what it draws is never stretched to fit.
+    const coarse = matchMedia('(pointer: coarse)').matches, nw = window.innerWidth;
+    const nh = Math.round(fxc.getBoundingClientRect().height) || window.innerHeight;
+    if (coarse && nw === w && nh === h) return false;
     w = nw; h = nh;
     if (fx) { dprFx = Math.min(coarse ? 1 : 2, window.devicePixelRatio || 1); fxc.width = Math.round(w * dprFx); fxc.height = Math.round(h * dprFx); }
     if (!GRAIN) return;
@@ -2469,7 +2472,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
      pinpoint to 100px across. The glows and their grain bend, swirl and pour into it. Move the
      cursor away and it shrinks back to nothing. Press on the hole and drag to carry it around. */
   const BG = 'html,body,.wrap,main,.home,.hero,.tabs,.tabs-in,.panel,.plist,#vstage,.reel,.viewer,.viewer-text,article,.work-head,.hero,.fig,.chapters,.chapter,.chapter>.body,.about-head,.bio,.foot,.cards,.quotes';
-  const HOLD = 10000, LONG = 550, SIZE = 50, GROW = 1.6, SHRINK = 0.9;
+  // On touch screens the hole opens bigger, so its edge shows clearly around a fingertip.
+  const HOLD = 10000, LONG = 550, SIZE = matchMedia('(pointer: coarse)').matches ? 76 : 50, GROW = 1.6, SHRINK = 0.9;
   let hActive = false, drag = false, hs = 0, hl = 0, hx = 0, hy = 0, tx = 0, ty = 0, hR = 0;
   let aX = -9999, aY = -9999, aT = 0, aOK = false;
   function holeUpdate(dt){
