@@ -194,7 +194,10 @@ body.splash-open{overflow:hidden}
 .panel{touch-action:pan-y pinch-zoom}
 .pane.arriving{transform:translate3d(calc(var(--side) * 100vw),0,0);transition:none}
 .pane.landing{transform:translate3d(0,0,0);transition:transform .4s cubic-bezier(.16,.9,.24,1)}
-.panel .viewer{grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:clamp(20px,3vw,40px)}
+/* The visual sits on the left and the list on the right, so scrolling down from the tabs (on the
+   left) doesn't drag the cursor across the list. */
+.panel .viewer{grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:clamp(28px,4vw,56px)}
+.panel .viewer>.plist{order:2}
 /* The Work section fills the screen under the floating tabs, with its contents centred in it. */
 @media (min-width:821px){
   .pane[data-pane="work"]{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 var(--bleed,0px) 12px;display:grid;align-content:center}
@@ -363,8 +366,9 @@ body.splash-open{overflow:hidden}
 .work-head h1{font-size:clamp(2.4rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;margin-top:clamp(20px,4vw,40px);max-width:12em;text-wrap:balance}
 .thesis{margin-top:18px;font-size:clamp(1.15rem,2vw,1.4rem);line-height:1.4;color:var(--muted);max-width:30em}
 .work-head h1 .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:.26em;font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;margin-left:1.15em;white-space:nowrap}
-:root[data-theme=dark] .work-head h1 .yr{color:var(--accent)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .work-head h1 .yr{color:var(--accent)}}
+.card h2 .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:.39em;font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;margin-left:1.15em;white-space:nowrap}
+:root[data-theme=dark] .work-head h1 .yr,:root[data-theme=dark] .card h2 .yr{color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .work-head h1 .yr,:root:not([data-theme=light]) .card h2 .yr{color:var(--accent)}}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .meta{margin-top:clamp(28px,4vw,44px);padding-top:20px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px 28px}
 .meta dt{font-size:.88rem;color:var(--muted)}
@@ -1117,6 +1121,9 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   // Play and pause, from the button anywhere, or by tapping the video itself on touch screens.
   // Each toggle gives one quick pulse of the button and, on phones, a light haptic tick.
   const touchUI = matchMedia('(hover: none)').matches;
+  // Marks pointer events where the pointer itself moved (not the page scrolling beneath it).
+  let pmx = null, pmy = null;
+  document.addEventListener('pointermove', e => { e.__moved = e.clientX !== pmx || e.clientY !== pmy; pmx = e.clientX; pmy = e.clientY; }, true);
   const haptic = (() => {
     let lab = null;
     return () => {
@@ -1196,7 +1203,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
 
     const cards = SITE.work.map(w =>
       '<li class="card"><a href="#work-' + w.slug + '" data-route>' + stage(device(w.hero), w.slug) +
-      '<div><p class="kind">' + kindLabel(w) + ', ' + esc(w.when) + '</p><h2>' + esc(w.title) + '</h2><p class="sum">' + esc(w.summary) + '</p></div></a></li>').join('');
+      '<div><h2>' + esc(w.title) + '<sub class="yr"><span class="vh">, </span>' + esc(w.when) + '</sub></h2><p class="sum">' + esc(w.summary) + '</p></div></a></li>').join('');
     const soon = '<li class="soon"><p>Write-ups in progress</p>' + SITE.soon.map(s => '<p><strong>' + esc(s.title) + '.</strong> ' + esc(s.note) + ' ' + esc(s.when) + '.</p>').join('') + '</li>';
 
     return '<section class="reel" aria-label="Selected work">' +
@@ -1275,15 +1282,15 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       const head = FLAGS.groups && w.kind !== lastKind ? '<li class="pgrp" aria-hidden="true">' + GROUPS[w.kind] + '</li>' : ''; lastKind = w.kind;
       const badge = FLAGS.review && w.rv ? ' <i class="rv-dot" title="' + RVT[w.rv.type] + '"></i>' : '';
       return head + '<li><a class="prow' + (w === active ? ' is-active' : '') + '" href="#work-' + w.slug + '" data-route data-p="' + w.slug + '">' +
-      '<span class="pt">' + esc(w.title) + badge + '</span><span class="pg" aria-hidden="true">' + esc(w.title) + '</span><span class="pk">' + kindLabel(w) + ', ' + esc(w.when) + '</span></a></li>';
+      '<span class="pt">' + esc(w.title) + badge + '</span><span class="pg" aria-hidden="true">' + esc(w.title) + '</span><span class="pk">' + esc(w.when) + '</span></a></li>';
     }).join('') +
       SITE.soon.map(x => '<li><span class="prow soon"><span class="pt">' + esc(x.title) + '</span><span class="pk">Write-up in progress</span></span></li>').join('');
     const cards = SITE.work.map(w =>
       '<li class="card"><a href="#work-' + w.slug + '" data-route>' + stage(device(w.hero), w.slug) +
-      '<div><p class="kind">' + kindLabel(w) + ', ' + esc(w.when) + '</p><h2>' + esc(w.title) + '</h2><p class="sum">' + esc(w.summary) + '</p></div></a></li>').join('');
+      '<div><h2>' + esc(w.title) + '<sub class="yr"><span class="vh">, </span>' + esc(w.when) + '</sub></h2><p class="sum">' + esc(w.summary) + '</p></div></a></li>').join('');
     const soon = SITE.soon.length ? '<li class="soon"><p>Write-ups in progress</p>' + SITE.soon.map(x => '<p><strong>' + esc(x.title) + '.</strong> ' + esc(x.note) + ' ' + esc(x.when) + '.</p>').join('') + '</li>' : '';
     return '<section class="reel" aria-label="Selected work">' +
-      '<div class="viewer" id="viewer"><ul class="plist">' + rows + '</ul><div><div id="vstage">' + stage(device(active.hero), active.slug) + '</div><p class="vsum" id="vsum">' + esc(active.summary) + '</p></div></div>' +
+      '<div class="viewer" id="viewer"><ul class="plist">' + rows + '</ul><div><div id="vstage">' + stage(device(active.hero), active.slug) + '</div></div></div>' +
       '<ul class="cards">' + cards + soon + '</ul></section>';
   }
   function initWorkPanel(active){
@@ -1308,12 +1315,14 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       el.style.zIndex = String(++vz);
       if (getComputedStyle(el).visibility === 'hidden' && !reduce) { el.classList.add('enter'); void el.offsetWidth; el.classList.remove('enter'); }
       el.classList.remove('off');
-      const sum = document.getElementById('vsum'); if (sum) { sum.textContent = bySlug[slug].summary; sum.classList.remove('swap'); void sum.offsetWidth; sum.classList.add('swap'); }
       const v = el.querySelector('video');
       if (v && !reduce) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
     };
+    // Only a real mouse movement over a row previews it. When the page scrolls under a still
+    // cursor the rows slide past it without moving the pointer, so they're ignored: scrolling down
+    // from the tabs never switches the project by accident.
     rows.forEach(r => {
-      r.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') pick(r.dataset.p); });
+      r.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && e.__moved) pick(r.dataset.p); });
       r.addEventListener('focus', () => pick(r.dataset.p));
     });
   }
@@ -1957,6 +1966,13 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       const k = Math.min(1, 1600 / v.videoWidth), c = document.createElement('canvas');
       c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
       c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      // Some browsers (Safari, notably on iPhone) can hand back a blank frame. A blank copy would
+      // flash, so it's thrown away and the still is used instead.
+      const t = document.createElement('canvas'); t.width = t.height = 6;
+      const tc = t.getContext('2d'); tc.drawImage(c, 0, 0, 6, 6);
+      const px = tc.getImageData(0, 0, 6, 6).data; let hi = 0;
+      for (let i = 0; i < px.length; i += 4) hi = Math.max(hi, px[i], px[i + 1], px[i + 2]);
+      if (hi < 10) return null;
       c.className = 'xf-frame'; return c;
     } catch (e) { return null; }
   };
@@ -2040,10 +2056,18 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const dk0 = document.querySelector('body > .dock');
     if (dk0) { const c = dk0.cloneNode(true); c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); c.inert = true; ghost.appendChild(c); }
     let box = null, d0 = null, b0, m0, rad0;
+    // The video that's playing travels with the artwork: the element itself, not a copy, so it
+    // never reloads, seeks or swaps for a stand-in, and simply carries on on the other page.
+    const vs0 = fromDev ? [...fromDev.querySelectorAll('video')] : [];
+    let carry = vs0.length && vs0.every(v => v.readyState >= 2) ? vs0 : null;
     if (from0 && fromDev) {
       b0 = rectOf(from0); m0 = rectOf(fromDev); rad0 = radius(from0);
       box = document.createElement('div'); box.className = 'xf-box';
       d0 = devCopy(fromDev, m0, frames);
+      if (carry) {
+        const scrs = [...d0.querySelectorAll('.scr')], at = [...fromDev.querySelectorAll('.scr')];
+        carry.forEach(v => { const sc = scrs[at.indexOf(v.closest('.scr'))]; if (!sc) return; sc.querySelectorAll('.xf-frame').forEach(n => n.remove()); v.style.opacity = '1'; sc.appendChild(v); });
+      }
       layer.append(box, d0);
     }
     document.body.appendChild(layer);
@@ -2057,24 +2081,15 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const target = box ? visibleStage(slug) : null;
     const toDev = target && target.querySelector('.device');
     let d1 = null, rad1 = 0;
-    // The same recording on both pages carries on from the moment it had reached, and its frame
-    // stays over the new video until that video is actually drawing.
-    const handoff = [];
+    const vs1 = toDev ? [...toDev.querySelectorAll('video')] : [];
+    // Carried only into the very same recording(s); otherwise the new page's video starts from the
+    // beginning, which is what its still shows.
+    if (carry && !(vs1.length === carry.length && vs1.every((v, i) => v.getAttribute('src') === carry[i].getAttribute('src')))) {
+      carry.forEach(v => { v.style.opacity = ''; }); carry = null;
+    }
     if (target && toDev) {
-      const vs0 = [...fromDev.querySelectorAll('video')], vs1 = [...toDev.querySelectorAll('video')];
-      const tf = new Map();
-      vs1.forEach((v, i) => {
-        const v0 = vs0[i]; if (!v0 || v0.getAttribute('src') !== v.getAttribute('src')) return;
-        // Only carried on when there's a captured frame to bridge with. Otherwise the video starts
-        // from the beginning, which is what its still shows, so nothing jumps.
-        const fr = frames.get(v0); if (!fr) return;
-        const at = v0.currentTime;
-        const seek = () => { try { v.currentTime = at; } catch (e) {} };
-        if (v.readyState >= 1) seek(); else v.addEventListener('loadedmetadata', seek, { once: true });
-        tf.set(v, fr); handoff.push([v, fr, at]);
-      });
       rad1 = radius(target);
-      d1 = devCopy(toDev, rectOf(toDev), tf); d1.style.opacity = '0';
+      d1 = devCopy(toDev, rectOf(toDev), new Map()); d1.style.opacity = '0';
       layer.appendChild(d1);
       target.style.visibility = 'hidden';
     } else if (box) { box.remove(); d0.style.transition = 'opacity .2s'; box = null; }
@@ -2087,24 +2102,17 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const finish = () => {
       if (done) return; done = true; cancelAnimationFrame(raf); xfStop = null;
       layer.remove(); main.style.opacity = ''; if (dk1) dk1.style.opacity = '';
+      // The carried video takes the place of the new page's own copy, already showing its frame.
+      if (carry && target) {
+        carry.forEach((v, i) => {
+          const vt = vs1[i]; if (!vt || !vt.isConnected) return;
+          if (vio) vio.unobserve(vt); near.delete(vt); vt.pause();
+          vt.replaceWith(v); v.style.opacity = ''; v._ring = null; v._held = false;
+          const sc = v.closest('.scr'); if (sc) sc.classList.add('live');
+        });
+        initVideos(target.parentElement);
+      }
       if (target) target.style.visibility = '';
-      // The carried frame stays over the new video until that video is actually showing the same
-      // moment. If the browser didn't take the jump (or the clip has looped), it eases out more
-      // slowly instead of snapping.
-      handoff.forEach(([v, fr, at]) => {
-        const scr = v.closest('.scr'); if (!scr || !v.isConnected) return;
-        const c = copyFrame(fr); scr.appendChild(c);
-        const t1 = performance.now();
-        const out = ms => { c.style.transition = 'opacity ' + ms + 'ms'; c.style.opacity = '0'; setTimeout(() => c.remove(), ms + 40); };
-        const wait = () => {
-          if (!c.isConnected) return;
-          const live = scr.classList.contains('live');
-          if (live && v.currentTime >= at - 0.05 && v.currentTime < at + 1.5) out(200);
-          else if ((live && performance.now() - t1 > 400) || performance.now() - t1 > 3000) out(420);
-          else requestAnimationFrame(wait);
-        };
-        requestAnimationFrame(wait);
-      });
       revealTabs();
     };
     xfStop = finish;
@@ -2121,7 +2129,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
         box.style.width = b.w + 'px'; box.style.height = b.h + 'px'; box.style.borderRadius = lerp(rad0, rad1, k) + 'px';
         d0.style.transform = 'translate3d(' + m.x + 'px,' + m.y + 'px,0) scale(' + (m.w / m0.w) + ',' + (m.h / m0.h) + ')';
         d1.style.transform = 'translate3d(' + m.x + 'px,' + m.y + 'px,0) scale(' + (m.w / m1.w) + ',' + (m.h / m1.h) + ')';
-        d0.style.opacity = 1 - x; d1.style.opacity = x;
+        if (!carry) { d0.style.opacity = 1 - x; d1.style.opacity = x; }
       } else if (d0) d0.style.opacity = 1 - EASE_IO(Math.min(1, t / T_OUT));
       if (t >= total) { finish(); return; }
       raf = requestAnimationFrame(tick);
