@@ -198,9 +198,10 @@ body.splash-open{overflow:hidden}
    left) doesn't drag the cursor across the list. */
 .panel .viewer{grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:clamp(28px,4vw,56px)}
 .panel .viewer>.plist{order:2}
-/* The Work section fills the screen under the floating tabs, with its contents centred in it. */
+/* The Work section fills the screen under the floating tabs, with its contents centred on the
+   screen itself: the space the tabs take at the top is matched at the bottom. */
 @media (min-width:821px){
-  .pane[data-pane="work"]{min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 var(--bleed,0px) 12px;display:grid;align-content:center}
+  .pane[data-pane="work"]{box-sizing:border-box;min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 var(--bleed,0px) calc(var(--tabs-h,50px) + var(--tabs-top) + 12px);display:grid;align-content:center}
   .pane[data-pane="work"] .viewer .stage{height:clamp(440px,62vh,640px)}
 }
 .plist{display:grid;align-content:center}
