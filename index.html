@@ -177,7 +177,11 @@ body.splash-open{overflow:hidden}
 .tab-ind{position:absolute;left:0;top:3px;bottom:3px;width:0;border-radius:8px;background:var(--primary);opacity:0;transform:translateX(0);transition:transform var(--t-move) var(--ease),width var(--t-move) var(--ease),opacity .2s}
 .tabs.live .tab-ind{opacity:1}
 .panel{position:relative;min-height:70vh;margin-inline:calc(-1 * var(--bleed,0px));overflow:hidden;overflow:clip}
-.pane{padding:clamp(20px,3vw,36px) var(--bleed,0px) clamp(80px,12vw,140px)}
+.pane{padding:clamp(20px,3vw,36px) var(--bleed,0px) clamp(80px,12vw,140px);transform:translate3d(0,0,0)}
+/* The section keeps one layer for good: Safari redraws a layer's contents whenever it gains or
+   loses one, which showed as a flicker on the play buttons at the start and end of a swipe. Each
+   button is its own layer too, so the page sliding never redraws it. */
+.pp{will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .pane[data-pane="work"]{--side:-1}
 .pane[data-pane="about"]{--side:1}
 .panel .reel{margin-top:0}
@@ -1070,7 +1074,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
         const st = v.closest('.stage'); if (!st || !st._group || !v.duration) return;
         if ((st._group.length > 1 ? lead(st) : st._group[0]) !== v) return;
         const c = v._ring || (v._ring = st.querySelector('.pp-ring .pg')); if (!c) return;
-        c.style.strokeDashoffset = (100 - Math.min(1, v.currentTime / v.duration) * 100).toFixed(2) + 'px';
+        const off = (100 - Math.min(1, v.currentTime / v.duration) * 100).toFixed(2) + 'px';
+        if (c._off !== off) { c._off = off; c.style.strokeDashoffset = off; }   // only when it changes
       });
       requestAnimationFrame(ring);
     };
