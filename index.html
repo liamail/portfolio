@@ -294,8 +294,8 @@ body.splash-open{overflow:hidden}
 .pp:hover .pp-ring .tr{stroke:rgba(255,255,255,.32)}
 .pp-ring .pg{stroke:#fff;stroke-dasharray:100;stroke-dashoffset:100}
 .pp::before{content:"";width:3px;height:11px;border-left:2.5px solid currentColor;border-right:2.5px solid currentColor}
-@keyframes pp-in{from{opacity:0;transform:scale(.86)}}
-.stage.pp-in>.pp{animation:pp-in .38s var(--ease) both}
+@keyframes pp-in{from{opacity:0;transform:scale(.9)}}
+.stage.pp-in>.pp{animation:pp-in .6s var(--ease) .08s both}
 @keyframes pp-pulse{40%{transform:scale(1.14)}}
 .pp.pulse{animation:pp-pulse .32s var(--ease)}
 .pp[aria-pressed="true"]::before{width:0;height:0;border:0;border-left:10px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:3px}
@@ -2105,7 +2105,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       if (target) {
         target.style.visibility = '';
         // Its play button eases in once the artwork has landed, like everything else around it.
-        if (target.querySelector(':scope > .pp')) { target.classList.add('pp-in'); setTimeout(() => target.classList.remove('pp-in'), 450); }
+        if (target.querySelector(':scope > .pp')) { target.classList.add('pp-in'); setTimeout(() => target.classList.remove('pp-in'), 760); }
       }
       revealTabs();
     };
