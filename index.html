@@ -294,6 +294,8 @@ body.splash-open{overflow:hidden}
 .pp:hover .pp-ring .tr{stroke:rgba(255,255,255,.32)}
 .pp-ring .pg{stroke:#fff;stroke-dasharray:100;stroke-dashoffset:100}
 .pp::before{content:"";width:3px;height:11px;border-left:2.5px solid currentColor;border-right:2.5px solid currentColor}
+@keyframes pp-in{from{opacity:0;transform:scale(.86)}}
+.stage.pp-in>.pp{animation:pp-in .38s var(--ease) both}
 @keyframes pp-pulse{40%{transform:scale(1.14)}}
 .pp.pulse{animation:pp-pulse .32s var(--ease)}
 .pp[aria-pressed="true"]::before{width:0;height:0;border:0;border-left:10px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:3px}
@@ -1093,26 +1095,10 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     holdUntil = performance.now() + ms; clearTimeout(holdT);
     holdT = setTimeout(() => near.forEach(v => { if (canPlay(v)) playV(v); }), ms + 20);
   }
-  // Nestle each play button into the bottom-right corner of its media: centred on the corner's
-  // curve (on the bezel's curve for phones), so it hangs slightly off the media, with a
-  // ring in the frame colour carving a notch, and always clear of the frame's outer edge.
-  function placePP(st){
-    const b = st.querySelector(':scope > .pp'); if (!b) return;
-    const sr = st.getBoundingClientRect(); if (!sr.width) return;
-    let best = null, far = -Infinity;
-    st.querySelectorAll('.device .scr').forEach(scr => { const r = scr.getBoundingClientRect(); if (r.right + r.bottom > far) { far = r.right + r.bottom; best = { scr, r }; } });
-    if (!best) return;
-    const cs = getComputedStyle(best.scr);
-    const rad = parseFloat(cs.borderBottomRightRadius) || 0;
-    const m = /0px 0px 0px ([\d.]+)px/.exec(best.scr.closest('.device.phone') ? cs.boxShadow : '');
-    const bez = m ? parseFloat(m[1]) : 0;
-    const R = rad + bez, k = R * (1 - Math.SQRT1_2);               // the corner's 45° point
-    const half = b.offsetWidth / 2, inset = 0;                      // centre sits on the curve
-    const cx = best.r.right + bez - k - inset, cy = best.r.bottom + bez - k - inset;
-    const gap = 8;                                                  // never closer than this to the frame's edge
-    st.style.setProperty('--pp-r', Math.max(gap, sr.right - cx - half).toFixed(1) + 'px');
-    st.style.setProperty('--pp-b', Math.max(gap, sr.bottom - cy - half).toFixed(1) + 'px');
-  }
+  // Every play button sits in the same spot: the bottom-right corner of its frame, a fixed
+  // distance in from both edges, so down the right side of a page they all line up. (It used
+  // to hug each video's own corner, which put it somewhere different on every frame.)
+  function placePP(st){ st.style.removeProperty('--pp-r'); st.style.removeProperty('--pp-b'); }
   const ppRO = 'ResizeObserver' in window ? new ResizeObserver(es => es.forEach(e => placePP(e.target))) : null;
   function initVideos(root){
     initGroups(root);
@@ -2005,7 +1991,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     // IDs stay: some styles depend on them (the viewer hides its inactive projects by ID). The
     // copy sits after the real page, so lookups by ID still find the real elements first.
     g.querySelectorAll('[data-route],a,button').forEach(n => { n.removeAttribute('data-route'); n.removeAttribute('href'); });
-    const src = g.querySelector('[data-xf]'); if (src) { src.removeAttribute('data-xf'); src.style.visibility = 'hidden'; }
+    const src = g.querySelector('[data-xf]'); if (src) { src.removeAttribute('data-xf'); src.style.visibility = 'hidden'; const p = src.querySelector(':scope > .pp'); if (p) p.style.visibility = 'visible'; }
     g.setAttribute('aria-hidden', 'true'); g.inert = true;
     g.style.left = r.left + 'px'; g.style.top = r.top + 'px'; g.style.width = r.width + 'px';
     return g;
@@ -2116,7 +2102,11 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
         });
         initVideos(target.parentElement);
       }
-      if (target) target.style.visibility = '';
+      if (target) {
+        target.style.visibility = '';
+        // Its play button eases in once the artwork has landed, like everything else around it.
+        if (target.querySelector(':scope > .pp')) { target.classList.add('pp-in'); setTimeout(() => target.classList.remove('pp-in'), 450); }
+      }
       revealTabs();
     };
     xfStop = finish;
