@@ -910,7 +910,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: false };
+  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: false, dock: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   if (!FLAGS.matchMove) SITE.work = SITE.work.filter(w => w.slug !== 'match-and-move');
@@ -1605,6 +1605,9 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     '</article>';
   }
   function initDock(){
+    // The chapter progress bar at the bottom of a project. Off for now: the sticky chapter titles
+    // already say where you are. Set FLAGS.dock to true to bring it back.
+    if (!FLAGS.dock) return;
     const secs = [...main.querySelectorAll('.chapter')];
     if (secs.length < 3) return;
     const dock = document.createElement('div');
