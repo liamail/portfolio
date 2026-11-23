@@ -39,6 +39,7 @@ REVIEWED = {    # src: reason the edge band is real content
     'fig-muteall-board': 'black board padding',
     'fig-optin-setting': 'white page margin on the right',
     'cv-highlights': 'white editor header in some frames',
+    'enhance': 'empty editor space above the toolbar, where the toast drops in',
     'bs-zoom': 'light timeline area along the top',
 }
 
