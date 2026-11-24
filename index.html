@@ -672,7 +672,7 @@ const SITE = {
       summary: "Taking Canva's video editor from a stack of pages to a real timeline, then making it simple again.",
       thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined just before launch and spent the next year and a half making it simple by default.",
       meta: [["Role", "Senior product designer"], ["Team", "Video Editor, Canva"], ["When", "June 2025 to October 2026"], ["Platforms", "Web, iOS and Android"]],
-      hero: { src: "cv-dragdrop", w: 1600, h: 900, shape: "wide", v: true, alt: "Clips dragged onto a multi-track timeline, with text and graphics on tracks above.", caption: "The multi-track timeline. From Canva's video editor page." },
+      hero: { src: "timeline-canvas", w: 1600, h: 900, shape: "wide", v: true, alt: "The bottom of the design's canvas above a multi-track timeline. Clips are dragged onto the timeline, with text and graphics on tracks above.", caption: "The multi-track timeline." },
       chapters: [
         { title: "A more powerful model", blocks: [
           { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. Each page had a background and its own duration, and everything on it lived and died with the page. Creators wanted real editing, and that model couldn't give it to them." },
@@ -744,6 +744,46 @@ const SITE = {
       ]
     },
     {
+      slug: "beat-sync", kind: "case", title: "Beat Sync", short: "Beat Sync",
+      start: "2022-10", end: "2023-03", when: "2022 to 2023",
+      summary: "Cut a video to the beat of its music in one click.",
+      thesis: "Cutting video to music is slow, fiddly work. Beat Sync finds the beats in a track and snaps your edit to them. It began as a hackathon idea and launched at Canva Create.",
+      meta: [["Role", "Product designer"], ["Team", "Video, Canva"], ["When", "October 2022 to March 2023"], ["Launched", "Canva Create 2023"]],
+      hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", v: true, alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor." },
+      chapters: [
+        { title: "From hackathon to launch", blocks: [
+          { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind and we could test it quickly." },
+          { p: "It reached staff in February 2023, a fifth of users two weeks later, and everyone by mid March, in time to launch at Canva Create." }
+        ]},
+        { title: "Snap points, not a cage", blocks: [
+          { p: "Beat markers work as snap points. Nothing forces a snap, so you can still drag a cut between beats when a transition needs to land off the beat." }
+        ]},
+        { title: "The toggle that became a button", blocks: [
+          { p: "The first design had an auto-sync switch. Then an engineer asked what happens when two people edit the same video at once. The switch's state couldn't be stored safely, and deriving it would not ship in time." },
+          { p: "I pushed on it, then agreed the honest answer was a one-way button. Press it and everything syncs. If pages drift, a message tells you. When everything is on the beat, the button gets out of the way." }
+        ]},
+        { title: "Sweating the beat markers", blocks: [
+          { p: "A beat marker is a tiny notch on the audio track. It had to read at every zoom level, feel exact when a clip lands on it, and stay out of the way the rest of the time." },
+          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", v: true, alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "The snap. Drag a clip edge onto a beat and the marker stretches to confirm it landed. Recreated for this page, as the animation no longer works in the product." } },
+          { list: [
+            ["A snap you can feel.", "The marker stretches and pulses the moment a clip edge lands on a beat, with haptic feedback where the device supports it. It was one of the most praised details inside Canva."],
+            ["Pointier marks.", "After a co-founder's review, the notches got sharper so the exact beat is never in doubt."],
+            ["Density follows zoom.", "Zoomed out, you see only the first beat of each bar. Zoom in and the minor beats fade in between them."]
+          ] },
+          { media: { src: "bs-zoom", w: 1044, h: 486, shape: "wide", v: true, alt: "Zooming the timeline in and out: minor beat markers appear between the major ones, then hide again.", caption: "Zoom in and the minor beats appear between the major ones. Zoom out and they step back." } }
+        ]},
+        { title: "After launch", blocks: [
+          { p: "Launch was the start of the feedback. A co-founder's review was sharp: the tooltip should take you into the feature, the card felt unclickable, resyncing should read as its own action, and the markers should be pointier. With a content designer, I turned the Beat Sync button from a description into a clear call to action and made Show beats secondary." },
+          { p: "Later I came back to it with the machine learning engineer I'd built it with. Beat Sync 2.0 would pair key moments in the music with moments in your footage, not just beats. It was well received, then deprioritised." },
+          { row: [{ src: "beat-sync", w: 492, h: 1080, shape: "phone", alt: "Beat Sync 2.0 on mobile: beat markers on the audio track and a button to sync visuals with beats." }], caption: "Beat Sync 2.0, exploring moment sync on mobile." }
+        ]},
+        { title: "Outcome", blocks: [
+          { p: "Beat Sync went on to reach 650,000 monthly users, second only to Background Remover among the AI editing tools in Canva's video editor. Beat detection worked 99.99% of the time. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment." },
+          { quote: { text: "Beat Sync would not have been brought to life [if] it weren't for his skill and ability to work under pressure.", who: "Beat Sync teammate, Canva" } }
+        ]}
+      ]
+    },
+    {
       slug: "ai-editing", kind: "story", title: "AI in the editor", short: "AI in the editor",
       start: "2023-01", end: "2026-06", when: "2023 to 2026",
       summary: "From bolting AI features onto the editor to designing early agentic workflows.",
@@ -792,46 +832,6 @@ const SITE = {
       ]
     },
     {
-      slug: "beat-sync", kind: "case", title: "Beat Sync", short: "Beat Sync",
-      start: "2022-10", end: "2023-03", when: "2022 to 2023",
-      summary: "Cut a video to the beat of its music in one click.",
-      thesis: "Cutting video to music is slow, fiddly work. Beat Sync finds the beats in a track and snaps your edit to them. It began as a hackathon idea and launched at Canva Create.",
-      meta: [["Role", "Product designer"], ["Team", "Video, Canva"], ["When", "October 2022 to March 2023"], ["Launched", "Canva Create 2023"]],
-      hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", v: true, alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor. From Canva's video editor page." },
-      chapters: [
-        { title: "From hackathon to launch", blocks: [
-          { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind and we could test it quickly." },
-          { p: "It reached staff in February 2023, a fifth of users two weeks later, and everyone by mid March, in time to launch at Canva Create." }
-        ]},
-        { title: "Snap points, not a cage", blocks: [
-          { p: "Beat markers work as snap points. Nothing forces a snap, so you can still drag a cut between beats when a transition needs to land off the beat." }
-        ]},
-        { title: "The toggle that became a button", blocks: [
-          { p: "The first design had an auto-sync switch. Then an engineer asked what happens when two people edit the same video at once. The switch's state couldn't be stored safely, and deriving it would not ship in time." },
-          { p: "I pushed on it, then agreed the honest answer was a one-way button. Press it and everything syncs. If pages drift, a message tells you. When everything is on the beat, the button gets out of the way." }
-        ]},
-        { title: "Sweating the beat markers", blocks: [
-          { p: "A beat marker is a tiny notch on the audio track. It had to read at every zoom level, feel exact when a clip lands on it, and stay out of the way the rest of the time." },
-          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", v: true, alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "The snap. Drag a clip edge onto a beat and the marker stretches to confirm it landed. Recreated for this page, as the animation no longer works in the product." } },
-          { list: [
-            ["A snap you can feel.", "The marker stretches and pulses the moment a clip edge lands on a beat, with haptic feedback where the device supports it. It was one of the most praised details inside Canva."],
-            ["Pointier marks.", "After a co-founder's review, the notches got sharper so the exact beat is never in doubt."],
-            ["Density follows zoom.", "Zoomed out, you see only the first beat of each bar. Zoom in and the minor beats fade in between them."]
-          ] },
-          { media: { src: "bs-zoom", w: 1044, h: 486, shape: "wide", v: true, alt: "Zooming the timeline in and out: minor beat markers appear between the major ones, then hide again.", caption: "Zoom in and the minor beats appear between the major ones. Zoom out and they step back." } }
-        ]},
-        { title: "After launch", blocks: [
-          { p: "Launch was the start of the feedback. A co-founder's review was sharp: the tooltip should take you into the feature, the card felt unclickable, resyncing should read as its own action, and the markers should be pointier. With a content designer, I turned the Beat Sync button from a description into a clear call to action and made Show beats secondary." },
-          { p: "Later I came back to it with the machine learning engineer I'd built it with. Beat Sync 2.0 would pair key moments in the music with moments in your footage, not just beats. It was well received, then deprioritised." },
-          { row: [{ src: "beat-sync", w: 492, h: 1080, shape: "phone", alt: "Beat Sync 2.0 on mobile: beat markers on the audio track and a button to sync visuals with beats." }], caption: "Beat Sync 2.0, exploring moment sync on mobile." }
-        ]},
-        { title: "Outcome", blocks: [
-          { p: "Beat Sync went on to reach 650,000 monthly users, second only to Background Remover among the AI editing tools in Canva's video editor. Beat detection worked 99.99% of the time. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment." },
-          { quote: { text: "Beat Sync would not have been brought to life [if] it weren't for his skill and ability to work under pressure.", who: "Beat Sync teammate, Canva" } }
-        ]}
-      ]
-    },
-    {
       slug: "audio-tools", kind: "story", title: "Audio tools", short: "Audio tools",
       start: "2024-09", end: "2025-07", when: "2024 to 2025",
       summary: "Enhance Voice and Balance Audio: one-tap audio tools used by 530,000 and 440,000 people a month.",
@@ -864,7 +864,7 @@ const SITE = {
       summary: "Two AI trimming tools, Highlights and Auto Trim, shaped through rounds of user testing.",
       thesis: "Smart Trim was our internal name for a set of AI trimming features. Highlights finds the moments worth keeping in a long clip. Auto Trim trims a single clip to its most engaging moment in one tap.",
       meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2023 to 2024"]],
-      hero: { src: "cv-highlights", w: 1600, h: 900, shape: "wide", v: true, alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", caption: "Picking highlights from a long clip. From Canva's video editor page." },
+      hero: { src: "cv-highlights", w: 1600, h: 900, shape: "wide", v: true, alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", caption: "Picking highlights from a long clip." },
       chapters: [
         { title: "Two ways to trim", blocks: [
           { p: "Highlights was the smarter and more useful of the two. It looks through a long clip, describes the moments it finds, and lets you choose which to keep." },
@@ -878,20 +878,25 @@ const SITE = {
           { p: "I also worked with machine learning engineers on a concept for the next generation of the tool, which we called progressive trimming. You simply start trimming a clip. Instead of cutting from the end, it takes out the least interesting frames from all through the clip, based on how much footage there is and how long you want it to be." },
           { p: "The technology to do it was real and within reach. We didn't build it, so it stayed a vision for where the tool could go." },
           { media: { src: "smart-trim", w: 1600, h: 996, shape: "wide", v: true, alt: "A long clip being trimmed down to its highlights on the timeline.", caption: "Progressive trimming: as you trim, the dull frames drop out from across the clip. A concept, not shipped." } }
-        ]}
+        ] }
       ]
     },
     {
       slug: "match-and-move", kind: "experiment", title: "Match and Move", short: "Match and Move",
       start: "2025-11", end: "2025-11", when: "2025",
       summary: "A coded prototype that offers a transition at the moment two clips meet.",
-      thesis: "A much-loved transition was lost when the timeline moved to multiple tracks. This prototype explores bringing it back in context, right where two clips touch.",
+      thesis: "A much-loved transition was lost when the timeline moved to multiple tracks, and people told us they missed it. This prototype explores bringing it back in context, right where two clips touch.",
       meta: [["Type", "Coded prototype"], ["Built with", "Cursor"], ["When", "November 2025"]],
       hero: { src: "match-move", w: 1600, h: 974, shape: "wide", alt: "Two clips dragged together on a track. A control appears at the join offering Match and Move.", caption: "Drag two overlay clips together and a control appears at the seam." },
       chapters: [
         { title: "Why build it", blocks: [
           { p: "Match and Move animates matching elements from one clip into the next. I wanted to offer it where intent is clearest, at the moment two clips meet, in place of hiding it in a menu." },
           { p: "Stakeholders needed to feel the timing of that reveal, which a static mock can't show. So I built it. The details I tuned were how close clips need to be before the control appears, the highlight on the seam, and keeping the popover small enough to leave the timeline visible." }
+        ]},
+        { title: "From prototype to spec", blocks: [
+          { p: "The prototype became a spec for Match & Move 2.0, bringing the transition to overlay tracks: drag two clips together, a control appears at the seam, and you can tune its duration. It didn't ship." },
+          { media: { src: "mm-btrack", w: 1600, h: 974, shape: "wide", v: true, alt: "Match and Move appearing between two overlay clips.", caption: "On overlay tracks." } },
+          { media: { src: "fig-mm-flyout", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "The Match and Move flyout with an on switch and a duration slider.", caption: "The flyout, with a duration you can tune." } }
         ]}
       ]
     },
@@ -1010,7 +1015,7 @@ const SITE = {
   /* ---------- media ---------- */
   // Each file's address carries a fingerprint of its contents, so a changed file is always fetched
   // fresh rather than from a browser's cache. Written by tools/stamp-media.py.
-const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9d0","auto-timing":"52244b75","balance":"153cea15","beat-sync":"dd5680ed","bs-snap":"8f6c2bd0","bs-zoom":"4f8a1164","cv-beatsync":"deda03ac","cv-bgremove":"efe5136e","cv-dragdrop":"cd835d21","cv-highlights":"bc19e7e6","duck":"55592d9d","enhance":"8c271af3","fig-ai-prompt":"916cc49a","fig-dropzone":"92c0445e","fig-optin-banner":"98e9b26a","fig-optin-banner-zoom":"bd7d4aad","fig-optin-setting":"3c548560","fig-slip-board":"bed82c76","fig-snap-board":"f036325c","fig-trim-states":"896d77a9","match-move":"22cf972d","mm-btrack":"2ce5af4e","mobile-ia":"a2e44fd2","mobile-overlay":"74762ec2","mobile-rearrange":"b4841362","mute":"a4d12411","overlay-drop":"a0815be7","simple-full":"b2e8ed6e","smart-trim":"3a9f8a9a","timeline-mobile":"2e0d99be","timeline-resize":"766a62cb","tl-existing-mobile":"d682bd27","tl-onboarding":"74971a7c","tl-switch-mobile":"69b1b141","zoom-bar":"bd9ceaf9"};  // media fingerprints, written by tools/stamp-media.py
+const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9d0","auto-timing":"52244b75","balance":"153cea15","beat-sync":"dd5680ed","bs-snap":"8f6c2bd0","bs-zoom":"4f8a1164","cv-beatsync":"deda03ac","cv-bgremove":"efe5136e","cv-dragdrop":"cd835d21","cv-highlights":"bc19e7e6","duck":"55592d9d","enhance":"8c271af3","fig-ai-prompt":"916cc49a","fig-dropzone":"92c0445e","fig-mm-flyout":"eff1cb25","fig-optin-banner":"98e9b26a","fig-optin-banner-zoom":"bd7d4aad","fig-optin-setting":"3c548560","fig-slip-board":"bed82c76","fig-snap-board":"f036325c","fig-trim-states":"896d77a9","match-move":"22cf972d","mm-btrack":"2ce5af4e","mobile-ia":"a2e44fd2","mobile-overlay":"74762ec2","mobile-rearrange":"b4841362","mute":"a4d12411","overlay-drop":"a0815be7","simple-full":"b2e8ed6e","smart-trim":"3a9f8a9a","timeline-canvas":"bcd3dc0d","timeline-mobile":"2e0d99be","timeline-resize":"766a62cb","tl-existing-mobile":"d682bd27","tl-onboarding":"74971a7c","tl-switch-mobile":"69b1b141","zoom-bar":"bd9ceaf9"};  // media fingerprints, written by tools/stamp-media.py
   const mv = src => MV[src] ? '?v=' + MV[src] : '';
   function device(m){
     if (m.img) return '<div class="device ' + m.shape + ' pic" style="aspect-ratio:' + m.w + ' / ' + m.h + '"><span class="scr"><img class="still" src="media/' + m.src + '.jpg' + mv(m.src) + '" alt="' + esc(m.alt) + '"></span></div>';
