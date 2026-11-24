@@ -910,9 +910,7 @@ const SITE = {
       ]
     }
   ],
-  soon: [
-    { title: "Audio tools", start: "2024-09", end: "2025-05", when: "2024 to 2025", note: "Enhance Voice, levelling and ducking on one toolbar." }
-  ],
+  soon: [],
   about: {
     headline: "Nice to meet you.",
     bio: [
@@ -1223,7 +1221,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const cards = SITE.work.map(w =>
       '<li class="card"><a href="#work-' + w.slug + '" data-route>' + stage(device(w.hero), w.slug) +
       '<div><h2>' + esc(w.title) + '<sub class="yr"><span class="vh">, </span>' + esc(w.when) + '</sub></h2><p class="sum">' + esc(w.summary) + '</p></div></a></li>').join('');
-    const soon = '<li class="soon"><p>Write-ups in progress</p>' + SITE.soon.map(s => '<p><strong>' + esc(s.title) + '.</strong> ' + esc(s.note) + ' ' + esc(s.when) + '.</p>').join('') + '</li>';
+    const soon = SITE.soon.length ? '<li class="soon"><p>Write-ups in progress</p>' + SITE.soon.map(s => '<p><strong>' + esc(s.title) + '.</strong> ' + esc(s.note) + ' ' + esc(s.when) + '.</p>').join('') + '</li>' : '';
 
     return '<section class="reel" aria-label="Selected work">' +
         '<div class="viewer" id="viewer">' + viewerInner(active) + '</div>' +
