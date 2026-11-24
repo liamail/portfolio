@@ -832,6 +832,33 @@ const SITE = {
       ]
     },
     {
+      slug: "audio-tools", kind: "story", title: "Audio tools", short: "Audio tools",
+      start: "2024-09", end: "2025-07", when: "2024 to 2025",
+      summary: "Enhance Voice and Balance Audio: one-tap audio tools used by 530,000 and 440,000 people a month.",
+      thesis: "Most people editing video in Canva aren't audio engineers. I designed tools that make their sound better in one tap, without needing to know how. Enhance Voice reached 530,000 monthly users and Balance Audio reached 440,000.",
+      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2024 to 2025"]],
+      hero: { src: "enhance", w: 1600, h: 900, shape: "wide", v: true, alt: "A street vlog in the timeline. A collaborator selects the voice recording and chooses Enhance voice. The street noise between the words falls away.", caption: "Enhance voice, recreated for this page: one tap and the street noise falls away from a vlog recorded on a phone." },
+      chapters: [
+        { title: "Enhance Voice", blocks: [
+          { p: "Enhance Voice cleans up speech in one tap. I owned the design, working with our machine learning engineer and stakeholders across video. We weighed up an overflow panel for audio tools, as other element types have, but kept Enhance Voice at the top level of the toolbar on desktop and mobile, even as the toolbar grew. The model ran on our servers rather than on the device, so it had to balance speed against quality, and on mobile people had to upload their media first. We dogfooded it across the team, then tested it with Canva Video Experts, a group of power users outside Canva, to land on how much background noise to remove. It reached 530,000 monthly users." }
+        ] },
+        { title: "Balance Audio, inside the limits", blocks: [
+          { p: "Audio in Canva had real limits at the time. When someone uploaded their own audio, we couldn't tell what kind of sound was in it, so we couldn't show a tool like Enhance Voice only on tracks with speech. Changing volume over time depended on a schema change that hadn't landed. And the audio panel had just been removed, so every tool had to earn its place on the toolbar." },
+          { p: "Balance Audio had a limit of its own. We could only balance gain, bringing the average level of every audio source in the design into line. We couldn't yet reach inside a single source to even out its peaks and dips, its dynamic range, which would have made an even better mix. So Balance Audio is one button that sets every sound in the video to a matching level. It needed no schema change and was a good first project for a new engineer. It went out to staff in March 2025 and went on to reach 440,000 monthly users." },
+          { media: { src: "balance", w: 1600, h: 900, shape: "wide", v: true, alt: "A wildlife short with music, a voiceover, birdsong and a wing hum at very different levels. A collaborator opens the volume flyout and chooses Balance all. Each track is turned up or down as a whole until they all sit at a matching level.", caption: "Balance Audio, recreated for this page: one tap and music, voice and sound effects settle to the same level." } }
+        ] },
+        { title: "Mute all", blocks: [
+          { p: "Muting every video in a design sounds trivial. I'd pushed back on it as an edge case that could wreck a balanced mix, until Cam, Canva's co-founder and the video group's sponsor at the time, asked for it directly. We iterated on it together over a few rounds, including live on a whiteboard, and landed on Mute all appearing in the volume flyout once you mute a video. It mutes the sound of every video in the design and leaves music alone. It shipped." },
+          { media: { src: "mute", w: 1600, h: 900, shape: "wide", v: true, alt: "Close on the volume flyout, beneath the toolbar, over a colourful video. A collaborator mutes the video and the slider drops to 0. Mute all appears beside Balance all, and choosing it mutes every video in the design.", caption: "Mute all, recreated for this page: mute one video and Mute all appears beside Balance all, ready to mute the rest." } }
+        ] },
+        { title: "Where we were heading: ducking", blocks: [
+          { p: "Ducking lowers the music automatically whenever someone speaks, so the voice always sits on top. Most of the design problem came down to how you'd start it. Is ducking an action on the track you want lowered, like the music? Or does it belong to the voice, which then lowers whatever plays beneath it? I ran user testing to see which track people expected to drive it, alongside an interpretation test of the entry point itself, including whether the button labels told people what would happen before they chose one." },
+          { p: "We got right up to validating those answers before the project was parked. The keyframing it relied on, changing volume over time, couldn't come together in time for a ducking experience that felt good. It's where we wanted to take the audio tools, and we didn't quite get there." },
+          { media: { src: "duck", w: 1600, h: 900, shape: "wide", v: true, alt: "A nature documentary in the timeline: one shot of a kookaburra on a branch. A collaborator selects the voiceover and chooses Prioritize, and the music dips beneath each line of narration.", caption: "Prioritize, recreated for this page: select the voice and the music dips under every line. Parked before it shipped." } }
+        ] },
+      ]
+    },
+    {
       slug: "smart-trim", kind: "story", title: "Smart Trim", short: "Smart Trim",
       start: "2023-11", end: "2024-07", when: "2023 to 2024",
       summary: "Two AI trimming tools, Highlights and Auto Trim, shaped through rounds of user testing.",
@@ -985,7 +1012,7 @@ const SITE = {
   /* ---------- media ---------- */
   // Each file's address carries a fingerprint of its contents, so a changed file is always fetched
   // fresh rather than from a browser's cache. Written by tools/stamp-media.py.
-const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9d0","auto-timing":"52244b75","beat-sync":"dd5680ed","bs-snap":"8f6c2bd0","bs-zoom":"4f8a1164","cv-beatsync":"deda03ac","cv-bgremove":"efe5136e","cv-dragdrop":"cd835d21","cv-highlights":"bc19e7e6","fig-ai-prompt":"916cc49a","fig-dropzone":"92c0445e","fig-optin-banner":"98e9b26a","fig-optin-banner-zoom":"bd7d4aad","fig-optin-setting":"3c548560","fig-slip-board":"bed82c76","fig-snap-board":"f036325c","fig-trim-states":"896d77a9","match-move":"22cf972d","mm-btrack":"2ce5af4e","mobile-ia":"a2e44fd2","mobile-overlay":"74762ec2","mobile-rearrange":"b4841362","overlay-drop":"a0815be7","simple-full":"b2e8ed6e","smart-trim":"3a9f8a9a","timeline-mobile":"2e0d99be","timeline-resize":"766a62cb","tl-existing-mobile":"d682bd27","tl-onboarding":"74971a7c","tl-switch-mobile":"69b1b141","zoom-bar":"bd9ceaf9"};  // media fingerprints, written by tools/stamp-media.py
+const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9d0","auto-timing":"52244b75","balance":"153cea15","beat-sync":"dd5680ed","bs-snap":"8f6c2bd0","bs-zoom":"4f8a1164","cv-beatsync":"deda03ac","cv-bgremove":"efe5136e","cv-dragdrop":"cd835d21","cv-highlights":"bc19e7e6","duck":"55592d9d","enhance":"8c271af3","fig-ai-prompt":"916cc49a","fig-dropzone":"92c0445e","fig-optin-banner":"98e9b26a","fig-optin-banner-zoom":"bd7d4aad","fig-optin-setting":"3c548560","fig-slip-board":"bed82c76","fig-snap-board":"f036325c","fig-trim-states":"896d77a9","match-move":"22cf972d","mm-btrack":"2ce5af4e","mobile-ia":"a2e44fd2","mobile-overlay":"74762ec2","mobile-rearrange":"b4841362","mute":"a4d12411","overlay-drop":"a0815be7","simple-full":"b2e8ed6e","smart-trim":"3a9f8a9a","timeline-mobile":"2e0d99be","timeline-resize":"766a62cb","tl-existing-mobile":"d682bd27","tl-onboarding":"74971a7c","tl-switch-mobile":"69b1b141","zoom-bar":"bd9ceaf9"};  // media fingerprints, written by tools/stamp-media.py
   const mv = src => MV[src] ? '?v=' + MV[src] : '';
   function device(m){
     if (m.img) return '<div class="device ' + m.shape + ' pic" style="aspect-ratio:' + m.w + ' / ' + m.h + '"><span class="scr"><img class="still" src="media/' + m.src + '.jpg' + mv(m.src) + '" alt="' + esc(m.alt) + '"></span></div>';
