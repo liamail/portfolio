@@ -402,13 +402,17 @@ article .device.card{width:min(100%,480px)}
 html.lb-open{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.lb{transition:none}}
 /* Project brief and numbers */
-.brief{display:grid;gap:20px;margin-top:clamp(44px,6vw,80px);max-width:50rem}
-.brief-ov{font-family:var(--display);font-weight:400;font-variation-settings:"opsz" 24;font-size:clamp(1.45rem,2.6vw,2.05rem);line-height:1.3;letter-spacing:-.01em;text-wrap:pretty}
-.brief-role{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px}
-.role-pill{display:inline-flex;align-items:center;flex:none;height:30px;padding:0 14px;border-radius:999px;background:var(--accent-soft);color:var(--primary);font-weight:600;font-size:.9rem;transform:translateY(-1px)}
+.brief{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px clamp(36px,6vw,88px);align-items:start;margin-top:clamp(44px,6vw,80px)}
+.brief-ov{font-family:var(--display);font-weight:400;font-variation-settings:"opsz" 24;font-size:clamp(1.35rem,2.2vw,1.85rem);line-height:1.32;letter-spacing:-.01em;text-wrap:pretty}
+.brief-side{display:grid;gap:22px;padding-top:6px}
+.bs-row{display:grid;gap:10px;justify-items:start}
+.bs-l{font-size:.84rem;color:var(--muted)}
+.role-pill{display:inline-flex;align-items:center;height:32px;padding:0 15px;border-radius:999px;background:var(--accent-soft);color:var(--primary);font-weight:600;font-size:.92rem}
 :root[data-theme=dark] .role-pill{color:var(--accent)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .role-pill{color:var(--accent)}}
-.brief-did{color:var(--muted);max-width:36em;line-height:1.5}
+.did{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.did li{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);font-size:.86rem;line-height:1;white-space:nowrap}
+@media (max-width:760px){.brief{grid-template-columns:minmax(0,1fr)}.brief-side{padding-top:0}}
 .stats{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px;margin-top:clamp(28px,4vw,48px)}
 .stats li{padding:20px 22px 22px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
 .stats b{display:block;font-family:var(--display);font-weight:400;font-variation-settings:"opsz" 24;font-size:clamp(1.75rem,3.2vw,2.4rem);line-height:1.05;letter-spacing:-.012em;font-variant-numeric:tabular-nums}
@@ -703,7 +707,7 @@ const SITE = {
       summary: "Taking Canva's video editor from a stack of pages to a real timeline, then making it simple again.",
       thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined a few months before launch and spent the next year and a half making it simple by default.",
       role: "Lead designer",
-      did: "Beta research, mobile patterns, onboarding and changeboarding, post-launch fixes and specs, the simple view",
+      did: ["Beta research", "Mobile patterns", "Onboarding", "Changeboarding", "Post-launch fixes", "Specs", "Simple view"],
       stats: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]],
       hero: { src: "timeline-canvas", w: 1600, h: 900, shape: "wide", alt: "The bottom of the design's canvas above a multi-track timeline. Clips are dragged onto the timeline, with text and graphics on tracks above.", caption: "The multi-track timeline." },
       chapters: [
@@ -741,7 +745,7 @@ const SITE = {
       summary: "Cut a video to the beat of its music in one click.",
       thesis: "Cutting video to music is slow, fiddly work. Beat Sync finds the beats in a track and snaps your edit to them. It began as a hackathon idea and launched at Canva Create 2023.",
       role: "Lead designer",
-      did: "Interaction and visual design, prototyping with engineers, beat marker details, post-launch iteration",
+      did: ["Interaction design", "Visual design", "Prototyping with engineers", "Beat markers", "Post-launch iteration"],
       stats: [["650,000", "monthly users"], ["2nd", "most used AI editing tool in the video editor, after Background Remover"], ["99.99%", "of tracks had their beats detected"]],
       hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor." },
       chapters: [
@@ -768,7 +772,7 @@ const SITE = {
       summary: "Enhance Voice and Balance Audio: one-tap audio tools, each used by around half a million people a month.",
       thesis: "Most people editing video in Canva aren't audio engineers. I designed tools that make their sound better in one tap, without needing to know how.",
       role: "Lead designer",
-      did: "Entry points and toolbar placement, tuning the output with machine learning, internal and expert testing, user testing for ducking",
+      did: ["Entry points", "Toolbar placement", "Output tuning with ML", "Internal testing", "Expert testing", "Ducking research"],
       stats: [["530,000", "monthly users of Enhance Voice"], ["440,000", "monthly users of Balance Audio"]],
       hero: { src: "enhance", w: 1600, h: 900, shape: "wide", alt: "A street vlog in the timeline. A collaborator selects the voice recording and chooses Enhance voice. The street noise between the words falls away.", caption: "Enhance voice, recreated for this page." },
       chapters: [
@@ -797,7 +801,7 @@ const SITE = {
       summary: "From bolting AI features onto the editor to designing early agentic workflows.",
       thesis: "We first shipped AI as features, one tool at a time. A crowded editor and our own research pointed the same way: people wanted help with the whole job. So I began exploring early agentic flows, a precursor to the AI assistant being built for Canva Video today.",
       role: "Lead designer",
-      did: "Shipped AI tools, then concept design and prototypes for agentic editing on mobile and desktop",
+      did: ["Shipped AI tools", "Agentic concepts", "Prototyping", "Mobile and desktop"],
       hero: { src: "cv-bgremove", w: 600, h: 600, shape: "card", alt: "Background Remover applied to a video of two people, the sky turning transparent.", caption: "Background Remover on video, the first AI tool I shipped." },
       chapters: [
         { title: "The problem", blocks: [
@@ -825,7 +829,7 @@ const SITE = {
       summary: "Two AI trimming tools, Highlights and Auto Trim, shaped through rounds of user testing.",
       thesis: "Highlights finds the moments worth keeping in a long clip. Auto Trim trims a single clip to its most engaging moment in one tap. For a tool that makes the cut for you, perceived quality decides whether anyone trusts it.",
       role: "Lead designer",
-      did: "Concepts, prototypes, moderated testing, a next-generation concept with machine learning engineers",
+      did: ["Concepts", "Prototypes", "Moderated testing", "Next-generation concept"],
       hero: { src: "cv-highlights", w: 1600, h: 900, shape: "wide", alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", caption: "Picking highlights from a long clip." },
       chapters: [
         { title: "Testing what good looks like", blocks: [
@@ -1558,11 +1562,14 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     if (b.facts) return '<div class="facts">' + b.facts.map(f => '<div><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></div>').join('') + '</div>';
     return '';
   }
-  /* The brief: the overview set large, then my role and what I did. Then the numbers. */
+  /* The brief: the overview set large on the left; my role and what I did on the right, as two
+     kinds of pill. Then the numbers. */
   function briefHTML(w){
+    const did = Array.isArray(w.did) ? w.did : (w.did ? [w.did] : []);
+    const side = (w.role ? '<div class="bs-row"><p class="bs-l">My role</p><span class="role-pill">' + esc(w.role) + '</span></div>' : '') +
+      (did.length ? '<div class="bs-row"><p class="bs-l">What I did</p><ul class="did">' + did.map(d => '<li>' + esc(d) + '</li>').join('') + '</ul></div>' : '');
     const brief = '<section class="brief" aria-label="Project brief"><p class="brief-ov">' + esc(w.thesis) + '</p>' +
-      (w.role || w.did ? '<div class="brief-role">' + (w.role ? '<span class="role-pill">' + esc(w.role) + '</span>' : '') + (w.did ? '<p class="brief-did">' + esc(w.did) + '</p>' : '') + '</div>' : '') +
-      '</section>';
+      (side ? '<div class="brief-side">' + side + '</div>' : '') + '</section>';
     const stats = w.stats && w.stats.length ? '<ul class="stats">' + w.stats.map(f => '<li><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></li>').join('') + '</ul>' : '';
     return rvWrap(w.briefRv, brief) + (stats ? rvWrap(w.statsRv, stats) : '');
   }
