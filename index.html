@@ -383,6 +383,36 @@ body.splash-open{overflow:hidden}
 .hero{margin-top:clamp(28px,4vw,44px)}
 .home .hero{margin-top:0}
 .fig figcaption{margin-top:10px;font-size:.9rem;color:var(--muted);max-width:44em}
+/* Project pages: one column, so visuals can use the full width; titles sit above each section. */
+article .chapter{grid-template-columns:minmax(0,1fr);gap:16px}
+article .chapter h2{position:static}
+article .stage{padding:clamp(14px,2.6vw,32px)}
+article .device.phone{width:min(100%,320px)}
+article .stage.row .device.phone{max-width:300px}
+article .device.card{width:min(100%,480px)}
+.stage.zoomable{cursor:zoom-in}
+.stage.zoomable:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+/* Enlarged view */
+.lb{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(6,6,14,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;transition:opacity .26s var(--ease-io);cursor:zoom-out}
+.lb.on{opacity:1}
+.lb-stage{display:flex;justify-content:center;align-items:center;gap:24px}
+.lb-stage .device .scr{box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lb-x{position:fixed;top:20px;right:20px;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;cursor:pointer}
+.lb-x:hover{background:rgba(255,255,255,.16)}
+html.lb-open{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.lb{transition:none}}
+/* Project brief and numbers */
+.brief{display:grid;gap:20px;margin-top:clamp(44px,6vw,80px);max-width:50rem}
+.brief-ov{font-family:var(--display);font-weight:400;font-variation-settings:"opsz" 24;font-size:clamp(1.45rem,2.6vw,2.05rem);line-height:1.3;letter-spacing:-.01em;text-wrap:pretty}
+.brief-role{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px}
+.role-pill{display:inline-flex;align-items:center;flex:none;height:30px;padding:0 14px;border-radius:999px;background:var(--accent-soft);color:var(--primary);font-weight:600;font-size:.9rem;transform:translateY(-1px)}
+:root[data-theme=dark] .role-pill{color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .role-pill{color:var(--accent)}}
+.brief-did{color:var(--muted);max-width:36em;line-height:1.5}
+.stats{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px;margin-top:clamp(28px,4vw,48px)}
+.stats li{padding:20px 22px 22px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+.stats b{display:block;font-family:var(--display);font-weight:400;font-variation-settings:"opsz" 24;font-size:clamp(1.75rem,3.2vw,2.4rem);line-height:1.05;letter-spacing:-.012em;font-variant-numeric:tabular-nums}
+.stats span{display:block;margin-top:8px;color:var(--muted);font-size:.95rem;line-height:1.4;max-width:22em}
 .chapters{margin-top:clamp(40px,6vw,72px)}
 .chapter{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:20px clamp(24px,5vw,64px);padding:clamp(36px,5vw,60px) 0;border-top:1px solid var(--line)}
 .chapter h2{font-size:1.5rem;line-height:1.15;letter-spacing:-.02em;font-weight:600;position:sticky;top:calc(var(--tabs-top) + var(--nav-h) + 28px);align-self:start;text-wrap:balance}
@@ -570,6 +600,7 @@ body.splash-open{overflow:hidden}
 .sx-bar{position:absolute;top:0;bottom:0;border-radius:4px;overflow:hidden;color:#0c0c18;font-style:normal}
 .sx-bar span{display:block;font-size:.66rem;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sx-row.scenes .sx-bar span{line-height:30px}
+.phbox{display:grid;place-items:center;aspect-ratio:16/9;border:1.5px dashed var(--line);border-radius:20px;background:color-mix(in srgb,var(--stage) 6%,transparent);padding:24px;text-align:center;color:var(--muted);font-size:.95rem}
 .pgrp{list-style:none;font-size:.72rem;font-weight:600;letter-spacing:.02em;color:var(--muted);opacity:.75;margin:14px 0 0;padding:0}
 .plist .pgrp:first-child{margin-top:0}
 .prow{padding:7px 0}
@@ -670,75 +701,36 @@ const SITE = {
       slug: "video-timeline", kind: "case", title: "Video timeline", short: "Video timeline",
       start: "2025-06", end: "2026-10", when: "2025 to 2026",
       summary: "Taking Canva's video editor from a stack of pages to a real timeline, then making it simple again.",
-      thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined just before launch and spent the next year and a half making it simple by default.",
-      meta: [["Role", "Senior product designer"], ["Team", "Video Editor, Canva"], ["When", "June 2025 to October 2026"], ["Platforms", "Web, iOS and Android"]],
-      hero: { src: "timeline-canvas", w: 1600, h: 900, shape: "wide", v: true, alt: "The bottom of the design's canvas above a multi-track timeline. Clips are dragged onto the timeline, with text and graphics on tracks above.", caption: "The multi-track timeline." },
+      thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined a few months before launch and spent the next year and a half making it simple by default.",
+      role: "Lead designer",
+      did: "Beta research, mobile patterns, onboarding and changeboarding, post-launch fixes and specs, the simple view",
+      stats: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]],
+      hero: { src: "timeline-canvas", w: 1600, h: 900, shape: "wide", alt: "The bottom of the design's canvas above a multi-track timeline. Clips are dragged onto the timeline, with text and graphics on tracks above.", caption: "The multi-track timeline." },
       chapters: [
-        { title: "A more powerful model", blocks: [
-          { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. Each page had a background and its own duration, and everything on it lived and died with the page. Creators wanted real editing, and that model couldn't give it to them." },
-          { diagram: "model" },
-          { p: "The single-page video schema changed two things. A video could only have one page, and that page could hold many backgrounds, which became its scenes. With everything on one page, every element got its own start and duration, so timing could run across scenes. That made a true multi-track editor possible." },
-          { p: "The new model was a big step up in power. It also changed what people had to understand. A video was no longer a row of pages but a main track with layers above it, and the old page controls didn't map cleanly onto it." },
-          { p: "I joined in June 2025, a few months before launch, during a change of designers on the team." }
+        { title: "The problem", blocks: [
+          { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. The new model put everything on one page, so every element got its own timing on a multi-track timeline. That was a big step up in power, and a new idea to learn: a main track with layers above it, which the old page controls didn't map onto." },
+          { diagram: "model" }
         ]},
-        { title: "Finding where it broke", blocks: [
-          { p: "I co-led the beta research with 20 creators across personal, business and professional cohorts. Over two in-person sessions they edited their own footage, first freely and then against a brief, while we watched and asked why." },
-          { p: "The sessions fed four decisions before launch: a main track that stays put, limits on vertical rearranging, onboarding for people arriving from the old editor, and the scope of our pre-launch test." },
-          { quote: { text: "Liam was the lead designer who worked strategically to embed research insights into his designs.", who: "Najwa Alameddine, Design Researcher" } }
-        ]},
-        { title: "Mobile first", blocks: [
-          { p: "On a phone the canvas and the timeline fight for the same screen. I compared how CapCut, Edits and Reels handle it, then designed patterns that fit Canva: a timeline you can resize, and an Overlay action in place of drag and drop." },
-          { p: "Reordering clips on the main track was fiddly on a small screen. I designed a focused view for it, and it shipped: press and hold a clip, the main track collapses into thumbnails you can drag into a new order, and the timeline comes back with everything in place." },
+        { title: "What I did", blocks: [
+          { list: [
+            ["Found where it broke.", "I co-led beta research with 20 creators editing their own footage. It shaped four decisions before launch, including a main track that stays put and onboarding for people coming from the old editor."],
+            ["Designed for the phone.", "A timeline you can resize, an Overlay action in place of drag and drop, and a focused view for reordering clips, which shipped."],
+            ["Brought people across.", "Coach marks for first-timers, changeboarding for existing designs, and within days of launch, a way back to the old editor with a short survey asking why."],
+            ["Fixed the paper cuts.", "Specs engineers built from directly, for trim and slip, snapping, drop zones and zoom, plus weekly office hours to solve problems in the room."]
+          ] },
           { row: [
             { src: "timeline-resize", w: 496, h: 1080, shape: "phone", alt: "Resizing the mobile timeline between two heights." },
             { src: "mobile-overlay", w: 496, h: 1080, shape: "phone", alt: "Turning a main track clip into an overlay with a toolbar action." },
             { src: "mobile-rearrange", w: 496, h: 1076, shape: "phone", alt: "Press and hold a clip, the main track collapses into thumbnails, the clip is dragged to a new spot, and the timeline returns with it in place." }
           ], caption: "Resizing the timeline, making an overlay from the toolbar, and rearranging the main track." }
         ]},
-        { title: "Bringing people across", blocks: [
-          { p: "Moving people to a new mental model is a design problem of its own. I led onboarding for the launch: coach marks for first-time users, and changeboarding for people arriving from the old editor with designs they'd already made." },
-          { row: [
-            { src: "tl-onboarding", w: 496, h: 1080, shape: "phone", v: true, alt: "A coach mark appearing as someone adds their first clip on mobile." },
-            { src: "tl-existing-mobile", w: 496, h: 1080, shape: "phone", v: true, alt: "An existing design opening in the new editor on mobile." },
-            { src: "tl-switch-mobile", w: 498, h: 1080, shape: "phone", v: true, alt: "Starting a new video from the Canva home screen on mobile." }
-          ], caption: "Onboarding on mobile: a coach mark on the first clip, an existing design in the new editor, and a new video from home." },
-          { p: "When the new editor launched in October 2025, most people adapted quietly. A small, vocal group did not. Within days I designed a way back: a setting in your profile, a banner inviting people to try the new editor again, and copy that explains what changes. Only new designs open in the new editor, so nothing anyone had made moved under them." },
-          { grid: [
-            { src: "fig-optin-banner-zoom", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "A banner in the old editor inviting people to try the new one, with a link to their profile.", cap: "The invitation back, in the old editor." },
-            { src: "fig-optin-setting", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Profile settings with a switch for the new multi-track video editor.", cap: "The switch, in profile settings." }
-          ] },
-          { p: "We also asked why, at the moment someone switched back, with a short survey in the flow. That gave the team reasons, not just a rate." },
-          { facts: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]] },
-          { p: "Even so, publishing was slower to recover than we hoped. The biggest confusion wasn't any one control. It was the model itself: the difference between the main track and everything above it. Our beta and pre-launch tests had been scoped around launch risks, and they missed it. That set up everything that came next." }
-        ]},
-        { title: "A year of fixing", blocks: [
-          { p: "After launch I worked through the paper cuts with engineering: playhead behaviour, selection, drag and drop, audio and transitions. I started weekly design office hours so engineers could bring problems in flight and we could solve them in the room." },
-          { p: "Some of the improvements I led, most written up as specs that engineers built from directly." },
-          { grid: [
-            { src: "fig-slip-board", img: true, w: 1600, h: 1131, shape: "wide", v: true, alt: "Spec board for trim and slip on desktop and mobile.", cap: "<b>Trim and slip.</b> Slip moves the footage inside a clip without moving the clip, as audio already could. It shipped." },
-            { src: "fig-snap-board", img: true, w: 1341, h: 960, shape: "wide", v: true, alt: "Spec for the snapping indicator on desktop and mobile.", cap: "<b>Snapping indicators.</b> A line appears only when a dragged edge comes within reach of something real. Built from customer feedback." },
-            { src: "mm-btrack", w: 1600, h: 974, shape: "wide", v: true, alt: "Match and Move appearing between two overlay clips.", cap: "<b>Match and Move on overlay tracks.</b> An exploration that didn't ship. People told us they missed the page-based version, so I explored bringing it back where two clips meet." },
-            { src: "zoom-bar", w: 1600, h: 898, shape: "wide", v: true, alt: "The trimmed-down bottom bar with a segmented zoom control.", cap: "<b>Zoom you can find.</b> Zoom sat behind a toggle that was easy to miss. Making it a segmented control gave it a clear affordance, and timeline zoom actions went up by about 20%." },
-            { src: "fig-trim-states", img: true, w: 772, h: 298, shape: "wide", v: true, alt: "A grid of clip states: deselected, selected, hover and edge hover.", cap: "<b>Trim handle states.</b> Every state for main and overlay tracks, with and without comments." },
-            { src: "fig-dropzone", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Dragging a video from the uploads panel. The main track in the timeline shows a dashed Drop media here zone.", cap: "<b>Drop zones you can see.</b> Start dragging and the main track shows exactly where media will land. Before, people couldn't see the target and dropped onto the track above by mistake." }
-          ] }
-        ]},
         { title: "Simple by default", blocks: [
-          { p: "Templates were the hard case. A graphic-heavy template became dozens of rows in the new timeline, and most people editing a template never need per-element timing." },
-          { p: "The answer had two parts. A simple view hides element tracks until you ask for them, and linking keeps overlays moving with their scene." },
+          { p: "Publishing was slower to recover than we hoped. The confusion wasn't any one control, it was the model itself, which our launch-scoped tests had missed. Templates made it worse: one could become dozens of rows. The answer was a simple view that hides element tracks until you ask for them, with linking that keeps overlays moving with their scene." },
           { media: { src: "simple-full", w: 1600, h: 898, shape: "wide", alt: "Switching between the simple timeline and the full multi-track timeline on desktop.", caption: "Simple view and full timeline. One control switches between them." } },
-          { p: "Before the big change, the team shipped a run of small experiments, from limiting how tall the timeline could grow to simplifying how tracks looked. We kept what helped and rolled back what didn't." },
-          { p: "Testing taught us more than the designs did. People rated linking very useful, yet most couldn't find its control, and they couldn't tell what was linked or why. In the first experiment, people who landed in the simple view often stayed stuck there. Roughly one in four found the way back." },
-          { p: "So we changed the defaults. The editor remembers the view you chose, and the way to see everything sits where people already look. That work shipped as an experiment in October 2026, after I handed over." }
-        ]},
-        { title: "Try the idea", blocks: [
-          { p: "A small working model of the two ideas above, rebuilt for this page. It is a sketch of the behaviour, not Canva's code or interface." },
-          { demo: "timeline", caption: "Drag a scene to reorder it, or drag its right edge to trim. In the simple view, elements always travel with their scene. Open the full timeline to see them, then switch Smart linking off and reorder again to see what it was protecting you from." }
+          { p: "Testing changed the defaults. People rated linking very useful but couldn't find its control, and in the first experiment only about one in four found their way out of the simple view. The editor now remembers the view you chose, and the way to see everything sits where people already look. It shipped as an experiment in October 2026, after I handed over." }
         ]},
         { title: "What I learned", blocks: [
-          { p: "Senior leadership saw the simple timeline as the answer. The full timeline, and the switch for smart linking, looked like lower priorities, and the instinct was to tuck them away for a cleaner editor." },
-          { p: "Testing told a more nuanced story. People liked the simple view, but they always needed a way back to full control of element timing. The linking switch was the same. With linking on by default and its control hidden, the editor suddenly behaved differently, and people couldn't see why or how to turn it off. Both findings backed the direction the team had proposed." },
-          { p: "The lesson I carry forward: simple should be the default, not the ceiling. Hide complexity until someone needs it, but keep the way to it in plain sight, and always show what the editor is doing on their behalf." },
+          { p: "Leadership wanted the full timeline and the linking switch tucked away for a cleaner editor. Testing showed people always needed a way back to full control, and hidden linking made the editor behave in ways they couldn't explain. Simple should be the default, not the ceiling: hide complexity until someone needs it, but keep the way to it in plain sight." },
           { quote: { text: "He pushed for testing multiple variants to find the best result, and kept iterating on proposed solutions even after landing on a direction.", who: "Software engineer, Canva" } }
         ]}
       ]
@@ -747,39 +739,55 @@ const SITE = {
       slug: "beat-sync", kind: "case", title: "Beat Sync", short: "Beat Sync",
       start: "2022-10", end: "2023-03", when: "2022 to 2023",
       summary: "Cut a video to the beat of its music in one click.",
-      thesis: "Cutting video to music is slow, fiddly work. Beat Sync finds the beats in a track and snaps your edit to them. It began as a hackathon idea and launched at Canva Create.",
-      meta: [["Role", "Product designer"], ["Team", "Video, Canva"], ["When", "October 2022 to March 2023"], ["Launched", "Canva Create 2023"]],
-      hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", v: true, alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor." },
+      thesis: "Cutting video to music is slow, fiddly work. Beat Sync finds the beats in a track and snaps your edit to them. It began as a hackathon idea and launched at Canva Create 2023.",
+      role: "Lead designer",
+      did: "Interaction and visual design, prototyping with engineers, beat marker details, post-launch iteration",
+      stats: [["650,000", "monthly users"], ["2nd", "most used AI editing tool in the video editor, after Background Remover"], ["99.99%", "of tracks had their beats detected"]],
+      hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor." },
       chapters: [
         { title: "From hackathon to launch", blocks: [
-          { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind and we could test it quickly." },
-          { p: "It reached staff in February 2023, a fifth of users two weeks later, and everyone by mid March, in time to launch at Canva Create." }
+          { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind. Five months later it reached everyone, in time for Canva Create." }
         ]},
-        { title: "Snap points, not a cage", blocks: [
-          { p: "Beat markers work as snap points. Nothing forces a snap, so you can still drag a cut between beats when a transition needs to land off the beat." }
-        ]},
-        { title: "The toggle that became a button", blocks: [
-          { p: "The first design had an auto-sync switch. Then an engineer asked what happens when two people edit the same video at once. The switch's state couldn't be stored safely, and deriving it would not ship in time." },
-          { p: "I pushed on it, then agreed the honest answer was a one-way button. Press it and everything syncs. If pages drift, a message tells you. When everything is on the beat, the button gets out of the way." }
-        ]},
-        { title: "Sweating the beat markers", blocks: [
-          { p: "A beat marker is a tiny notch on the audio track. It had to read at every zoom level, feel exact when a clip lands on it, and stay out of the way the rest of the time." },
-          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", v: true, alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "The snap. Drag a clip edge onto a beat and the marker stretches to confirm it landed. Recreated for this page, as the animation no longer works in the product." } },
+        { title: "Key decisions", blocks: [
           { list: [
-            ["A snap you can feel.", "The marker stretches and pulses the moment a clip edge lands on a beat, with haptic feedback where the device supports it. It was one of the most praised details inside Canva."],
-            ["Pointier marks.", "After a co-founder's review, the notches got sharper so the exact beat is never in doubt."],
-            ["Density follows zoom.", "Zoomed out, you see only the first beat of each bar. Zoom in and the minor beats fade in between them."]
+            ["Snap points, not a cage.", "Beat markers attract a cut but never force it, so a transition can still land off the beat."],
+            ["A button, not a toggle.", "The first design was an auto-sync switch, but its state couldn't be stored safely with two people editing at once. I pushed on it, then agreed the honest answer was a one-way button that syncs everything and gets out of the way."],
+            ["A snap you can feel.", "The marker stretches and pulses when a clip lands on a beat, minor beats appear as you zoom in, and the notches got sharper after a co-founder's review."]
           ] },
-          { media: { src: "bs-zoom", w: 1044, h: 486, shape: "wide", v: true, alt: "Zooming the timeline in and out: minor beat markers appear between the major ones, then hide again.", caption: "Zoom in and the minor beats appear between the major ones. Zoom out and they step back." } }
-        ]},
-        { title: "After launch", blocks: [
-          { p: "Launch was the start of the feedback. A co-founder's review was sharp: the tooltip should take you into the feature, the card felt unclickable, resyncing should read as its own action, and the markers should be pointier. With a content designer, I turned the Beat Sync button from a description into a clear call to action and made Show beats secondary." },
-          { p: "Later I came back to it with the machine learning engineer I'd built it with. Beat Sync 2.0 would pair key moments in the music with moments in your footage, not just beats. It was well received, then deprioritised." },
-          { row: [{ src: "beat-sync", w: 492, h: 1080, shape: "phone", alt: "Beat Sync 2.0 on mobile: beat markers on the audio track and a button to sync visuals with beats." }], caption: "Beat Sync 2.0, exploring moment sync on mobile." }
+          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "The snap, recreated for this page as the animation no longer works in the product." } }
         ]},
         { title: "Outcome", blocks: [
-          { p: "Beat Sync went on to reach 650,000 monthly users, second only to Background Remover among the AI editing tools in Canva's video editor. Beat detection worked 99.99% of the time. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment." },
+          { p: "Beat Sync reached 650,000 monthly users. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment. After launch I worked with a content designer to turn the button into a clear call to action, and later explored Beat Sync 2.0, matching moments in the music to moments in the footage. It was well received, then deprioritised." },
           { quote: { text: "Beat Sync would not have been brought to life [if] it weren't for his skill and ability to work under pressure.", who: "Beat Sync teammate, Canva" } }
+        ]}
+      ]
+    },
+    {
+      slug: "audio-tools", kind: "case", title: "Audio tools", short: "Audio tools",
+      start: "2024-09", end: "2025-07", when: "2024 to 2025",
+      summary: "Enhance Voice and Balance Audio: one-tap audio tools, each used by around half a million people a month.",
+      thesis: "Most people editing video in Canva aren't audio engineers. I designed tools that make their sound better in one tap, without needing to know how.",
+      role: "Lead designer",
+      did: "Entry points and toolbar placement, tuning the output with machine learning, internal and expert testing, user testing for ducking",
+      stats: [["530,000", "monthly users of Enhance Voice"], ["440,000", "monthly users of Balance Audio"]],
+      hero: { src: "enhance", w: 1600, h: 900, shape: "wide", alt: "A street vlog in the timeline. A collaborator selects the voice recording and chooses Enhance voice. The street noise between the words falls away.", caption: "Enhance voice, recreated for this page." },
+      chapters: [
+        { title: "Enhance Voice", blocks: [
+          { p: "Enhance Voice cleans up speech in one tap. We weighed up an overflow panel for audio tools, but kept it at the top level of the toolbar on desktop and mobile, even as the toolbar grew. The model ran on our servers, so it had to balance speed against quality. We dogfooded it across the team, then tested it with Canva Video Experts, a group of power users outside Canva, to land on how much background noise to remove." }
+        ]},
+        { title: "Balance Audio", blocks: [
+          { p: "We could only balance gain, bringing the average level of every audio source into line, not even out the peaks and dips inside one. So Balance Audio is one button that sets every sound in the video to a matching level. It needed no schema change, and it was a good first project for a new engineer." },
+          { media: { src: "balance", w: 1600, h: 900, shape: "wide", alt: "A wildlife short with music, a voiceover, birdsong and a wing hum at very different levels. A collaborator opens the volume flyout and chooses Balance all. Each track is turned up or down as a whole until they all sit at a matching level.", caption: "Balance Audio, recreated for this page." } }
+        ]},
+        { title: "Also on the toolbar", blocks: [
+          { list: [
+            ["Mute all, shipped.", "I'd pushed back on it as an edge case, until Cam, Canva's co-founder, asked for it. We iterated together and landed on Mute all appearing once you mute a video."],
+            ["Ducking, parked.", "I tested which track people expected to drive it, and whether the labels made sense. We got close to validating it before the keyframing it needed couldn't come together in time."]
+          ] },
+          { grid: [
+            { src: "mute", w: 1600, h: 900, shape: "wide", alt: "Close on the volume flyout. A collaborator mutes the video, and Mute all appears beside Balance all.", cap: "<b>Mute all.</b> Recreated for this page." },
+            { src: "duck", w: 1600, h: 900, shape: "wide", alt: "A collaborator selects the voiceover and chooses Prioritize, and the music dips beneath each line of narration.", cap: "<b>Ducking.</b> Recreated for this page. Parked before it shipped." }
+          ] }
         ]}
       ]
     },
@@ -787,98 +795,46 @@ const SITE = {
       slug: "ai-editing", kind: "story", title: "AI in the editor", short: "AI in the editor",
       start: "2023-01", end: "2026-06", when: "2023 to 2026",
       summary: "From bolting AI features onto the editor to designing early agentic workflows.",
-      thesis: "In the early days of AI at Canva, we shipped it as features, one tool at a time. Before long, a bloating editor and our own research pointed the same way: people wanted help with the whole job, not more tools to find. From there I began exploring early agentic flows, a precursor to the AI assistant being built for Canva Video today.",
-      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2023 to 2026"], ["Status", "Shipped features, then concepts and prototypes"]],
+      thesis: "We first shipped AI as features, one tool at a time. A crowded editor and our own research pointed the same way: people wanted help with the whole job. So I began exploring early agentic flows, a precursor to the AI assistant being built for Canva Video today.",
+      role: "Lead designer",
+      did: "Shipped AI tools, then concept design and prototypes for agentic editing on mobile and desktop",
       hero: { src: "cv-bgremove", w: 600, h: 600, shape: "card", alt: "Background Remover applied to a video of two people, the sky turning transparent.", caption: "Background Remover on video, the first AI tool I shipped." },
       chapters: [
-        { title: "Bolting on AI", blocks: [
-          { p: "When machine learning models first arrived at Canva, we did the natural thing and added AI one feature at a time. Video Background Remover lifts a person off their background in one click. Smart Trim finds the moments worth keeping in a long clip. Beat Sync cuts a video to its music." },
-          { p: "Each one paired a powerful model with one obvious action and a result you could see straight away. They all landed in the same nested surface in the editor, which wasn't easy to discover and was filling up fast." },
-          { grid: [
-            { src: "cv-highlights", w: 1600, h: 900, shape: "wide", alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", cap: "<b>Smart Trim.</b> Picking highlights from a long clip." },
-            { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", cap: "<b>Beat Sync.</b> Cutting a video to its music." }
-          ] }
-        ]},
-        { title: "Workflows over features", blocks: [
-          { p: "It wasn't long before that became a problem. People had to know a tool existed, dig for it, and stitch the results together themselves." },
-          { p: "Research said the same. We surveyed 1,200 video editors to learn which AI features mattered to them, and the answers pointed at a simple wish: make my video better without making me learn an editor." },
-          { p: "So we set a principle: workflows over features. Instead of bolting on more tools, we needed to explore AI editing as a whole, starting from what someone is trying to make." }
+        { title: "The problem", blocks: [
+          { p: "Background Remover, Smart Trim and Beat Sync each paired a powerful model with one obvious action. They all landed in the same nested surface, which was hard to find and filling up fast. When we surveyed 1,200 video editors, the wish was simple: make my video better without making me learn an editor. So we set a principle: workflows over features." }
         ]},
         { title: "An assistant that edits with you", blocks: [
-          { p: "That led me into early agentic explorations: tell the editor what you want, let it do the work, and stay in charge of the result. I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you review." },
-          { media: { src: "ai-mobile", w: 478, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype. Every change lands as something you can accept or reject." } },
+          { p: "I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you review." },
+          { media: { src: "ai-mobile", w: 478, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype." } },
           { list: [
-            ["Keep the video the hero.", "The editor collapses to a compact preview with playback always in reach. Pull down for full screen."],
             ["Review is a first-class step.", "Every change arrives with Accept and Reject. Nothing is applied behind your back."],
-            ["Rejection is a starting point.", "Turn down a change and you get quick ways to steer it, like more or less frequent sound effects."],
-            ["Suggestions beat a blank prompt.", "Contextual chips and specific placeholder text show what's possible."],
-            ["Progress is honest.", "The assistant says what it's doing, and when it trims the video the cuts stay on the beat."]
-          ]}
+            ["Rejection is a starting point.", "Turn down a change and you get quick ways to steer it."],
+            ["Keep the video the hero.", "The editor collapses to a compact preview with playback always in reach."]
+          ] },
+          { p: "On desktop I explored prompting right where you work: select clips, say what you want, and the edit happens on the timeline. In early 2026 I designed a way to tag Canva AI in a timeline comment and have it act on the note." },
+          { media: { src: "ai-comments", w: 1600, h: 898, shape: "wide", alt: "Tagging Canva AI in a timeline comment and the edit being applied.", caption: "Tag Canva AI in a comment, and it acts on the note." } }
         ]},
-        { title: "On the timeline", blocks: [
-          { p: "On desktop the question changed: where should you ask? I explored prompting right where you're working. Select some clips, say what you want, and the edit happens in place on the timeline." },
-          { media: { src: "fig-ai-prompt", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "Clips selected on the timeline with a prompt field reading Make it shorter.", caption: "Prompting from a selection." } },
-          { p: "The same model stretches to a conversation beside the canvas. Each change shows up on the timeline, where you can see and adjust it." },
-          { media: { src: "ai-desktop", w: 1600, h: 910, shape: "wide", alt: "Desktop concept: a chat panel beside the canvas, with sound effects appearing as clips on the timeline.", caption: "Ask for sound effects and they appear as clips on the timeline." } }
-        ]},
-        { title: "In comments", blocks: [
-          { p: "Teams already leave notes on each other's videos. In a core flows sprint in early 2026, I designed a way to tag Canva AI in a comment on the timeline and have it act on the note, so feedback can turn straight into an edit." },
-          { media: { src: "ai-comments", w: 1600, h: 898, shape: "wide", v: true, alt: "Tagging Canva AI in a timeline comment and the edit being applied.", caption: "Tag Canva AI in a comment, and it acts on the note." } }
-        ]},
-        { title: "What comes next", blocks: [
-          { p: "These explorations were a precursor to the AI assistant now being built for Canva Video, much like the assistants appearing across the rest of Canva's workspace." },
-          { p: "The thread runs through all of it. I started out shipping AI as features, learned to design for whole workflows, and began working out how an agent can edit with you, not for you. What comes next is a product of much of that thinking." }
+        { title: "Where it led", blocks: [
+          { p: "These explorations fed the AI assistant now being built for Canva Video. The thread runs through all of it: I started out shipping AI as features, learned to design for whole workflows, and began working out how an agent can edit with you, not for you." }
         ]}
-      ]
-    },
-    {
-      slug: "audio-tools", kind: "story", title: "Audio tools", short: "Audio tools",
-      start: "2024-09", end: "2025-07", when: "2024 to 2025",
-      summary: "Enhance Voice and Balance Audio: one-tap audio tools used by 530,000 and 440,000 people a month.",
-      thesis: "Most people editing video in Canva aren't audio engineers. I designed tools that make their sound better in one tap, without needing to know how. Enhance Voice reached 530,000 monthly users and Balance Audio reached 440,000.",
-      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2024 to 2025"]],
-      hero: { src: "enhance", w: 1600, h: 900, shape: "wide", v: true, alt: "A street vlog in the timeline. A collaborator selects the voice recording and chooses Enhance voice. The street noise between the words falls away.", caption: "Enhance voice, recreated for this page: one tap and the street noise falls away from a vlog recorded on a phone." },
-      chapters: [
-        { title: "Enhance Voice", blocks: [
-          { p: "Enhance Voice cleans up speech in one tap. I owned the design, working with our machine learning engineer and stakeholders across video. We weighed up an overflow panel for audio tools, as other element types have, but kept Enhance Voice at the top level of the toolbar on desktop and mobile, even as the toolbar grew. The model ran on our servers rather than on the device, so it had to balance speed against quality, and on mobile people had to upload their media first. We dogfooded it across the team, then tested it with Canva Video Experts, a group of power users outside Canva, to land on how much background noise to remove. It reached 530,000 monthly users." }
-        ] },
-        { title: "Balance Audio, inside the limits", blocks: [
-          { p: "Audio in Canva had real limits at the time. When someone uploaded their own audio, we couldn't tell what kind of sound was in it, so we couldn't show a tool like Enhance Voice only on tracks with speech. Changing volume over time depended on a schema change that hadn't landed. And the audio panel had just been removed, so every tool had to earn its place on the toolbar." },
-          { p: "Balance Audio had a limit of its own. We could only balance gain, bringing the average level of every audio source in the design into line. We couldn't yet reach inside a single source to even out its peaks and dips, its dynamic range, which would have made an even better mix. So Balance Audio is one button that sets every sound in the video to a matching level. It needed no schema change and was a good first project for a new engineer. It went out to staff in March 2025 and went on to reach 440,000 monthly users." },
-          { media: { src: "balance", w: 1600, h: 900, shape: "wide", v: true, alt: "A wildlife short with music, a voiceover, birdsong and a wing hum at very different levels. A collaborator opens the volume flyout and chooses Balance all. Each track is turned up or down as a whole until they all sit at a matching level.", caption: "Balance Audio, recreated for this page: one tap and music, voice and sound effects settle to the same level." } }
-        ] },
-        { title: "Mute all", blocks: [
-          { p: "Muting every video in a design sounds trivial. I'd pushed back on it as an edge case that could wreck a balanced mix, until Cam, Canva's co-founder and the video group's sponsor at the time, asked for it directly. We iterated on it together over a few rounds, including live on a whiteboard, and landed on Mute all appearing in the volume flyout once you mute a video. It mutes the sound of every video in the design and leaves music alone. It shipped." },
-          { media: { src: "mute", w: 1600, h: 900, shape: "wide", v: true, alt: "Close on the volume flyout, beneath the toolbar, over a colourful video. A collaborator mutes the video and the slider drops to 0. Mute all appears beside Balance all, and choosing it mutes every video in the design.", caption: "Mute all, recreated for this page: mute one video and Mute all appears beside Balance all, ready to mute the rest." } }
-        ] },
-        { title: "Where we were heading: ducking", blocks: [
-          { p: "Ducking lowers the music automatically whenever someone speaks, so the voice always sits on top. Most of the design problem came down to how you'd start it. Is ducking an action on the track you want lowered, like the music? Or does it belong to the voice, which then lowers whatever plays beneath it? I ran user testing to see which track people expected to drive it, alongside an interpretation test of the entry point itself, including whether the button labels told people what would happen before they chose one." },
-          { p: "We got right up to validating those answers before the project was parked. The keyframing it relied on, changing volume over time, couldn't come together in time for a ducking experience that felt good. It's where we wanted to take the audio tools, and we didn't quite get there." },
-          { media: { src: "duck", w: 1600, h: 900, shape: "wide", v: true, alt: "A nature documentary in the timeline: one shot of a kookaburra on a branch. A collaborator selects the voiceover and chooses Prioritize, and the music dips beneath each line of narration.", caption: "Prioritize, recreated for this page: select the voice and the music dips under every line. Parked before it shipped." } }
-        ] },
       ]
     },
     {
       slug: "smart-trim", kind: "story", title: "Smart Trim", short: "Smart Trim",
       start: "2023-11", end: "2024-07", when: "2023 to 2024",
       summary: "Two AI trimming tools, Highlights and Auto Trim, shaped through rounds of user testing.",
-      thesis: "Smart Trim was our internal name for a set of AI trimming features. Highlights finds the moments worth keeping in a long clip. Auto Trim trims a single clip to its most engaging moment in one tap.",
-      meta: [["Role", "Product designer"], ["Team", "Video AI, Canva"], ["When", "2023 to 2024"]],
-      hero: { src: "cv-highlights", w: 1600, h: 900, shape: "wide", v: true, alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", caption: "Picking highlights from a long clip." },
+      thesis: "Highlights finds the moments worth keeping in a long clip. Auto Trim trims a single clip to its most engaging moment in one tap. For a tool that makes the cut for you, perceived quality decides whether anyone trusts it.",
+      role: "Lead designer",
+      did: "Concepts, prototypes, moderated testing, a next-generation concept with machine learning engineers",
+      hero: { src: "cv-highlights", w: 1600, h: 900, shape: "wide", alt: "The Highlights panel listing described moments from a long clip, with some selected and added.", caption: "Picking highlights from a long clip." },
       chapters: [
-        { title: "Two ways to trim", blocks: [
-          { p: "Highlights was the smarter and more useful of the two. It looks through a long clip, describes the moments it finds, and lets you choose which to keep." },
-          { p: "Auto Trim, which was also its name in the product, was a quick one-tap button. It trims a single clip to its most engaging moment, based on a machine learning model's guess at the most representative frames." }
-        ]},
         { title: "Testing what good looks like", blocks: [
-          { p: "I explored five concepts, from a one-off action on a single clip to trimming many clips at once as they're added, and tested four prototypes. Each round changed something real: where you start it, how you see what was kept, and how the result is announced." },
-          { p: "I ran extensive moderated testing on these concepts, mostly to understand how good people felt the results were. For a tool that makes the cut for you, perceived quality decides whether anyone trusts it." }
+          { p: "I explored five concepts, from a one-off action on a single clip to trimming many clips as they're added, and tested four prototypes. Each round changed something real: where you start it, how you see what was kept, and how the result is announced. Most of the testing asked one thing: how good did people feel the results were?" }
         ]},
-        { title: "Evolving the feature", blocks: [
-          { p: "I also worked with machine learning engineers on a concept for the next generation of the tool, which we called progressive trimming. You simply start trimming a clip. Instead of cutting from the end, it takes out the least interesting frames from all through the clip, based on how much footage there is and how long you want it to be." },
-          { p: "The technology to do it was real and within reach. We didn't build it, so it stayed a vision for where the tool could go." },
-          { media: { src: "smart-trim", w: 1600, h: 996, shape: "wide", v: true, alt: "A long clip being trimmed down to its highlights on the timeline.", caption: "Progressive trimming: as you trim, the dull frames drop out from across the clip. A concept, not shipped." } }
-        ] }
+        { title: "What could come next", blocks: [
+          { p: "With machine learning engineers I designed progressive trimming: start trimming a clip and, instead of cutting from the end, it drops the least interesting frames from all through it. The technology was within reach, but we didn't build it." },
+          { media: { src: "smart-trim", w: 1600, h: 996, shape: "wide", alt: "A long clip being trimmed down to its highlights on the timeline.", caption: "Progressive trimming. A concept, not shipped." } }
+        ]}
       ]
     },
     {
@@ -886,17 +842,10 @@ const SITE = {
       start: "2025-11", end: "2025-11", when: "2025",
       summary: "A coded prototype that offers a transition at the moment two clips meet.",
       thesis: "A much-loved transition was lost when the timeline moved to multiple tracks, and people told us they missed it. This prototype explores bringing it back in context, right where two clips touch.",
-      meta: [["Type", "Coded prototype"], ["Built with", "Cursor"], ["When", "November 2025"]],
       hero: { src: "match-move", w: 1600, h: 974, shape: "wide", alt: "Two clips dragged together on a track. A control appears at the join offering Match and Move.", caption: "Drag two overlay clips together and a control appears at the seam." },
       chapters: [
         { title: "Why build it", blocks: [
-          { p: "Match and Move animates matching elements from one clip into the next. I wanted to offer it where intent is clearest, at the moment two clips meet, in place of hiding it in a menu." },
-          { p: "Stakeholders needed to feel the timing of that reveal, which a static mock can't show. So I built it. The details I tuned were how close clips need to be before the control appears, the highlight on the seam, and keeping the popover small enough to leave the timeline visible." }
-        ]},
-        { title: "From prototype to spec", blocks: [
-          { p: "The prototype became a spec for Match & Move 2.0, bringing the transition to overlay tracks: drag two clips together, a control appears at the seam, and you can tune its duration. It didn't ship." },
-          { media: { src: "mm-btrack", w: 1600, h: 974, shape: "wide", v: true, alt: "Match and Move appearing between two overlay clips.", caption: "On overlay tracks." } },
-          { media: { src: "fig-mm-flyout", img: true, w: 1360, h: 765, shape: "wide", v: true, alt: "The Match and Move flyout with an on switch and a duration slider.", caption: "The flyout, with a duration you can tune." } }
+          { p: "Stakeholders needed to feel the timing of the reveal, which a static mock can't show, so I built it in code. It became a spec for Match & Move 2.0 on overlay tracks. It didn't ship." }
         ]}
       ]
     },
@@ -905,12 +854,10 @@ const SITE = {
       start: "2025-06", end: "2025-06", when: "2025",
       summary: "A motion study for lifting a clip off the main track.",
       thesis: "How should a clip feel when it leaves the main track? A short motion study to settle the lift, the gap it leaves and the landing.",
-      meta: [["Type", "Motion study"], ["When", "June 2025"]],
       hero: { src: "overlay-drop", w: 992, h: 526, shape: "wide", alt: "Blocks standing in for clips. One lifts off the main track and settles above it.", caption: "Blocks stand in for clips so the motion is the only thing on screen." },
       chapters: [
         { title: "The study", blocks: [
-          { p: "Dragging between tracks is where a timeline feels good or broken. I stripped the interface back to blocks and worked on three moments: the lift when a clip is picked up, the gap that opens to show where it will land, and the settle when it's dropped." },
-          { p: "A study like this takes an hour and saves a week of back and forth. Engineers get a target they can match by eye." }
+          { p: "I stripped the interface back to blocks and worked on the lift, the gap and the settle. A study like this takes an hour and saves a week of back and forth." }
         ]}
       ]
     }
@@ -947,7 +894,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: false, dock: false };
+  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: true, dock: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   if (!FLAGS.matchMove) SITE.work = SITE.work.filter(w => w.slug !== 'match-and-move');
@@ -1602,6 +1549,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     if (b.grid) return '<div class="fgrid' + (b.grid.length === 2 ? ' two' : '') + '">' + b.grid.map(m => '<figure class="fig">' + stage(device(m), null, 'tile') + verdict(m) + (m.cap ? '<figcaption>' + capHTML(m.cap) + '</figcaption>' : '') + '</figure>').join('') + '</div>';
     if (b.table) return '<table class="tbl"><thead><tr>' + b.table.head.map(h => '<th>' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' + b.table.rows.map(r => '<tr>' + r.map(c => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
     if (b.diagram === 'model') return modelDiagram();
+    if (b.placeholder) return '<figure class="fig"><div class="phbox"><span>' + esc(b.placeholder) + '</span></div></figure>';
     if (b.media) return figure(b.media);
     if (b.row) return '<figure class="fig">' + stage(b.row.map(device).join(''), null, 'row') + b.row.map(verdict).join('') + (b.caption ? '<figcaption>' + esc(b.caption) + '</figcaption>' : '') + '</figure>';
     if (b.quote) return '<blockquote class="quote"><p>' + esc(b.quote.text) + '</p><cite>' + esc(b.quote.who) + '</cite></blockquote>';
@@ -1610,22 +1558,83 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     if (b.facts) return '<div class="facts">' + b.facts.map(f => '<div><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></div>').join('') + '</div>';
     return '';
   }
+  /* The brief: the overview set large, then my role and what I did. Then the numbers. */
+  function briefHTML(w){
+    const brief = '<section class="brief" aria-label="Project brief"><p class="brief-ov">' + esc(w.thesis) + '</p>' +
+      (w.role || w.did ? '<div class="brief-role">' + (w.role ? '<span class="role-pill">' + esc(w.role) + '</span>' : '') + (w.did ? '<p class="brief-did">' + esc(w.did) + '</p>' : '') + '</div>' : '') +
+      '</section>';
+    const stats = w.stats && w.stats.length ? '<ul class="stats">' + w.stats.map(f => '<li><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></li>').join('') + '</ul>' : '';
+    return rvWrap(w.briefRv, brief) + (stats ? rvWrap(w.statsRv, stats) : '');
+  }
   function itemHTML(w){
     const i = SITE.work.indexOf(w), nx = SITE.work[(i + 1) % SITE.work.length];
     return '<article>' +
       '<a class="navback back" href="#work" data-route aria-label="All work">' + arrowBack + '</a>' +
       '<header class="work-head">' +
         '<h1 tabindex="-1">' + esc(w.title) + '<sub class="yr"><span class="vh">, </span>' + esc(w.when) + '</sub></h1>' +
-        rvWrap(w.rv, '<p class="thesis">' + esc(w.thesis) + '</p>') +
-        (FLAGS.projectMeta ? '<dl class="meta">' + w.meta.map(m => '<div><dt>' + esc(m[0]) + '</dt><dd>' + esc(m[1]) + '</dd></div>').join('') + '</dl>' : '') +
+        rvWrap(w.rv, '<p class="thesis">' + esc(w.summary) + '</p>') +
       '</header>' +
       '<div class="hero">' + rvWrap(w.heroRv, figure(w.hero, w.slug)) + '</div>' +
+      briefHTML(w) +
       '<div class="chapters">' + w.chapters.map((c, n) =>
         '<section class="chapter' + (FLAGS.review && c.rv ? ' rv-ch' : '') + '" id="ch' + n + '" data-title="' + esc(c.title) + '"><h2>' + esc(c.title) + '</h2><div class="body">' + rvWrap(c.rv, c.blocks.map(block).join('')) + '</div></section>').join('') +
       '</div>' +
       '<a class="next" href="#work-' + nx.slug + '" data-route><small>Next, ' + kindLabel(nx).toLowerCase() + '</small><strong>' + esc(nx.title) + ' ' + arrowBig + '</strong></a>' +
     '</article>';
   }
+  /* Enlarge. On a project page, click any visual (or focus it and press Enter) to see it as big as
+     the window allows; click, press Escape or use the close button to come back. Touch screens keep
+     tap to play and pause, and their visuals already run the full width. */
+  function initZoom(){
+    if (touchUI) return;
+    main.querySelectorAll('article .fig .stage').forEach(st => {
+      st.classList.add('zoomable'); st.tabIndex = 0; st.setAttribute('role', 'button'); st.setAttribute('aria-label', 'Enlarge');
+    });
+  }
+  let lb = null, lbFrom = null;
+  function zoomOpen(st){
+    if (lb) return;
+    lbFrom = document.activeElement;
+    lb = document.createElement('div');
+    lb.className = 'lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Enlarged visual');
+    const view = st.cloneNode(true);
+    view.className = 'lb-stage' + (st.classList.contains('row') ? ' row' : '');
+    view.removeAttribute('tabindex'); view.removeAttribute('role'); view.removeAttribute('aria-label'); view.removeAttribute('data-slug');
+    view.querySelectorAll('.pp').forEach(n => n.remove());
+    const devs = [...view.querySelectorAll('.device')];
+    // fit the visuals to the window: widest the screen allows, no taller than it
+    const ars = devs.map(d => { const m = (d.getAttribute('style') || '').match(/aspect-ratio:\s*([\d.]+)\s*\/\s*([\d.]+)/); return m ? m[1] / m[2] : 16 / 9; });
+    const sum = ars.reduce((a, b) => a + b, 0), gap = 24 * (devs.length - 1);
+    const H = Math.min(window.innerHeight - 120, (Math.min(window.innerWidth - 96, 1600) - gap) / sum);
+    devs.forEach((d, i) => { d.style.width = (H * ars[i]) + 'px'; d.style.maxWidth = 'none'; d.style.flex = 'none'; });
+    view.querySelectorAll('video').forEach(v => { v.removeAttribute('data-auto'); v.closest('.scr').classList.add('live'); v.muted = true; v.loop = true; const p = v.play(); if (p && p.catch) p.catch(() => {}); });
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'lb-x'; close.setAttribute('aria-label', 'Close');
+    close.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    lb.append(view, close);
+    document.body.appendChild(lb);
+    document.documentElement.classList.add('lb-open');
+    requestAnimationFrame(() => lb && lb.classList.add('on'));
+    close.focus({ preventScroll: true });
+    lb.addEventListener('click', zoomClose);
+  }
+  function zoomClose(){
+    if (!lb) return;
+    const el = lb; lb = null;
+    el.classList.remove('on');
+    document.documentElement.classList.remove('lb-open');
+    setTimeout(() => el.remove(), reduce ? 0 : 260);
+    if (lbFrom && lbFrom.focus) lbFrom.focus({ preventScroll: true });
+  }
+  main.addEventListener('click', e => {
+    if (touchUI || e.defaultPrevented || e.target.closest('.pp, a, button, .rv-bar, .rv-vd')) return;
+    const st = e.target.closest('.stage.zoomable'); if (st) zoomOpen(st);
+  });
+  main.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('zoomable')) { e.preventDefault(); zoomOpen(e.target); }
+  });
+  document.addEventListener('keydown', e => { if (lb && e.key === 'Escape') zoomClose(); });
+  window.addEventListener('hashchange', zoomClose);
   function initDock(){
     // The chapter progress bar at the bottom of a project. Off for now: the sticky chapter titles
     // already say where you are. Set FLAGS.dock to true to bring it back.
@@ -1815,7 +1824,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const entries = [];
     SITE.work.forEach(w => {
       const add = (rv, where) => { if (rv) entries.push({ rv, slug: w.slug, title: w.title, where }); };
-      add(w.rv, 'Summary'); add(w.heroRv, 'Hero');
+      add(w.rv, 'Summary'); add(w.heroRv, 'Hero'); add(w.briefRv, 'Brief'); add(w.statsRv, 'Numbers');
       w.chapters.forEach(c => { add(c.rv, c.title); c.blocks.forEach(b => add(b.rv, c.title)); });
     });
     const visuals = [];
@@ -1825,8 +1834,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const removed = SITE.removed || [];
     const state = { review: {}, visual: {}, publish: null };
     let db = null, local = true;
-    try { Object.assign(state, JSON.parse(localStorage.getItem('lr-draft-review') || '{}')); } catch (e) {}
-    const saveLocal = () => { try { localStorage.setItem('lr-draft-review', JSON.stringify(state)); } catch (e) {} };
+    try { Object.assign(state, JSON.parse(localStorage.getItem('lr-draft3-review') || '{}')); } catch (e) {}
+    const saveLocal = () => { try { localStorage.setItem('lr-draft3-review', JSON.stringify(state)); } catch (e) {} };
 
     const panel = document.createElement('div');
     panel.className = 'rvp'; panel.id = 'rvp';
@@ -1948,6 +1957,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       main.innerHTML = itemHTML(r.item);
       initDock();
       initDemo();
+      initZoom();
     }
     initVideos();
     // Where to land: back on the home page you return to where you were; otherwise the home page
@@ -2564,6 +2574,10 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   if (reduce) return;
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
 
+  // Only on the home page: on a project page people rest the cursor while reading, and a hole
+  // opening beside the text takes them by surprise.
+  const onHome = () => !/^#work-/.test(location.hash);
+  window.addEventListener('hashchange', () => { if (!onHome()) { aOK = false; hActive = false; } });
   const rest = ok => { aT = performance.now(); hActive = false; if (ok === false) aOK = false; };
   const endDrag = e => {
     if (!drag) return;
@@ -2577,7 +2591,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const dx = e.clientX - aX, dy = e.clientY - aY;
     if (dx * dx + dy * dy < 36) return;       // ignore hand tremor
     aX = e.clientX; aY = e.clientY;
-    aOK = !!(e.target && e.target.matches && e.target.matches(BG));
+    aOK = onHome() && !!(e.target && e.target.matches && e.target.matches(BG));
     rest();
     if (hl > 0) { tx = e.clientX; ty = e.clientY; }   // a shrinking hole trails the cursor
   }, { passive: true });
@@ -2601,7 +2615,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   window.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse' || !fx) return;
     letGo();
-    if (!(e.target && e.target.matches && e.target.matches(BG))) return;
+    if (!onHome() || !(e.target && e.target.matches && e.target.matches(BG))) return;
     pressX = e.clientX; pressY = e.clientY;
     pressT = setTimeout(() => { pressT = 0; openAt(pressX, pressY); }, LONG);
   });
