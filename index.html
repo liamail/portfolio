@@ -289,11 +289,11 @@ body.splash-open{overflow:hidden}
 .cards .device.card{width:min(100%,240px)}
 /* Play and pause. Every frame plays as one timeline: its videos start together, any that finish
    early hold on their last frame, and all restart when the longest ends.
-   Progress is a thin primary line on a line-coloured track, centred in the frame's bottom
-   margin and exactly as wide as the artwork above it. Tapping or clicking the frame plays and pauses it, and the new state flashes
-   up in the middle as a glass disc. On desktop a tiny expand button appears on hover at the end
-   of the progress line, so the bottom margin reads as one small control row. */
-.vbar{position:absolute;left:var(--sp);right:var(--sp);bottom:calc(var(--sp) / 2 - 1px);height:2px;border-radius:1px;background:var(--line);z-index:3;pointer-events:none;overflow:hidden}
+   Progress is a thin primary line on a line-coloured track that hugs the frame's bottom edge,
+   running the straight stretch between its two rounded corners. Tapping or clicking the frame plays and pauses it, and the new state flashes
+   up in the middle as a glass disc. On desktop a tiny expand button appears on hover in the
+   bottom-right corner, just above the line, its corner concentric with the frame's. */
+.vbar{position:absolute;left:var(--sr,20px);right:var(--sr,20px);bottom:0;height:2px;border-radius:1px;background:var(--line);z-index:3;pointer-events:none;overflow:hidden}
 .vbar i{position:absolute;inset:0;border-radius:inherit;background:var(--primary);transform-origin:0 50%;transform:scaleX(0)}
 .stage.pp-in>.vbar{animation:vb-in .6s var(--ease) .08s both}
 @keyframes vb-in{from{opacity:0}}
@@ -306,7 +306,7 @@ body.splash-open{overflow:hidden}
 /* If the browser won't autoplay (Low Power Mode, say), the play disc stays up until it's tapped. */
 .stage.needs-play .vflash{opacity:1;animation:none}
 /* Tiny buttons: the icon button at its smallest, for controls laid over a visual. */
-.xp{position:absolute;right:var(--sp);bottom:calc(var(--sp) / 2 - 13px);z-index:4;display:grid;place-items:center;width:26px;height:26px;padding:0;border-radius:8px;color:var(--ink);cursor:pointer;
+.xp{position:absolute;right:calc(var(--sr,20px) - 8px);bottom:calc(var(--sr,20px) - 8px);z-index:4;display:grid;place-items:center;width:26px;height:26px;padding:0;border-radius:8px;color:var(--ink);cursor:pointer;
   background:var(--glass);border:1px solid var(--primary);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
   opacity:0;transform:translateY(2px);transition:opacity .18s,transform .18s var(--ease),color var(--t-fast)}
 .xp::before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:var(--primary);opacity:0;transition:opacity var(--t-fast)}
@@ -316,7 +316,6 @@ body.splash-open{overflow:hidden}
 .xp:hover::before{opacity:1}
 .xp:active{transform:scale(.92)}
 .xp:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-.stage.zoomable>.vbar{right:calc(var(--sp) + 36px)}   /* stops short of the expand button, which ends the row */
 .stage.playable{cursor:pointer}
 .stage.playable:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
@@ -597,7 +596,7 @@ html.lb-open{overflow:hidden}
 .device.pic .still{object-fit:cover}
 .fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin:10px 0}
 .fgrid .fig{margin:0}
-.stage.tile{--sp:clamp(12px,2vw,22px);border-radius:16px;min-height:0}
+.stage.tile{--sp:clamp(12px,2vw,22px);--sr:16px;border-radius:16px;min-height:0}
 .fgrid figcaption b{color:var(--ink);font-weight:600}
 @media (max-width:720px){.fgrid{grid-template-columns:minmax(0,1fr)}}
 .tbl{border-collapse:collapse;width:100%;max-width:44em;margin:6px 0;font-size:.98rem}
