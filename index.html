@@ -297,7 +297,7 @@ body.splash-open{overflow:hidden}
    white in the middle, the same in both themes, as it sits over footage. On desktop a tiny expand button appears on hover in the bottom-right
    corner, just above the line, its corner concentric with the frame's. */
 .vbar{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);z-index:3;pointer-events:none;overflow:hidden}
-.vbar i{position:absolute;inset:0;background:var(--primary);transform-origin:0 50%;transform:scaleX(0)}
+.vbar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--primary)}
 .stage.pp-in>.vbar{animation:vb-in .6s var(--ease) .08s both}
 @keyframes vb-in{from{opacity:0}}
 .vflash{position:absolute;inset:0;z-index:4;border-radius:inherit;display:grid;place-items:center;pointer-events:none;opacity:0;
@@ -1059,8 +1059,10 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   // that finishes early holds on its last frame, and when the longest finishes they all start
   // again together. A frame with one video simply loops.
   const lead = st => st._group.reduce((a, v) => ((v.duration || 0) > (a.duration || 0) ? v : a), st._group[0]);
+  // Every frame in a part of the page, including that part itself when it is a frame.
+  const stagesIn = root => { const r = root || main; return [...(r.matches && r.matches('.stage') ? [r] : []), ...r.querySelectorAll('.stage')]; };
   function initGroups(root){
-    (root || main).querySelectorAll('.stage').forEach(st => {
+    stagesIn(root).forEach(st => {
       const vs = [...st.querySelectorAll('video')];
       st._group = vs;
       if (vs.length > 1) vs.forEach(v => { v.loop = false; v.removeAttribute('loop'); v._grp = st; });
@@ -1092,11 +1094,13 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   if (!reduce) {
     const ring = () => {
       near.forEach(v => {
+        if (!v.isConnected) { near.delete(v); return; }
         const st = v.closest('.stage'); if (!st || !st._group || !v.duration) return;
         if ((st._group.length > 1 ? lead(st) : st._group[0]) !== v) return;
         const c = v._ring || (v._ring = st.querySelector(':scope > .vbar i')); if (!c) return;
-        const k = Math.min(1, v.currentTime / v.duration).toFixed(4);
-        if (c._k !== k) { c._k = k; c.style.transform = 'scaleX(' + k + ')'; }   // only when it changes
+        // drawn as a width in whole device pixels, so the 1px line stays crisp end to end
+        const k = (Math.round(Math.min(1, v.currentTime / v.duration) * 10000) / 100) + '%';
+        if (c._k !== k) { c._k = k; c.style.width = k; }   // only when it changes
       });
       requestAnimationFrame(ring);
     };
@@ -1125,7 +1129,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     initGroups(root);
     if (vio) (root || main).querySelectorAll('video[data-auto]').forEach(v => vio.observe(v));
     // A frame that isn't itself a link plays and pauses when clicked or tapped (or with Enter).
-    (root || main).querySelectorAll('.stage').forEach(st => {
+    stagesIn(root).forEach(st => {
       if (!st.querySelector(':scope > .vbar') || st.closest('a')) return;
       st.classList.add('playable'); st.tabIndex = 0; st.setAttribute('role', 'button');
       st.setAttribute('aria-label', st.dataset.paused ? 'Play video' : 'Pause video');
@@ -1258,6 +1262,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       if (slug === activeSlug) return;
       activeSlug = slug; mark();
       viewer.innerHTML = viewerInner(bySlug[slug], true);
+      initVideos(viewer);   // its progress line and play/pause, like any other frame
       const v = viewer.querySelector('video');
       if (v && !reduce) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
     };
@@ -2102,7 +2107,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     // IDs stay: some styles depend on them (the viewer hides its inactive projects by ID). The
     // copy sits after the real page, so lookups by ID still find the real elements first.
     g.querySelectorAll('[data-route],a,button').forEach(n => { n.removeAttribute('data-route'); n.removeAttribute('href'); });
-    const src = g.querySelector('[data-xf]'); if (src) { src.removeAttribute('data-xf'); src.style.visibility = 'hidden'; const p = src.querySelector(':scope > .vbar'); if (p) p.style.visibility = 'visible'; }
+    const src = g.querySelector('[data-xf]'); if (src) { src.removeAttribute('data-xf'); src.style.visibility = 'hidden'; }
     g.setAttribute('aria-hidden', 'true'); g.inert = true;
     g.style.left = r.left + 'px'; g.style.top = r.top + 'px'; g.style.width = r.width + 'px';
     return g;
