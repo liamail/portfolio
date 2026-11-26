@@ -134,6 +134,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .splash.out .sp-card{animation:sp-card-out .8s var(--ease-io) both}
 .sp-card{width:min(480px,100%);padding:clamp(8px,2vw,16px);color:var(--ink);animation:sp-card .5s var(--ease) both}
 .sp-card:focus{outline:none}
+/* Page titles take focus when a page opens, so screen readers start there. They aren't controls, so
+   they never show a focus ring. */
+[tabindex="-1"]:focus{outline:none}
 .sp-card .mark{margin-bottom:24px}
 .sp-card .mark svg{height:clamp(34px,4.4vw,44px)}
 .sp-card h2{font-size:clamp(1.9rem,4.4vw,2.5rem);line-height:1.15;letter-spacing:-.02em;font-weight:600}
