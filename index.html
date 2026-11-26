@@ -934,7 +934,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: true, dock: false };
+  const FLAGS = { progress: false, copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: true, dock: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   if (!FLAGS.matchMove) SITE.work = SITE.work.filter(w => w.slug !== 'match-and-move');
@@ -1012,7 +1012,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       '<img class="still" src="media/' + m.src + '.jpg' + mv(m.src) + '" alt="" aria-hidden="true"></span></div>';
   }
   // Play and pause glyphs with softly rounded corners, like the rest of the icon set.
-  const pp = '<span class="vbar" aria-hidden="true"><i></i></span><span class="vflash" aria-hidden="true">' +
+  // The progress line along a frame's bottom edge is off for now: set FLAGS.progress to bring it back.
+  const pp = (FLAGS.progress ? '<span class="vbar" aria-hidden="true"><i></i></span>' : '') + '<span class="vflash" aria-hidden="true">' +
     '<svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="4" width="4.5" height="16" rx="1.6"/><rect x="14" y="4" width="4.5" height="16" rx="1.6"/></svg>' +
     '<svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 5.4v13.2c0 1.05 1.15 1.7 2.05 1.15l10.4-6.6c.83-.53.83-1.77 0-2.3L9.55 4.25c-.9-.55-2.05.1-2.05 1.15z"/></svg></span>';
   function stage(inner, slug, extra){
@@ -1130,7 +1131,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     if (vio) (root || main).querySelectorAll('video[data-auto]').forEach(v => vio.observe(v));
     // A frame that isn't itself a link plays and pauses when clicked or tapped (or with Enter).
     stagesIn(root).forEach(st => {
-      if (!st.querySelector(':scope > .vbar') || st.closest('a')) return;
+      if (!st.querySelector(':scope > .vflash') || st.closest('a')) return;
       st.classList.add('playable'); st.tabIndex = 0; st.setAttribute('role', 'button');
       st.setAttribute('aria-label', st.dataset.paused ? 'Play video' : 'Pause video');
     });
@@ -2228,7 +2229,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       if (target) {
         target.style.visibility = '';
         // Its play button eases in once the artwork has landed, like everything else around it.
-        if (target.querySelector(':scope > .vbar')) { target.classList.add('pp-in'); setTimeout(() => target.classList.remove('pp-in'), 760); }
+        if (target.querySelector(':scope > .vflash')) { target.classList.add('pp-in'); setTimeout(() => target.classList.remove('pp-in'), 760); }
       }
       revealTabs();
     };
