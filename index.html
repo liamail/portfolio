@@ -76,7 +76,7 @@ html.entering .home .tabs-in{transition-delay:.32s}
 /* Work preview: the chosen project fades in on top. Whatever is underneath holds exactly as it
    is until the new one fully covers it, then drops away unseen, so moving quickly down the list
    never cuts. */
-#vstage{display:grid}
+#vstage{display:grid;container-type:inline-size}
 #vstage>.stage{grid-area:1/1;opacity:1;transition:opacity .34s var(--ease-io)}
 #vstage>.stage.off{opacity:0;visibility:hidden;pointer-events:none;transition:opacity 0s linear .36s,visibility 0s linear .36s}
 #vstage>.stage.enter{opacity:0;transition:none}
@@ -208,7 +208,9 @@ body.splash-open{overflow:hidden}
    screen itself: the space the tabs take at the top is matched at the bottom. */
 @media (min-width:821px){
   .pane[data-pane="work"]{box-sizing:border-box;min-height:calc(100vh - var(--tabs-h,50px) - var(--tabs-top) - 12px);min-height:calc(100svh - var(--tabs-h,50px) - var(--tabs-top) - 12px);padding:0 var(--bleed,0px) calc(var(--tabs-h,50px) + var(--tabs-top) + 12px);display:grid;align-content:center}
-  .pane[data-pane="work"] .viewer .stage{height:clamp(440px,62vh,640px)}
+  /* sized from its width so a 16:9 artwork fills it with the standard margin all round; phones
+     and square artwork fill its height, centred, so it never changes size between projects */
+  .pane[data-pane="work"] .viewer .stage{height:calc((100cqw - 2 * var(--frame-pad)) * 9 / 16 + 2 * var(--frame-pad))}
 }
 .plist{display:grid;align-content:center}
 /* An invisible copy of each title at its enlarged size sets the column width, so the hovered
@@ -262,7 +264,7 @@ body.splash-open{overflow:hidden}
 @keyframes swap{from{opacity:.0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* Stage and devices */
-.stage{position:relative;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:20px;--sp:clamp(20px,4vw,44px);padding:var(--sp);display:flex;justify-content:center;align-items:center;gap:clamp(12px,3vw,28px);overflow:hidden}
+.stage{position:relative;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:20px;--sp:var(--frame-pad);padding:var(--sp);display:flex;justify-content:center;align-items:center;gap:clamp(12px,3vw,28px);overflow:hidden}
 /* Device frames. The frame is drawn as an outline outside the screen, so the screen keeps the
    recording's exact proportions. Corners are sized from the device's own width (cqw), which keeps
    them circular and keeps the frame's outer curve concentric with the screen's. */
@@ -283,7 +285,7 @@ body.splash-open{overflow:hidden}
 .device.card .scr{border-radius:14px;box-shadow:var(--lift)}
 .device.wide .scr{border-radius:10px;box-shadow:var(--lift)}
 .stage.row .device.phone{flex:1 1 0;min-width:0;max-width:250px;width:auto}
-.viewer .stage{height:440px;--sp:28px}
+.viewer .stage{height:440px}
 .viewer .stage .device.phone{height:100%;width:auto}
 .viewer .stage .device.card{height:100%;width:auto}
 .cards .device.card{width:min(100%,240px)}
@@ -389,6 +391,9 @@ body.splash-open{overflow:hidden}
    with the page's fade.) */
 .work-head h1{font-size:clamp(2.4rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;margin-top:clamp(20px,4vw,40px);max-width:12em;text-wrap:balance}
 .thesis{margin-top:18px;font-size:clamp(1.15rem,2vw,1.4rem);line-height:1.4;color:var(--muted);max-width:30em}
+/* One margin between artwork and the edge of its frame, on every frame on the site, so the
+   artwork always sits the same distance above the progress line. */
+:root{--frame-pad:clamp(16px,2.6vw,32px)}
 /* Glass: the one fill for anything that holds other things (buttons, cards, frames, diagrams).
    See-through paper with the page blurred behind it. */
 :root{--glass:color-mix(in srgb,var(--paper) 66%,transparent);--blur:blur(22px) saturate(1.8) brightness(1.04);
@@ -415,7 +420,6 @@ body.splash-open{overflow:hidden}
 main > article{padding-bottom:var(--page-end)}
 article .chapter{grid-template-columns:minmax(0,1fr);gap:16px}
 article .chapter h2{position:static}
-article .stage{--sp:clamp(14px,2.6vw,32px)}
 article .device.phone{width:min(100%,320px)}
 article .stage.row .device.phone{max-width:300px}
 article .device.card{width:min(100%,480px)}
@@ -600,7 +604,7 @@ html.lb-open{overflow:hidden}
 .device.pic .still{object-fit:cover}
 .fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin:10px 0}
 .fgrid .fig{margin:0}
-.stage.tile{--sp:clamp(12px,2vw,22px);--sr:16px;border-radius:16px;min-height:0}
+.stage.tile{min-height:0}
 .fgrid figcaption b{color:var(--ink);font-weight:600}
 @media (max-width:720px){.fgrid{grid-template-columns:minmax(0,1fr)}}
 .tbl{border-collapse:collapse;width:100%;max-width:44em;margin:6px 0;font-size:.98rem}
