@@ -972,6 +972,7 @@ const SITE = {
   };
   const jump = y => { stopGlide(); window.scrollTo({ top: Math.max(0, y), behavior: 'instant' }); };
   let firstHome = true;
+  let homeSeen = false;   // whether the home page has been shown yet this visit
   let cleanup = [];
 
   /* ---------- media ---------- */
@@ -1966,6 +1967,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     current = hash;
     if (r.name === 'home') {
       const active = bySlug[lastItem] || bySlug[SITE.flagship];
+      // Coming back from a project skips the home page's opening flourish.
+      if (opts && opts.restore) firstHome = false;
       homeTab = r.tab;
       main.innerHTML = homeHTML(active, homeTab);
       initHome(active);
@@ -1983,17 +1986,31 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     if (r.name === 'home') {
       // A fresh load or refresh always starts at the top of the page, even if the address still
       // ends in #work or #about from earlier browsing.
-      if (opts && opts.restore) y = homeY();
+      if (opts && opts.restore) {
+        if (homeSeen) y = homeY();
+        else {
+          const st = listStage(opts.from), pt = panelTop();
+          if (st) { const r = st.getBoundingClientRect(); y = Math.max(pt, r.top + window.scrollY - Math.max(0, (window.innerHeight - r.height) / 2)); }
+          else y = pt;
+        }
+      }
+      homeSeen = true;
     } else if (opts && opts.history && mem.item[r.item.slug] != null) y = mem.item[r.item.slug];
     jump(y);
     if (r.name === 'home') { const hm = main.querySelector('.home'); if (hm && hm._mark) hm._mark(); }
     if (!first && r.name !== 'home') { const h = main.querySelector('h1'); if (h) h.focus({ preventScroll: true }); }
   }
   // The project's visual on screen right now: in the open section, at least partly in view.
+  // Most of it has to be in view: a visual half off the screen would fly from or to somewhere the
+  // eye can't follow, so the pages simply dissolve instead.
   const visibleStage = slug => [...document.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => {
-    if (el.offsetParent === null || el.closest('.off')) return false;
-    const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+    if (el.offsetParent === null || el.closest('.off, #xf')) return false;
+    const r = el.getBoundingClientRect(); if (!r.width || !r.height) return false;
+    const seen = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+    return seen >= Math.min(r.height, window.innerHeight) * .6;
   });
+  // The project's visual in the open section, wherever it is on the page.
+  const listStage = slug => [...main.querySelectorAll('.stage[data-slug="' + slug + '"]')].find(el => el.offsetParent !== null && !el.closest('.off'));
   // Cubic-bezier easing, to match the CSS curves (--ease and --ease-io).
   const bez = (x1, y1, x2, y2) => t => {
     if (t <= 0) return 0; if (t >= 1) return 1;
@@ -2077,7 +2094,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     const from = parse(current), to = parse(hash);
     saveScroll();
     const slug = !FLAGS.morph ? null : to.name === 'item' ? to.item.slug : (from.name === 'item' ? from.item.slug : null);
-    const opts = { restore: from.name === 'item' && to.name === 'home', history: !!history };
+    const opts = { restore: from.name === 'item' && to.name === 'home', history: !!history, from: from.name === 'item' ? from.item.slug : null };
     const revealTabs = () => {
       const els = [...main.querySelectorAll('.tabs-in.wait, .navback.wait')]; if (!els.length) return;
       const h = main.querySelector('.home'); if (h && h._mark) h._mark();
@@ -2144,7 +2161,14 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       d1 = devCopy(toDev, rectOf(toDev), new Map()); d1.style.opacity = '0';
       layer.appendChild(d1);
       target.style.visibility = 'hidden';
-    } else if (box) { box.remove(); d0.style.transition = 'opacity .2s'; box = null; }
+    } else if (box) {
+      box.remove(); box = null;
+      if (carry) {
+        d0.querySelectorAll('video').forEach(v => { const fr = frames.get(v); if (fr) v.replaceWith(copyFrame(fr)); else v.remove(); });
+        carry.forEach(v => { v.style.opacity = ''; }); carry = null;
+      }
+      d0.style.transformOrigin = (m0.w / 2) + 'px ' + (m0.h / 2) + 'px';
+    }
     const morphing = !!d1;
     const inAt = morphing ? 260 : 120;
 
@@ -2186,7 +2210,10 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
         d0.style.transform = 'translate3d(' + m.x + 'px,' + m.y + 'px,0) scale(' + (m.w / m0.w) + ',' + (m.h / m0.h) + ')';
         d1.style.transform = 'translate3d(' + m.x + 'px,' + m.y + 'px,0) scale(' + (m.w / m1.w) + ',' + (m.h / m1.h) + ')';
         if (!carry) { d0.style.opacity = 1 - x; d1.style.opacity = x; }
-      } else if (d0) d0.style.opacity = 1 - EASE_IO(Math.min(1, t / T_OUT));
+      } else if (d0) {
+        const o = EASE_IO(Math.min(1, t / T_OUT));
+        d0.style.opacity = 1 - o; d0.style.transform = 'translate3d(' + m0.x + 'px,' + m0.y + 'px,0) scale(' + (1 - .03 * o) + ')';
+      }
       if (t >= total) { finish(); return; }
       raf = requestAnimationFrame(tick);
     };
