@@ -262,7 +262,7 @@ body.splash-open{overflow:hidden}
 @keyframes swap{from{opacity:.0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* Stage and devices */
-.stage{position:relative;background:var(--stage);border-radius:20px;padding:clamp(20px,4vw,44px);display:flex;justify-content:center;align-items:center;gap:clamp(12px,3vw,28px);overflow:hidden}
+.stage{position:relative;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:20px;padding:clamp(20px,4vw,44px);display:flex;justify-content:center;align-items:center;gap:clamp(12px,3vw,28px);overflow:hidden}
 /* Device frames. The frame is drawn as an outline outside the screen, so the screen keeps the
    recording's exact proportions. Corners are sized from the device's own width (cqw), which keeps
    them circular and keeps the frame's outer curve concentric with the screen's. */
@@ -277,11 +277,11 @@ body.splash-open{overflow:hidden}
 .device video{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover;opacity:0}
 .device .scr.live video{opacity:1;transition:opacity .22s var(--ease-io)}
 .device.phone{width:min(100%,280px);--b:2.2cqw;--r:10cqw}
-.device.phone .scr{border-radius:var(--r);box-shadow:0 0 0 var(--b) var(--bezel),0 18px 50px rgba(0,0,0,.35)}
+.device.phone .scr{border-radius:var(--r);box-shadow:0 0 0 var(--b) var(--bezel),var(--lift)}
 .device.wide{width:100%}
 .device.card{width:min(100%,400px)}
-.device.card .scr{border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
-.device.wide .scr{border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.device.card .scr{border-radius:14px;box-shadow:var(--lift)}
+.device.wide .scr{border-radius:10px;box-shadow:var(--lift)}
 .stage.row .device.phone{flex:1 1 0;min-width:0;max-width:250px;width:auto}
 .viewer .stage{height:440px;padding:28px}
 .viewer .stage .device.phone{height:100%;width:auto}
@@ -289,16 +289,15 @@ body.splash-open{overflow:hidden}
 .cards .device.card{width:min(100%,240px)}
 /* Play and pause. Every frame plays as one timeline: its videos start together, any that finish
    early hold on their last frame, and all restart when the longest ends. The ring shows how far
-   through that timeline the frame is. Frames are dark in both themes, so the control is always
-   a solid disc in the frame's own colour with a light icon. Its 4px margin keeps the white
-   progress ring clear of whatever footage sits behind it. */
-.pp{position:absolute;z-index:3;right:var(--pp-r,12px);bottom:var(--pp-b,12px);width:34px;height:34px;box-shadow:0 0 0 4px var(--stage);padding:0;border:0;border-radius:50%;display:grid;place-items:center;opacity:0;cursor:pointer;color:#fff;
-  background:var(--stage);transition:opacity .18s}
+   through that timeline the frame is. The control is a glass disc like the other buttons; its
+   ring is the system's line colour, filling with primary as the frame plays. */
+.pp{position:absolute;z-index:3;right:var(--pp-r,12px);bottom:var(--pp-b,12px);width:34px;height:34px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;opacity:0;cursor:pointer;color:var(--ink);
+  background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);transition:opacity .18s}
 .pp-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
-.pp-ring circle{fill:none;stroke-width:1}
-.pp-ring .tr{stroke:rgba(255,255,255,.2);transition:stroke .18s}
-.pp:hover .pp-ring .tr{stroke:rgba(255,255,255,.32)}
-.pp-ring .pg{stroke:#fff;stroke-dasharray:100;stroke-dashoffset:100}
+.pp-ring circle{fill:none;stroke-width:1.5}
+.pp-ring .tr{stroke:var(--line);transition:stroke .18s}
+.pp:hover .pp-ring .tr{stroke:color-mix(in srgb,var(--primary) 35%,var(--line))}
+.pp-ring .pg{stroke:var(--primary);stroke-dasharray:100;stroke-dashoffset:100}
 .pp::before{content:"";width:3px;height:11px;border-left:2.5px solid currentColor;border-right:2.5px solid currentColor}
 @keyframes pp-in{from{opacity:0;transform:scale(.9)}}
 .stage.pp-in>.pp{animation:pp-in .6s var(--ease) .08s both}
@@ -355,7 +354,7 @@ body.splash-open{overflow:hidden}
 .back{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
 .back svg{transition:transform .22s var(--ease)}
 .back:hover svg{transform:translateX(-3px)}
-.work-head{padding:calc(var(--tabs-top) + var(--nav-h) + clamp(24px,4vw,48px)) 0 0}
+.work-head{padding:calc(var(--tabs-top) + 2px) calc(var(--nav-h) + clamp(16px,3vw,32px)) 0 0}
 .work-head h1{margin-top:0!important}
 /* Floating controls share one size and one look: the Work/About tabs top left on the home page, and
    on a project page, which opens like an overlay, a square close button top right. */
@@ -374,11 +373,19 @@ body.splash-open{overflow:hidden}
    with the page's fade.) */
 .work-head h1{font-size:clamp(2.4rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.035em;font-weight:600;margin-top:clamp(20px,4vw,40px);max-width:12em;text-wrap:balance}
 .thesis{margin-top:18px;font-size:clamp(1.15rem,2vw,1.4rem);line-height:1.4;color:var(--muted);max-width:30em}
+/* Glass: the one fill for anything that holds other things (buttons, cards, frames, diagrams).
+   See-through paper with the page blurred behind it. */
+:root{--glass:color-mix(in srgb,var(--paper) 66%,transparent);--blur:blur(22px) saturate(1.8) brightness(1.04);
+  /* a soft lift for screens sitting in a glass frame, tinted to the palette rather than grey */
+  --lift:0 1px 2px rgba(18,16,60,.08),0 12px 32px rgba(18,16,60,.14)}
+:root[data-theme=dark]{--lift:0 1px 2px rgba(0,0,0,.3),0 14px 36px rgba(0,0,0,.42)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--lift:0 1px 2px rgba(0,0,0,.3),0 14px 36px rgba(0,0,0,.42)}}
 /* The subscript beside a title (years on a project, "Next" before the next one): one size, one look
    everywhere, whatever the heading beside it. */
 :root{--sub:clamp(.9rem,.55rem + .9vw,1.25rem)}
 .work-head h1 .yr,.card h2 .yr,.next .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:var(--sub);font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;white-space:nowrap}
-.work-head h1 .yr,.card h2 .yr{margin-left:.9em}
+.card h2 .yr{margin-left:.9em}
+.work-head h1 .yr{display:block;margin:.6em 0 0}
 .next .yr{margin-right:.9em}
 :root[data-theme=dark] .yr{color:var(--accent)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .yr{color:var(--accent)}}
@@ -555,7 +562,7 @@ html.lb-open{overflow:hidden}
 #xf{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;contain:strict}
 #xf>.wrap{position:absolute;margin:0;max-width:none;box-sizing:border-box}
 #xf .xf-box,#xf .xf-dev{position:fixed;left:0;top:0;margin:0;transform-origin:0 0;will-change:transform,opacity}
-#xf .xf-box{background:var(--stage)}
+#xf .xf-box{background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
 #xf .xf-dev{flex:none;max-width:none}
 /* The exact frame a video was showing, held in place while the page changes over. */
 .xf-frame{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
@@ -589,31 +596,31 @@ html.lb-open{overflow:hidden}
 .tbl th{text-align:left;font-weight:600;color:var(--muted);font-size:.85rem;padding:0 16px 8px 0;border-bottom:1px solid var(--line)}
 .tbl td{padding:11px 16px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
 .tbl td:first-child{font-weight:600;width:48%}
-.mdl{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:clamp(14px,2.4vw,28px);align-items:start;background:var(--stage);border-radius:20px;padding:clamp(18px,3.4vw,36px);color:#ececf6}
-.mdl-arrow{align-self:center;color:#918bff;padding-top:28px}
+.mdl{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:clamp(14px,2.4vw,28px);align-items:start;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:20px;padding:clamp(18px,3.4vw,36px);color:var(--ink)}
+.mdl-arrow{align-self:center;color:var(--accent);padding-top:28px}
 @media (max-width:760px){.mdl{grid-template-columns:minmax(0,1fr)}.mdl-arrow{transform:rotate(90deg);justify-self:center;padding:0}}
 .mdl-h{margin:0 0 12px;font-weight:600;font-size:.95rem}
-.mdl-c{margin:14px 0 0;font-size:.86rem;color:#a0a2ba;line-height:1.45}
-.sx{position:relative;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-.sx-l{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;font-weight:600;color:#c9cadb;margin-bottom:8px}
-.sx-l em{font-style:normal;font-weight:500;color:#918bff}
+.mdl-c{margin:14px 0 0;font-size:.86rem;color:var(--muted);line-height:1.45}
+.sx{position:relative;border-radius:10px;box-shadow:inset 0 0 0 1px var(--line)}
+.sx-l{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:8px}
+.sx-l em{font-style:normal;font-weight:500;color:var(--accent)}
 .sx.doc{padding:10px}
 .sx-pages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.sx.page{padding:10px;background:rgba(255,255,255,.04);display:grid;gap:5px;align-content:start}
+.sx.page{padding:10px;background:color-mix(in srgb,var(--panel) 55%,transparent);display:grid;gap:5px;align-content:start}
 .sx.page .sx-l{margin-bottom:2px}
 .sx-b{display:block;font-style:normal;font-size:.64rem;line-height:18px;padding:0 5px;border-radius:4px;color:#0c0c18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sx-b.bg,.sx-bar.bg{background:linear-gradient(160deg,#5b5f86,#34365a);color:#ececf6}
-.sx-b.t,.sx-bar.t{background:#7fdde6}
-.sx-b.g,.sx-bar.g{background:#c7b8f5}
-.sx-bar.a{background:#6a3fd1;color:#fff}
+.sx-b.bg,.sx-bar.bg{background:linear-gradient(160deg,#3c3a72,#1d1c3d);color:#ececf6}
+.sx-b.t,.sx-bar.t{background:#a3e6f0;box-shadow:inset 0 0 0 1px #6ccbd9}
+.sx-b.g,.sx-bar.g{background:#ccc1e1}
+.sx-bar.a{background:#58339a;color:#fff}
 .sx.page.one{padding:10px}
 .sx-tl{display:grid;gap:6px}
-.sx-row{position:relative;height:20px;border-radius:4px;background:rgba(255,255,255,.04)}
+.sx-row{position:relative;height:20px;border-radius:4px;background:color-mix(in srgb,var(--panel) 75%,transparent)}
 .sx-row.scenes{height:30px}
 .sx-doca{margin-top:8px}
 .sx-row.sm{height:18px}
 .sx-row.sm .sx-bar span{line-height:18px;font-size:.62rem;padding:0 5px}
-.sx.page .sx-row{background:rgba(255,255,255,.03)}
+.sx.page .sx-row{background:color-mix(in srgb,var(--paper) 55%,transparent)}
 .sx-bar{position:absolute;top:0;bottom:0;border-radius:4px;overflow:hidden;color:#0c0c18;font-style:normal}
 .sx-bar span{display:block;font-size:.66rem;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sx-row.scenes .sx-bar span{line-height:30px}
