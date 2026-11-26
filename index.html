@@ -740,19 +740,20 @@ const SITE = {
       slug: "video-timeline", kind: "case", title: "Video timeline", short: "Video timeline",
       start: "2025-06", end: "2026-10", when: "2025 to 2026",
       summary: "Taking Canva's video editor from a stack of pages to a real timeline, then making it simple again.",
-      thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined a few months before launch and spent the next year and a half making it simple by default.",
+      thesis: "Canva rebuilt its video editor around a multi-track timeline. It made the editor far more capable, and harder to use. I joined a few months before launch and spent the next year and a half improving it.",
       role: "Lead designer",
       did: ["Beta research", "Mobile patterns", "Onboarding", "Changeboarding", "Post-launch fixes", "Specs", "Simple view"],
       stats: [["Tens of millions", "people a month edit on the new timeline"], ["About 1 in 70", "switched back to the old editor"], ["About 1 in 8", "of those later came back"]],
       hero: { src: "timeline-canvas", w: 1600, h: 900, shape: "wide", alt: "The bottom of the design's canvas above a multi-track timeline. Clips are dragged onto the timeline, with text and graphics on tracks above.", caption: "The multi-track timeline." },
       chapters: [
         { title: "The problem", blocks: [
+          { p: "Feedback kept saying the same thing: our video editor was too limited. Creators wanted the control of a real multi-track editor, and CapCut and others were already giving it to them. To keep the people we had and win new ones, we had to catch up, and quickly." },
           { p: "Canva's first video editor treated a video as a stack of pages, like a slideshow with a play button. The new model put everything on one page, so every element got its own timing on a multi-track timeline. That was a big step up in power, and a new idea to learn: a main track with layers above it, which the old page controls didn't map onto." },
           { diagram: "model" }
         ]},
         { title: "What I did", blocks: [
           { list: [
-            ["Found where it broke.", "I co-led beta research with 20 creators editing their own footage. It shaped four decisions before launch, including a main track that stays put and onboarding for people coming from the old editor."],
+            ["Found where it broke.", "I co-led beta research with 20 creators editing their own footage. It shaped four decisions before launch, including locking the main track in place beneath the layers and onboarding for people coming from the old editor."],
             ["Designed for the phone.", "A timeline you can resize, an Overlay action in place of drag and drop, and a focused view for reordering clips, which shipped."],
             ["Brought people across.", "Coach marks for first-timers, changeboarding for existing designs, and within days of launch, a way back to the old editor with a short survey asking why."],
             ["Fixed the paper cuts.", "Specs engineers built from directly, for trim and slip, snapping, drop zones and zoom, plus weekly office hours to solve problems in the room."]
@@ -785,16 +786,18 @@ const SITE = {
       hero: { src: "cv-beatsync", w: 1600, h: 900, shape: "wide", alt: "Picking a song, then Beat Sync offering to sync the video's pages and elements to the music.", caption: "Beat Sync in the editor." },
       chapters: [
         { title: "From hackathon to launch", blocks: [
-          { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind. Five months later it reached everyone, in time for Canva Create." }
+          { p: "The idea won the Magic category at a Canva hackathon in October 2022. I shared a mock on day two so engineers could build the prototype with real UI in mind. Five months later it reached everyone, in time for Canva Create." },
+          { p: "It was going to debut on stage, and our creator community had been telling us it would change how they edit. First impressions mattered, so we sweated the details: how the markers look, how they move, and how a snap feels in the hand." }
         ]},
-        { title: "Key decisions", blocks: [
+        { title: "The details", blocks: [
           { list: [
-            ["Snap points, not a cage.", "Beat markers attract a cut but never force it, so a transition can still land off the beat."],
-            ["A button, not a toggle.", "The first design was an auto-sync switch, but its state couldn't be stored safely with two people editing at once. I pushed on it, then agreed the honest answer was a one-way button that syncs everything and gets out of the way."],
-            ["A snap you can feel.", "The marker stretches and pulses when a clip lands on a beat, minor beats appear as you zoom in, and the notches got sharper after a co-founder's review."]
+            ["Markers you switch on.", "Beat markers are an optional overlay on the music track. Turn them on and clips snap to the beat as you drag, for syncing by hand. Turn them off and you edit freely."],
+            ["Markers you can read.", "Notches cut into the top of the track: a larger one on each bar, and smaller ones on the beats between that appear as you zoom in. A co-founder's review made them sharper."],
+            ["A snap you can feel.", "The marker stretches and pulses as a clip lands on a beat, and on mobile a light haptic tick confirms it."],
+            ["A button, not a toggle.", "The first design was an auto-sync switch, but its state couldn't be stored safely with two people editing at once. We worked through the limits with engineering and iterated to a one-way button that syncs everything and gets out of the way."]
           ] },
           { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "Snapping to a beat. The marker stretches and pulses as the clip lands." } },
-          { media: { src: "beat-zoom", w: 1600, h: 900, shape: "wide", alt: "A collaborator drags the timeline zoom from 100% to 240%. The timeline opens up around the playhead, and past 170% smaller off-beat markers pop in between the beats. Zooming back out, they tuck away again.", caption: "Zooming in. Off-beat markers appear past a set zoom level, and tuck away again on the way out." } }
+          { media: { src: "beat-zoom", w: 1600, h: 900, shape: "wide", alt: "A collaborator drags the timeline zoom from 100% to 240%. The timeline opens up around the playhead, and past 170% smaller markers pop in on the beats between each bar. Zooming back out, they tuck away again.", caption: "Zooming in. Minor beat markers appear past a set zoom level, and tuck away again on the way out." } }
         ]},
         { title: "Outcome", blocks: [
           { p: "Beat Sync reached 650,000 monthly users. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment. After launch I worked with a content designer to turn the button into a clear call to action, and later explored Beat Sync 2.0, matching moments in the music to moments in the footage. It was well received, then deprioritised." },
@@ -844,10 +847,10 @@ const SITE = {
           { p: "Background Remover, Smart Trim and Beat Sync each paired a powerful model with one obvious action. They all landed in the same nested surface, which was hard to find and filling up fast. When we surveyed 1,200 video editors, the wish was simple: make my video better without making me learn an editor. So we set a principle: workflows over features." }
         ]},
         { title: "An assistant that edits with you", blocks: [
-          { p: "I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you review." },
+          { p: "I designed and prototyped a conversational flow for mobile first, where the constraint is hardest. You ask, the assistant edits, and you stay in control." },
           { media: { src: "ai-mobile", w: 478, h: 1048, shape: "phone", alt: "Mobile prototype: an assistant suggests edits to a video, each with Accept and Reject.", caption: "The mobile prototype." } },
           { list: [
-            ["Review is a first-class step.", "Every change arrives with Accept and Reject. Nothing is applied behind your back."],
+            ["Big changes ask first.", "Destructive or sweeping edits wait for you to Accept or Reject them. Smaller ones simply happen."],
             ["Rejection is a starting point.", "Turn down a change and you get quick ways to steer it."],
             ["Keep the video the hero.", "The editor collapses to a compact preview with playback always in reach."]
           ] },
@@ -855,7 +858,7 @@ const SITE = {
           { media: { src: "ai-comments", w: 1600, h: 898, shape: "wide", alt: "Tagging Canva AI in a timeline comment and the edit being applied.", caption: "Tag Canva AI in a comment, and it acts on the note." } }
         ]},
         { title: "Where it led", blocks: [
-          { p: "These explorations fed the AI assistant now being built for Canva Video. The thread runs through all of it: I started out shipping AI as features, learned to design for whole workflows, and began working out how an agent can edit with you, not for you." }
+          { p: "These explorations fed the AI assistant now being built for Canva Video. Over three years my work moved from single AI features, to whole workflows, to an assistant that edits alongside you rather than for you." }
         ]}
       ]
     },
