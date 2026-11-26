@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -697,6 +697,13 @@ body.rv-off .rv-bar,body.rv-off .rv-vd,body.rv-off .rv-dot{display:none}
 .rvp-tog{display:flex;align-items:center;gap:8px;margin-left:auto;font:inherit;font-weight:600;border:1px solid var(--primary);border-radius:12px;padding:9px 14px;background:color-mix(in srgb,var(--paper,#fff) 80%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--ink);cursor:pointer}
 .rvp-tog b{font-variant-numeric:tabular-nums;color:var(--primary)}
 .rvp-dot{width:8px;height:8px;border-radius:50%;background:#d98a12}
+/* Draft only: a theme switcher beside the Draft button, to preview light and dark without changing the system setting. */
+.rvp-row{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.rvp-row .rvp-tog{margin-left:0}
+.thsw{display:flex;gap:2px;padding:3px;border:1px solid var(--primary);border-radius:12px;background:color-mix(in srgb,var(--paper,#fff) 80%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.thsw button{font:inherit;font-weight:600;border:0;border-radius:9px;padding:6px 10px;background:none;color:var(--muted);cursor:pointer;transition:background-color .2s var(--ease),color .2s var(--ease)}
+@media (hover:hover){.thsw button:hover{color:var(--ink)}}
+.thsw button[aria-pressed=true]{background:var(--primary);color:var(--primary-ink)}
 .rvp-body{margin-top:8px;max-height:min(70vh,640px);overflow:auto;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--paper,#fff);box-shadow:0 18px 50px rgba(0,0,0,.25)}
 .rvp-lead{margin:0 0 6px;font-weight:600}
 .rvp-stats,.rvp-sync,.rvp-pub{margin:0 0 6px;color:var(--muted);font-size:.8rem}
@@ -1981,7 +1988,8 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
 
     const panel = document.createElement('div');
     panel.className = 'rvp'; panel.id = 'rvp';
-    panel.innerHTML = '<button type="button" class="rvp-tog" aria-expanded="false"><span class="rvp-dot"></span>Draft <b id="rvp-n"></b></button>' +
+    panel.innerHTML = '<div class="rvp-row"><div class="thsw" role="group" aria-label="Theme">' + ['Auto', 'Light', 'Dark'].map(t => '<button type="button" data-th="' + t.toLowerCase() + '">' + t + '</button>').join('') + '</div>' +
+      '<button type="button" class="rvp-tog" aria-expanded="false"><span class="rvp-dot"></span>Draft <b id="rvp-n"></b></button></div>' +
       '<div class="rvp-body" hidden><p class="rvp-lead">This is a draft. Nothing here is live until you publish.</p>' +
       '<p class="rvp-stats" id="rvp-stats"></p><p class="rvp-sync" id="rvp-sync"></p>' +
       '<p class="rvp-h">Changes</p><ol class="rvp-list" id="rvp-list"></ol>' +
@@ -1994,6 +2002,16 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       const b = panel.querySelector('.rvp-body'); b.hidden = !b.hidden; e.currentTarget.setAttribute('aria-expanded', String(!b.hidden));
     });
     $('rvp-hide').addEventListener('change', e => document.body.classList.toggle('rv-off', e.target.checked));
+    // Theme preview. Auto follows the system; Light and Dark set data-theme, which the colour tokens already honour.
+    const setTheme = t => {
+      if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = t;
+      panel.querySelectorAll('[data-th]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.th === t)));
+      try { localStorage.setItem('lr-draft3-theme', t); } catch (e) {}
+      window.dispatchEvent(new Event('themechange'));   // the background reads its colours from the tokens
+    };
+    panel.querySelector('.thsw').addEventListener('click', e => { const b = e.target.closest('[data-th]'); if (b) setTheme(b.dataset.th); });
+    let th = 'auto'; try { th = localStorage.getItem('lr-draft3-theme') || 'auto'; } catch (e) {}
+    setTheme(th);
 
     const D = { accepted: 'Accepted', returned: 'Sent back' }, V = { ship: 'Ship', polish: 'Needs polish', cut: 'Cut' };
     const link = (slug, id, label) => '<a href="#work-' + slug + '" data-route data-goto="' + id + '">' + label + '</a>';
@@ -2749,6 +2767,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   window.addEventListener('resize', () => { if (size() !== false) step(0); });
   const scheme = matchMedia('(prefers-color-scheme: dark)');
   if (scheme.addEventListener) scheme.addEventListener('change', () => { colours(); veil(); step(0); });
+  window.addEventListener('themechange', () => { colours(); veil(); step(0); });
   if (reduce) return;
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
 
