@@ -10,7 +10,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Hedvig+Letters+Serif:opsz@12..24&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Hedvig+Letters+Serif:opsz@12..24&display=swap" rel="stylesheet">
 <script>window.LR={calmUntil:0};if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('pre-enter')</script>
 <style>
 :root{
@@ -32,7 +32,7 @@
   --bezel:#20202f;
   --glow-1:#e3d9f9; --glow-2:#dadbfa; --glow-3:#d5e3f9;
   --grain-1:#7a4fe0; --grain-2:#4f46e5; --grain-3:#3a7bdc; --grain-a:.3;
-  --font:"Avenir Next","Avenir","Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font:"Manrope","Avenir Next","Avenir",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
@@ -406,7 +406,7 @@ body.splash-open{overflow:hidden}
 /* The subscript beside a title (years on a project, "Next" before the next one): one size, one look
    everywhere, whatever the heading beside it. */
 :root{--sub:clamp(.9rem,.55rem + .9vw,1.25rem)}
-.work-head h1 .yr,.card h2 .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:var(--sub);font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;white-space:nowrap}
+.work-head h1 .yr,.card h2 .yr{font-family:var(--font);font-variation-settings:normal;font-size:var(--sub);font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;white-space:nowrap}
 .card h2 .yr{margin-left:.9em}
 .work-head h1 .yr{display:block;margin:.6em 0 0}
 :root[data-theme=dark] .yr{color:var(--accent)}
