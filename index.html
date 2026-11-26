@@ -770,7 +770,8 @@ const SITE = {
             ["A button, not a toggle.", "The first design was an auto-sync switch, but its state couldn't be stored safely with two people editing at once. I pushed on it, then agreed the honest answer was a one-way button that syncs everything and gets out of the way."],
             ["A snap you can feel.", "The marker stretches and pulses when a clip lands on a beat, minor beats appear as you zoom in, and the notches got sharper after a co-founder's review."]
           ] },
-          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "The snap, recreated for this page as the animation no longer works in the product." } }
+          { media: { src: "bs-snap", w: 1600, h: 900, shape: "wide", alt: "A clip edge dragged along the timeline snaps to a beat marker, which stretches and pulses.", caption: "Snapping to a beat. The marker stretches and pulses as the clip lands." } },
+          { media: { src: "beat-zoom", w: 1600, h: 900, shape: "wide", alt: "A collaborator drags the timeline zoom from 100% to 240%. The timeline opens up around the playhead, and past 170% smaller off-beat markers pop in between the beats. Zooming back out, they tuck away again.", caption: "Zooming in. Off-beat markers appear past a set zoom level, and tuck away again on the way out." } }
         ]},
         { title: "Outcome", blocks: [
           { p: "Beat Sync reached 650,000 monthly users. Beat markers are free and one-click sync is part of Pro, a split the team chose with an experiment. After launch I worked with a content designer to turn the button into a clear call to action, and later explored Beat Sync 2.0, matching moments in the music to moments in the footage. It was well received, then deprioritised." },
@@ -786,14 +787,14 @@ const SITE = {
       role: "Lead designer",
       did: ["Entry points", "Toolbar placement", "Output tuning with ML", "Internal testing", "Expert testing", "Ducking research"],
       stats: [["530,000", "monthly users of Enhance Voice"], ["440,000", "monthly users of Balance Audio"]],
-      hero: { src: "enhance", w: 1600, h: 900, shape: "wide", alt: "A street vlog in the timeline. A collaborator selects the voice recording and chooses Enhance voice. The street noise between the words falls away.", caption: "Enhance voice, recreated for this page." },
+      hero: { src: "enhance", w: 1600, h: 900, shape: "wide", alt: "A street vlog in the timeline. A collaborator selects the voice recording and chooses Enhance voice. The street noise between the words falls away.", caption: "Enhance voice." },
       chapters: [
         { title: "Enhance Voice", blocks: [
           { p: "Enhance Voice cleans up speech in one tap. We weighed up an overflow panel for audio tools, but kept it at the top level of the toolbar on desktop and mobile, even as the toolbar grew. The model ran on our servers, so it had to balance speed against quality. We dogfooded it across the team, then tested it with Canva Video Experts, a group of power users outside Canva, to land on how much background noise to remove." }
         ]},
         { title: "Balance Audio", blocks: [
           { p: "We could only balance gain, bringing the average level of every audio source into line, not even out the peaks and dips inside one. So Balance Audio is one button that sets every sound in the video to a matching level. It needed no schema change, and it was a good first project for a new engineer." },
-          { media: { src: "balance", w: 1600, h: 900, shape: "wide", alt: "A wildlife short with music, a voiceover, birdsong and a wing hum at very different levels. A collaborator opens the volume flyout and chooses Balance all. Each track is turned up or down as a whole until they all sit at a matching level.", caption: "Balance Audio, recreated for this page." } }
+          { media: { src: "balance", w: 1600, h: 900, shape: "wide", alt: "A wildlife short with music, a voiceover, birdsong and a wing hum at very different levels. A collaborator opens the volume flyout and chooses Balance all. Each track is turned up or down as a whole until they all sit at a matching level.", caption: "Balance Audio." } }
         ]},
         { title: "Also on the toolbar", blocks: [
           { list: [
@@ -801,8 +802,8 @@ const SITE = {
             ["Ducking, parked.", "I tested which track people expected to drive it, and whether the labels made sense. We got close to validating it before the keyframing it needed couldn't come together in time."]
           ] },
           { grid: [
-            { src: "mute", w: 1600, h: 900, shape: "wide", alt: "Close on the volume flyout. A collaborator mutes the video, and Mute all appears beside Balance all.", cap: "<b>Mute all.</b> Recreated for this page." },
-            { src: "duck", w: 1600, h: 900, shape: "wide", alt: "A collaborator selects the voiceover and chooses Prioritize, and the music dips beneath each line of narration.", cap: "<b>Ducking.</b> Recreated for this page. Parked before it shipped." }
+            { src: "mute", w: 1600, h: 900, shape: "wide", alt: "Close on the volume flyout. A collaborator mutes the video, and Mute all appears beside Balance all.", cap: "<b>Mute all.</b>" },
+            { src: "duck", w: 1600, h: 900, shape: "wide", alt: "A collaborator selects the voiceover and chooses Prioritize, and the music dips beneath each line of narration.", cap: "<b>Ducking.</b> Parked before it shipped." }
           ] }
         ]}
       ]
@@ -978,7 +979,7 @@ const SITE = {
   /* ---------- media ---------- */
   // Each file's address carries a fingerprint of its contents, so a changed file is always fetched
   // fresh rather than from a browser's cache. Written by tools/stamp-media.py.
-const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9d0","auto-timing":"52244b75","balance":"153cea15","beat-sync":"dd5680ed","bs-snap":"8f6c2bd0","bs-zoom":"4f8a1164","cv-beatsync":"deda03ac","cv-bgremove":"efe5136e","cv-dragdrop":"cd835d21","cv-highlights":"bc19e7e6","duck":"55592d9d","enhance":"8c271af3","fig-ai-prompt":"916cc49a","fig-dropzone":"92c0445e","fig-mm-flyout":"eff1cb25","fig-optin-banner":"98e9b26a","fig-optin-banner-zoom":"bd7d4aad","fig-optin-setting":"3c548560","fig-slip-board":"bed82c76","fig-snap-board":"f036325c","fig-trim-states":"896d77a9","match-move":"22cf972d","mm-btrack":"2ce5af4e","mobile-ia":"a2e44fd2","mobile-overlay":"74762ec2","mobile-rearrange":"b4841362","mute":"a4d12411","overlay-drop":"a0815be7","simple-full":"b2e8ed6e","smart-trim":"3a9f8a9a","timeline-canvas":"bcd3dc0d","timeline-mobile":"2e0d99be","timeline-resize":"766a62cb","tl-existing-mobile":"d682bd27","tl-onboarding":"74971a7c","tl-switch-mobile":"69b1b141","zoom-bar":"bd9ceaf9"};  // media fingerprints, written by tools/stamp-media.py
+const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9d0","auto-timing":"52244b75","balance":"153cea15","beat-sync":"dd5680ed","beat-zoom":"f80b332c","bs-snap":"8f6c2bd0","bs-zoom":"4f8a1164","cv-beatsync":"deda03ac","cv-bgremove":"efe5136e","cv-dragdrop":"cd835d21","cv-highlights":"bc19e7e6","duck":"55592d9d","enhance":"8c271af3","fig-ai-prompt":"916cc49a","fig-dropzone":"92c0445e","fig-mm-flyout":"eff1cb25","fig-optin-banner":"98e9b26a","fig-optin-banner-zoom":"bd7d4aad","fig-optin-setting":"3c548560","fig-slip-board":"bed82c76","fig-snap-board":"f036325c","fig-trim-states":"896d77a9","match-move":"22cf972d","mm-btrack":"2ce5af4e","mobile-ia":"a2e44fd2","mobile-overlay":"74762ec2","mobile-rearrange":"b4841362","mute":"a4d12411","overlay-drop":"a0815be7","simple-full":"b2e8ed6e","smart-trim":"3a9f8a9a","timeline-canvas":"bcd3dc0d","timeline-mobile":"2e0d99be","timeline-resize":"766a62cb","tl-existing-mobile":"d682bd27","tl-onboarding":"74971a7c","tl-switch-mobile":"69b1b141","zoom-bar":"bd9ceaf9"};  // media fingerprints, written by tools/stamp-media.py
   const mv = src => MV[src] ? '?v=' + MV[src] : '';
   function device(m){
     if (m.img) return '<div class="device ' + m.shape + ' pic" style="aspect-ratio:' + m.w + ' / ' + m.h + '"><span class="scr"><img class="still" src="media/' + m.src + '.jpg' + mv(m.src) + '" alt="' + esc(m.alt) + '"></span></div>';
