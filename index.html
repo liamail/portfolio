@@ -383,10 +383,9 @@ body.splash-open{overflow:hidden}
 /* The subscript beside a title (years on a project, "Next" before the next one): one size, one look
    everywhere, whatever the heading beside it. */
 :root{--sub:clamp(.9rem,.55rem + .9vw,1.25rem)}
-.work-head h1 .yr,.card h2 .yr,.next .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:var(--sub);font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;white-space:nowrap}
+.work-head h1 .yr,.card h2 .yr{font-family:"Avenir Next","Avenir","Figtree",system-ui,sans-serif;font-variation-settings:normal;font-size:var(--sub);font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;white-space:nowrap}
 .card h2 .yr{margin-left:.9em}
 .work-head h1 .yr{display:block;margin:.6em 0 0}
-.next .yr{margin-right:.9em}
 :root[data-theme=dark] .yr{color:var(--accent)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .yr{color:var(--accent)}}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
@@ -454,20 +453,18 @@ html.lb-open{overflow:hidden}
   .facts b{font-size:1.6rem}
 }
 .cards .device.phone{width:min(100%,210px)}
-.next{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:clamp(16px,2vw,24px);text-align:right;text-decoration:none;color:var(--ink);padding:clamp(36px,6vw,72px) 0 0}
-.next strong{text-wrap:balance}
-.next strong{display:block;font-size:clamp(2rem,5vw,3.6rem);line-height:1.05;letter-spacing:-.035em;font-weight:600}
-.next .go{position:relative;flex:none;display:grid;place-items:center;width:var(--nav-h);height:var(--nav-h);border-radius:12px;color:var(--ink);
-  background:color-mix(in srgb,var(--paper) 66%,transparent);border:1px solid var(--primary);
-  -webkit-backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);backdrop-filter:blur(22px) saturate(1.8) brightness(1.04);
+/* Next project: the icon button again, with a text label before the arrow. */
+.next{display:flex;justify-content:flex-end;padding:clamp(36px,6vw,72px) 0 0}
+.next .go{position:relative;display:inline-flex;align-items:center;gap:10px;max-width:100%;height:var(--nav-h);padding:0 15px 0 18px;border-radius:12px;color:var(--ink);text-decoration:none;font-size:1rem;font-weight:600;white-space:nowrap;
+  background:var(--glass);border:1px solid var(--primary);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
   transform:translateZ(0);transition:color var(--t-fast),transform var(--t-fast) var(--ease)}
-.next .go svg{position:relative;transition:transform .22s var(--ease)}
-.next:hover .go{color:var(--primary-ink)}
-.next:hover .go::before{opacity:1}
-.next:hover .go svg{transform:translateX(2px)}
-.next:active .go{transform:scale(.94)}
-.next:focus-visible{outline:none}
-.next:focus-visible .go{outline:2px solid var(--primary);outline-offset:3px}
+.next .go span{position:relative;overflow:hidden;text-overflow:ellipsis}
+.next .go svg{position:relative;flex:none;transition:transform .22s var(--ease)}
+.next .go:hover{color:var(--primary-ink)}
+.next .go:hover::before{opacity:1}
+.next .go:hover svg{transform:translateX(2px)}
+.next .go:active{transform:scale(.96)}
+.next .go:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 .has-dock{padding-bottom:96px}
 
 /* Chapter scrubber */
@@ -1606,7 +1603,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       '<div class="chapters">' + w.chapters.map((c, n) =>
         '<section class="chapter' + (FLAGS.review && c.rv ? ' rv-ch' : '') + '" id="ch' + n + '" data-title="' + esc(c.title) + '"><h2>' + esc(c.title) + '</h2><div class="body">' + rvWrap(c.rv, c.blocks.map(block).join('')) + '</div></section>').join('') +
       '</div>' +
-      '<a class="next" href="#work-' + nx.slug + '" data-route><strong><sub class="yr">Next<span class="vh">: </span></sub>' + esc(nx.title) + '</strong><span class="go">' + arrow + '</span></a>' +
+      '<nav class="next" aria-label="Next project"><a class="go" href="#work-' + nx.slug + '" data-route><span>' + esc(nx.title) + '</span>' + arrow + '</a></nav>' +
     '</article>';
   }
   /* Enlarge. On a project page, click any visual (or focus it and press Enter) to see it as big as
