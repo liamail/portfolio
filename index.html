@@ -408,7 +408,9 @@ body.splash-open{overflow:hidden}
 :root{--sub:clamp(.9rem,.55rem + .9vw,1.25rem)}
 .work-head h1 .yr,.card h2 .yr{font-family:var(--font);font-variation-settings:normal;font-size:var(--sub);font-weight:400;letter-spacing:0;line-height:1;color:var(--primary);vertical-align:baseline;position:static;white-space:nowrap}
 .card h2 .yr{margin-left:.9em}
-.work-head h1 .yr{display:block;margin:.6em 0 0}
+/* The years sit just above the project title, tucked in like a dateline, clear of the summary below. */
+.work-head h1{display:flex;flex-direction:column-reverse;align-items:flex-start}
+.work-head h1 .yr{display:block;margin:0 0 .7em}
 :root[data-theme=dark] .yr{color:var(--accent)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .yr{color:var(--accent)}}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
