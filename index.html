@@ -384,7 +384,9 @@ body.splash-open{overflow:hidden}
 .navback svg{position:relative;transition:transform .22s var(--ease)}
 .navback:hover{color:var(--primary-ink)}
 .navback:hover::before{opacity:1}
-.navback:hover svg{transform:rotate(90deg)}
+/* Like the arrow buttons' nudge, but for a cross: it grows a touch. Mouse only, so a tap on a phone
+   doesn't leave it stuck mid-hover. */
+@media (hover:hover){.navback:hover svg{transform:scale(1.14)}}
 .navback:active{transform:scale(.94)}
 .navback:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 /* (A sideways push between the tabs and the back button is parked for now; both simply come in
@@ -941,7 +943,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { progress: false, copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: true, dock: false };
+  const FLAGS = { progress: false, copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: false, dock: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   if (!FLAGS.matchMove) SITE.work = SITE.work.filter(w => w.slug !== 'match-and-move');
