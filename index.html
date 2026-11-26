@@ -556,14 +556,24 @@ html.lb-open{overflow:hidden}
 .rows em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .quotes{display:grid;gap:28px}
 .reach{list-style:none;display:grid;gap:14px;justify-items:start}
+.reach li{display:flex;align-items:center;flex-wrap:wrap;row-gap:6px}
 .rl{display:inline-flex;align-items:center;gap:14px;font:inherit;color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
 .rl-t{font-family:var(--display);font-variation-settings:"opsz" 24;font-weight:400;font-size:clamp(1.6rem,2.6vw,2rem);line-height:1.1;overflow-wrap:anywhere;transition:color .2s}
 .rl-i{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;color:var(--ink);border:1px solid var(--primary);background:color-mix(in srgb,var(--paper) 42%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);transition:color .2s,transform .25s var(--ease)}
 .rl-i>*{position:relative}
-.rl:hover,.rl:focus-visible,.rl.done{color:var(--ink)}
-.rl:hover .rl-i,.rl:focus-visible .rl-i,.rl.done .rl-i{color:var(--primary-ink)}
-.rl:hover .rl-i::before,.rl:focus-visible .rl-i::before,.rl.done .rl-i::before{opacity:1}
-.rl:hover .rl-i{transform:translateX(3px)}
+.rl:focus-visible{color:var(--ink)}
+.rl:focus-visible .rl-i{color:var(--primary-ink)}
+.rl:focus-visible .rl-i::before{opacity:1}
+/* Hover only with a mouse: on a phone a tap would otherwise leave the button looking pressed. */
+@media (hover:hover){
+  .rl:hover{color:var(--ink)}
+  .rl:hover .rl-i{color:var(--primary-ink);transform:translateX(3px)}
+  .rl:hover .rl-i::before{opacity:1}
+}
+/* Copy feedback: a quiet note to the right of the button that eases in and out, so nothing moves. */
+.rl-note{margin-left:14px;font-size:.95rem;color:var(--muted);opacity:0;transform:translateX(-4px);transition:opacity .22s var(--ease),transform .22s var(--ease);pointer-events:none}
+.rl-note.on{opacity:.85;transform:none;pointer-events:auto}
+.rl-note.addr{user-select:all;-webkit-user-select:all}
 .rl:active .rl-i{transform:scale(.94)}
 .rl:focus-visible{outline:none}
 .rl:focus-visible .rl-i{outline:2px solid var(--primary);outline-offset:3px}
@@ -948,7 +958,7 @@ const SITE = {
 <script>
 (function(){
   // Switches for things kept in the code but hidden for now.
-  const FLAGS = { progress: false, copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: false, dock: false };
+  const FLAGS = { projectSwipe: false, progress: false, copyEmail: false, timelinePicker: false, projectMeta: false, aboutHow: false, footer: false, overlayDrop: false, matchMove: false, morph: true, review: false, groups: false, dock: false };
   // Projects switched off here are left out of every list and link, and their pages don't open.
   if (!FLAGS.overlayDrop) SITE.work = SITE.work.filter(w => w.slug !== 'overlay-drop');
   if (!FLAGS.matchMove) SITE.work = SITE.work.filter(w => w.slug !== 'match-and-move');
@@ -1585,6 +1595,67 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     document.addEventListener('click', e => { if (performance.now() < eatClick) { e.preventDefault(); e.stopPropagation(); } }, true);
   })();
 
+  // On touch screens, swipe sideways on a project page to move between projects: left for the next,
+  // right for the previous. The page follows your finger; a long or quick enough swipe slides it away
+  // and the next project eases in from the side it came from. Mostly-vertical moves stay scrolls, and
+  // swipes from the very edge of the screen are left to the browser's own back gesture.
+  (() => {
+    if (!FLAGS.projectSwipe) return;
+    let sx = 0, sy = 0, st = 0, page = null, lock = 0, dx = 0, eatClick = 0, busy = false;
+    const SKIP = 'input,textarea,select,[data-no-swipe],.td-tracks,.lb';
+    const ease = 'transform .32s cubic-bezier(.22,1,.36,1)';
+    const neighbour = step => {
+      const r = parse(current); if (r.name !== 'item') return null;
+      const list = SITE.work, i = list.indexOf(r.item);
+      return list[(i + step + list.length) % list.length];
+    };
+    window.addEventListener('touchstart', e => {
+      page = null;
+      if (busy || e.touches.length !== 1 || document.querySelector('.lb, #xf')) return;
+      const art = main.querySelector(':scope > article'); if (!art) return;
+      const t = e.touches[0];
+      if (t.clientX < 24 || t.clientX > window.innerWidth - 24) return;
+      if (e.target.closest && e.target.closest(SKIP)) return;
+      sx = t.clientX; sy = t.clientY; st = performance.now(); page = art; lock = 0; dx = 0;
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (!page) return;
+      const t = e.touches[0]; if (!t) return;
+      const mx = t.clientX - sx, my = t.clientY - sy;
+      if (!lock) {
+        if (Math.abs(mx) < 10 && Math.abs(my) < 10) return;
+        if (performance.now() - st > 450 || Math.abs(mx) < Math.abs(my) * 1.4) { page = null; return; }
+        lock = 1; page.style.transition = 'none';
+      }
+      if (e.cancelable) e.preventDefault();
+      dx = mx;
+      if (!reduce) page.style.transform = 'translate3d(' + dx + 'px,0,0)';
+    }, { passive: false });
+    const end = cancel => {
+      if (!page) return;
+      const p = page; page = null;
+      if (!lock) return;
+      eatClick = performance.now() + 450;
+      const speed = Math.abs(dx) / Math.max(1, performance.now() - st);
+      const go = !cancel && (Math.abs(dx) > window.innerWidth * 0.22 || (Math.abs(dx) > 30 && speed > 0.35));
+      if (!go) { p.style.transition = ease; p.style.transform = ''; setTimeout(() => { if (!p.style.transform) p.style.transition = ''; }, 340); return; }
+      const sign = dx < 0 ? -1 : 1, to = neighbour(sign < 0 ? 1 : -1); if (!to) return;
+      busy = true;
+      p.style.transition = reduce ? 'none' : 'transform .2s cubic-bezier(.4,0,1,1)';
+      p.style.transform = 'translate3d(' + (sign * window.innerWidth) + 'px,0,0)';
+      setTimeout(() => {
+        show('#work-' + to.slug);
+        // the next project slides in from the side the old one left towards
+        if (!reduce && main.animate) main.animate([{ transform: 'translate3d(' + (-sign * 56) + 'px,0,0)' }, { transform: 'none' }], { duration: 460, easing: 'cubic-bezier(.22,1,.36,1)' });
+        busy = false;
+      }, reduce ? 0 : 190);
+    };
+    window.addEventListener('touchend', () => end(false), { passive: true });
+    window.addEventListener('touchcancel', () => end(true), { passive: true });
+    // A swipe that started on a visual shouldn't also play or pause it.
+    document.addEventListener('click', e => { if (performance.now() < eatClick) { e.preventDefault(); e.stopPropagation(); } }, true);
+  })();
+
   /* ---------- work page ---------- */
 
   // Act one diagram: the page-based schema beside the single-page video schema.
@@ -1874,7 +1945,7 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
         '<section class="chapter"><h2>From colleagues</h2><div class="body"><div class="quotes">' + a.quotes.map(q => '<blockquote class="quote"><p>' + esc(q.text) + '</p><cite>' + esc(q.who) + '</cite></blockquote>').join('') + '</div></div></section>' +
         '<section class="chapter"><h2>Experience</h2><div class="body"><ul class="rows">' + a.experience.map(x => '<li><div><strong>' + esc(x[0]) + '</strong><br><span>' + esc(x[1]) + '</span></div><em>' + esc(x[2]) + '</em></li>').join('') + '</ul></div></section>' +
         '<section class="chapter"><h2>Get in touch</h2><div class="body"><ul class="reach">' +
-          '<li><button class="rl" type="button" data-mail aria-label="Copy email address, ' + esc(SITE.email) + '"><span class="rl-t">Email</span><span class="rl-i" aria-hidden="true">' + ICON_COPY + '</span></button></li>' +
+          '<li><button class="rl" type="button" data-mail aria-label="Copy email address, ' + esc(SITE.email) + '"><span class="rl-t">Email</span><span class="rl-i" aria-hidden="true">' + ICON_COPY + '</span></button><span class="rl-note" aria-hidden="true"></span></li>' +
           '<li><a class="rl" href="https://www.linkedin.com/in/liamrayner" target="_blank" rel="noopener noreferrer"><span class="rl-t">LinkedIn</span><span class="rl-i" aria-hidden="true">' + ICON_OUT + '</span><span class="vh"> (opens in a new tab)</span></a></li>' +
         '</ul><p class="rl-status" role="status" aria-live="polite"></p></div></section>' +
       '</div></article>';
@@ -2292,14 +2363,16 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
   /* ---------- Get in touch: Email copies the address ---------- */
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-mail]'); if (!b) return;
-    const t = b.querySelector('.rl-t'), ic = b.querySelector('.rl-i'), st = b.closest('.body').querySelector('.rl-status');
+    const ic = b.querySelector('.rl-i'), note = b.parentElement.querySelector('.rl-note'), st = b.closest('.body').querySelector('.rl-status');
     clearTimeout(b._t);
+    b.blur();   // no lingering pressed or focused look once the tap is done
     const done = ok => {
-      // If the browser refuses the clipboard, show the address so it can be copied by hand.
-      t.textContent = ok ? 'Copied' : SITE.email;
-      if (ok) { ic.innerHTML = ICON_DONE; b.classList.add('done'); }
-      if (st) st.textContent = ok ? 'Email address copied.' : '';
-      b._t = setTimeout(() => { t.textContent = 'Email'; ic.innerHTML = ICON_COPY; b.classList.remove('done'); if (st) st.textContent = ''; }, ok ? 1800 : 6000);
+      // The button stays as it is; a short note beside it says what happened. If the browser refuses
+      // the clipboard, the note shows the address instead, ready to select and copy by hand.
+      if (note) { note.textContent = ok ? 'Copied' : SITE.email; note.classList.toggle('addr', !ok); note.classList.add('on'); }
+      if (ok) ic.innerHTML = ICON_DONE;
+      if (st) st.textContent = ok ? 'Email address copied.' : 'Copy failed. The address is ' + SITE.email + '.';
+      b._t = setTimeout(() => { if (note) note.classList.remove('on'); ic.innerHTML = ICON_COPY; if (st) st.textContent = ''; }, ok ? 1600 : 6000);
     };
     try { navigator.clipboard.writeText(SITE.email).then(() => done(true), () => done(false)); } catch (err) { done(false); }
   });
