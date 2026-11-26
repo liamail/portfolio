@@ -454,7 +454,7 @@ html.lb-open{overflow:hidden}
 }
 .cards .device.phone{width:min(100%,210px)}
 /* Next project: the icon button again, with a text label before the arrow. */
-.next{display:flex;justify-content:flex-end;padding:clamp(36px,6vw,72px) 0 0}
+.next{display:flex;justify-content:flex-end;padding:clamp(36px,6vw,72px) 0 0;margin-right:-3px}
 .next .go{position:relative;display:inline-flex;align-items:center;gap:10px;max-width:100%;height:var(--nav-h);padding:0 15px 0 18px;border-radius:12px;color:var(--ink);text-decoration:none;font-size:1rem;font-weight:600;white-space:nowrap;
   background:var(--glass);border:1px solid var(--primary);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
   transform:translateZ(0);transition:color var(--t-fast),transform var(--t-fast) var(--ease)}
@@ -2268,11 +2268,12 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
     try { navigator.clipboard.writeText(SITE.email).then(() => done(true), () => done(false)); } catch (err) { done(false); }
   });
 
-  // The tabs sit on the content column's left edge, the close button on its right edge.
+  // The tabs sit just outside the content column's left edge and the close button mirrors them on
+  // the right, so each is as far from its side of the screen as from the top.
   const placeNav = () => {
     const r = main.getBoundingClientRect(), root = document.documentElement;
     root.style.setProperty('--navx', (r.left - 3) + 'px');
-    root.style.setProperty('--navxr', (root.clientWidth - r.right) + 'px');
+    root.style.setProperty('--navxr', (root.clientWidth - r.right - 3) + 'px');
   };
   // Escape closes a project page, as it would any overlay (after the enlarged view, if one is open).
   document.addEventListener('keydown', e => {
