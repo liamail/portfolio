@@ -182,7 +182,7 @@ body.splash-open{overflow:hidden}
 /* The section keeps one layer for good: Safari redraws a layer's contents whenever it gains or
    loses one, which showed as a flicker on the play buttons at the start and end of a swipe. Each
    button is its own layer too, so the page sliding never redraws it. */
-.vflash,.xp{will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.xp{will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .pane[data-pane="work"]{--side:-1}
 .pane[data-pane="about"]{--side:1}
 .pane[data-pane="about"] .chapter:last-child{padding-bottom:0}
@@ -289,20 +289,24 @@ body.splash-open{overflow:hidden}
 .cards .device.card{width:min(100%,240px)}
 /* Play and pause. Every frame plays as one timeline: its videos start together, any that finish
    early hold on their last frame, and all restart when the longest ends.
-   Progress is a thin primary line on a line-coloured track that hugs the frame's bottom edge,
-   running the straight stretch between its two rounded corners. Tapping or clicking the frame plays and pauses it, and the new state flashes
-   up in the middle as a glass disc. On desktop a tiny expand button appears on hover in the
-   bottom-right corner, just above the line, its corner concentric with the frame's. */
-.vbar{position:absolute;left:var(--sr,20px);right:var(--sr,20px);bottom:0;height:2px;border-radius:1px;background:var(--line);z-index:3;pointer-events:none;overflow:hidden}
-.vbar i{position:absolute;inset:0;border-radius:inherit;background:var(--primary);transform-origin:0 50%;transform:scaleX(0)}
+   Progress is a 1px primary line on a line-coloured track along the frame's bottom edge, running
+   edge to edge so the frame's rounded corners crop its ends. Tapping or clicking the frame plays
+   and pauses it: a brief blue-black tint washes over the whole frame with the new state's icon in
+   white in the middle, the same in both themes, as it sits over footage. On desktop a tiny expand button appears on hover in the bottom-right
+   corner, just above the line, its corner concentric with the frame's. */
+.vbar{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);z-index:3;pointer-events:none;overflow:hidden}
+.vbar i{position:absolute;inset:0;background:var(--primary);transform-origin:0 50%;transform:scaleX(0)}
 .stage.pp-in>.vbar{animation:vb-in .6s var(--ease) .08s both}
 @keyframes vb-in{from{opacity:0}}
-.vflash{position:absolute;left:50%;top:50%;z-index:4;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;display:grid;place-items:center;color:var(--ink);pointer-events:none;opacity:0;
-  background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:0 0 0 1px var(--line)}
-.vflash::before{content:"";width:5px;height:18px;border-left:4px solid currentColor;border-right:4px solid currentColor}
-.vflash.play::before{width:0;height:0;border:0;border-left:16px solid currentColor;border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px}
+.vflash{position:absolute;inset:0;z-index:4;border-radius:inherit;display:grid;place-items:center;pointer-events:none;opacity:0;
+  background:rgba(12,12,24,.38);color:#fff}
+.vflash svg{width:44px;height:44px;filter:drop-shadow(0 1px 6px rgba(12,12,24,.25))}
+.vflash .i-play,.vflash.play .i-pause{display:none}
+.vflash.play .i-play{display:block}
+.vflash.go svg{animation:vflash-i .72s var(--ease) both}
+@keyframes vflash-i{0%{transform:scale(.88)}18%,100%{transform:scale(1)}}
 .vflash.go{animation:vflash .72s var(--ease) both}
-@keyframes vflash{0%{opacity:0;transform:scale(.86)}18%{opacity:1;transform:scale(1)}62%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.04)}}
+@keyframes vflash{0%{opacity:0}18%,58%{opacity:1}100%{opacity:0}}
 /* If the browser won't autoplay (Low Power Mode, say), the play disc stays up until it's tapped. */
 .stage.needs-play .vflash{opacity:1;animation:none}
 /* Tiny buttons: the icon button at its smallest, for controls laid over a visual. */
@@ -1003,7 +1007,10 @@ const MV = {"ai-comments":"8de9422f","ai-desktop":"7f9d1144","ai-mobile":"1ee9f9
       (reduce ? ' controls' : '') + ' aria-label="' + esc(m.alt) + '"></video>' +
       '<img class="still" src="media/' + m.src + '.jpg' + mv(m.src) + '" alt="" aria-hidden="true"></span></div>';
   }
-  const pp = '<span class="vbar" aria-hidden="true"><i></i></span><span class="vflash" aria-hidden="true"></span>';
+  // Play and pause glyphs with softly rounded corners, like the rest of the icon set.
+  const pp = '<span class="vbar" aria-hidden="true"><i></i></span><span class="vflash" aria-hidden="true">' +
+    '<svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="4" width="4.5" height="16" rx="1.6"/><rect x="14" y="4" width="4.5" height="16" rx="1.6"/></svg>' +
+    '<svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 5.4v13.2c0 1.05 1.15 1.7 2.05 1.15l10.4-6.6c.83-.53.83-1.77 0-2.3L9.55 4.25c-.9-.55-2.05.1-2.05 1.15z"/></svg></span>';
   function stage(inner, slug, extra){
     return '<div class="stage' + (extra ? ' ' + extra : '') + '"' + (slug ? ' data-slug="' + slug + '"' : '') + '>' + inner + (reduce || inner.indexOf('<video') < 0 ? '' : pp) + '</div>';
   }
